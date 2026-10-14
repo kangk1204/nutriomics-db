@@ -1,6 +1,7 @@
 """Stream all public Parquet values against SQLite and optionally the frozen source."""
 import argparse
 import json
+import time
 from collections import defaultdict
 from contextlib import ExitStack
 from datetime import UTC, datetime
@@ -25,6 +26,7 @@ def validate(release, output, core=None):
     release, output = Path(release), Path(output)
     manifest = json.loads((release / "manifest.json").read_text())
     checked, errors, parts, mismatch_count = 0, [], [], 0
+    last_checkpoint = time.monotonic()
     fields = (*TEXT_EFFECT, *REAL_EFFECT, *INT_EFFECT)
     with ExitStack() as stack:
         public = stack.enter_context(read_only(release / "nutriomics.sqlite3"))
@@ -62,6 +64,13 @@ def validate(release, output, core=None):
                                 errors.append({"id": row["id"], "reason": "source_value_or_metadata_mismatch"})
                 checked += len(rows)
                 part_count += len(rows)
+                if time.monotonic() - last_checkpoint >= 30:
+                    atomic_json(output, {"status": "in_progress", "release_id": manifest["release_id"],
+                                "database_sha256": manifest["database_sha256"], "checked_rows": checked,
+                                "mismatch_count": mismatch_count, "first_errors": errors,
+                                "completed_partitions": parts, "current_partition": path.name,
+                                "current_partition_rows": part_count, "source_compared": origin is not None})
+                    last_checkpoint = time.monotonic()
             parts.append({"file": path.name, "rows": part_count, "sha256": sha256(path)})
             atomic_json(output, {"status": "in_progress", "release_id": manifest["release_id"], "checked_rows": checked, "first_errors": errors, "completed_partitions": parts})
         total = public.execute("SELECT count(*) FROM effect").fetchone()[0]

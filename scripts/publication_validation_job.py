@@ -11,10 +11,10 @@ from nutrigenomics.explorer_build import sha256
 from nutrigenomics.source_updates import atomic_json
 
 
-def run(root, source, api_pid):
+def run(root, source, api_pid, candidate_id="nutriomics-data-20261014-candidate-v3"):
     reports = root / "research/publication/20261014/validation"
     reports.mkdir(parents=True, exist_ok=True)
-    candidate = root / "data/publication/releases/nutriomics-data-20261014-candidate-v2"
+    candidate = root / "data/publication/releases" / candidate_id
     state = {"status": "running", "phase": "waiting_candidate"}
     atomic_json(reports / "state.json", state)
     while not candidate.exists():
@@ -72,9 +72,10 @@ if __name__ == "__main__":
     for name in ("root", "source"):
         p.add_argument("--" + name, type=Path, required=True)
     p.add_argument("--api-pid", type=int, required=True)
+    p.add_argument("--candidate-id", default="nutriomics-data-20261014-candidate-v3")
     a = p.parse_args()
     try:
-        run(a.root.resolve(), a.source.resolve(), a.api_pid)
+        run(a.root.resolve(), a.source.resolve(), a.api_pid, a.candidate_id)
     except Exception as exc:
         atomic_json(a.root / "research/publication/20261014/validation/state.json", {"status": "failed", "error_type": type(exc).__name__, "error": str(exc)})
         raise

@@ -17,6 +17,8 @@ python -m scripts.prepare_public_service_release --candidate <new-public-candida
 python -m pytest
 ```
 
+논문 그림 재생성에는 `uv sync --frozen --extra figures`로 별도 plotting extra를 설치하고 `scripts.plot_data_descriptor`를 사용한다. 실제 release metadata·검수 manifest·새 성능 결과가 입력이다. PNG/PDF/SVG와 패널 원자료가 함께 생성된다.
+
 원본 core는 SQLite backup API로 WAL을 포함한 일관된 **비공개** snapshot을 만든다. 원본에 checkpoint를 강제하거나 공개 패키지에 전체 core를 넣지 않는다. 구축 실패 시 `.building`은 실패 증거와 함께 남고 운영 pointer를 교체하지 않는다. 정상 완성한 새 디렉터리만 release로 사용한다.
 
 `review/scientific-review.json`의 기록별 SHA256에 검수 결정을 연결한다. 검수자·일자·원 논문 위치·이유를 반드시 기재한다. 자동 추출과 `source_checked`는 교수님 승인 또는 독립 전문가 검수로 보고하지 않는다. 수정·제외가 있으면 새 release를 구축하고 영향을 받는 대비·주장·평가 정답도 다시 감사한다.
@@ -24,6 +26,8 @@ python -m pytest
 ## 공개 서비스
 
 공개 앱의 진입점은 `nutrigenomics.public_service:app_factory`다. `NUTRIOMICS_PUBLIC_RELEASE`를 명시하지 않으면 내부 DB로 대체하지 않고 종료한다. 기본값은 검수·검증 완료 release만 받는다. 후보 검토에 한해 `NUTRIOMICS_ALLOW_CANDIDATE=1`을 사용하고 **127.0.0.1**에서 실행한다.
+
+정식 배포에는 `release-gate.json`이 필요하다. release ID·DB 해시·실제 검수/검증 파일의 해시가 일치해야 하며, metadata의 `status` 문자열만 변경해 배포할 수 없다. `scripts.submission_readiness`는 검증 결과 JSON을 직접 읽고 해시·판정·release ID를 확인한다. 아직 실행하지 않은 검사에 `passed: true`만 기재하거나 다른 release의 보고서를 넣어 제출 조건을 충족시키지 않는다.
 
 ```powershell
 $env:NUTRIOMICS_PUBLIC_RELEASE='<public-service-candidate>'

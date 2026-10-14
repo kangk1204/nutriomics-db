@@ -22,6 +22,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<9", "ruff>=0.11,<1"]
+figures = ["matplotlib==3.10.7"]
 
 [tool.setuptools.packages.find]
 include = ["nutrigenomics*"]

@@ -32,8 +32,22 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     database = release / "nutriomics.sqlite3"
     if verify_hash and sha256(database) != manifest["database_sha256"]:
         raise ValueError("public release hash mismatch")
-    if not allow_candidate and metadata.get("status") != "submission_ready":
-        raise ValueError("public deployment requires a reviewed, validated submission-ready release")
+    if not allow_candidate:
+        gate_path = release / "release-gate.json"
+        gate = json.loads(gate_path.read_text(encoding="utf-8")) if gate_path.is_file() else {}
+        if (metadata.get("status") != "submission_ready" or gate.get("submission_ready") is not True
+                or gate.get("release_id") != metadata["release_id"]
+                or gate.get("database_sha256") != manifest["database_sha256"]
+                or gate.get("failures") != []):
+            raise ValueError("public deployment requires a reviewed, validated, hash-bound release gate")
+        bindings = gate.get("evidence_files", [])
+        if not bindings:
+            raise ValueError("public deployment requires stored review and validation evidence")
+        for binding in bindings:
+            bound = (release / binding["path"]).resolve()
+            if (not bound.is_relative_to(release) or not bound.is_file()
+                    or sha256(bound) != binding.get("sha256")):
+                raise ValueError("public release review/validation evidence hash mismatch")
     os.environ["NUTRIGENOMICS_EXPLORER_DATABASE"] = str(database)
     os.environ["NUTRIGENOMICS_EXPLORER_CORE_DATABASE"] = str(database)
     app = FastAPI(title="NutriOmics public data", version=metadata["release_id"])

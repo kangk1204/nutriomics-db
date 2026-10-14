@@ -163,7 +163,10 @@ def build_candidate(release, core, policy_path, output, release_id, *, batch_siz
             dest.execute(ddl[0])
         dest.execute("CREATE TABLE meta(key TEXT PRIMARY KEY,value_json TEXT NOT NULL)")
         dest.execute("CREATE TABLE effect(" + ",".join(
-            ["id TEXT PRIMARY KEY"] + [f"{k} TEXT" for k in TEXT_EFFECT] +
+            # Hashed IDs are random: incremental B-tree maintenance causes
+            # millions of random writes. Enforce uniqueness in one bulk index
+            # build before validation/activation; failed builds remain private.
+            ["id TEXT NOT NULL"] + [f"{k} TEXT" for k in TEXT_EFFECT] +
             [f"{k} REAL" for k in REAL_EFFECT] + [f"{k} INTEGER" for k in INT_EFFECT] +
             [f"{k} TEXT NOT NULL" for k in EFFECT_FIELDS[-3:]]) + ")")
         dest.execute("CREATE TABLE effect_selector(series_accession TEXT,contrast TEXT,analysis_version TEXT,feature_type TEXT,total INTEGER,PRIMARY KEY(series_accession,contrast,analysis_version,feature_type))")
@@ -254,6 +257,7 @@ def build_candidate(release, core, policy_path, output, release_id, *, batch_siz
             exclusions.append({"series_accession": key[0], "analysis_version": key[1],
                                "records": denied, "reason": "explicit_denial_or_source_output_hash_mismatch"})
             atomic_json(staging / "build-progress.json", {"completed_analysis": key, "public_effects": total})
+        dest.execute("CREATE UNIQUE INDEX public_effect_id ON effect(id)")
         dest.execute("CREATE INDEX public_effect_page ON effect(series_accession,analysis_version,contrast,feature_type,feature_id)")
         dest.execute("CREATE INDEX public_effect_feature ON effect(feature_type,feature_id)")
         dest.execute("INSERT INTO effect_selector SELECT series_accession,contrast,analysis_version,feature_type,count(*) FROM effect GROUP BY series_accession,contrast,analysis_version,feature_type")
