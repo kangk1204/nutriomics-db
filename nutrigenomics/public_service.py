@@ -10,9 +10,9 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field, FiniteFloat
+from pydantic import BaseModel, Field, FiniteFloat, field_validator
 
-from .explorer import attach_explorer
+from .explorer import MatchInput, ReferenceContext, _match, attach_explorer
 from .explorer_build import canonical, sha256
 
 
@@ -20,9 +20,17 @@ class PublicMealItem(BaseModel):
     food_id: str | int
     amount_g: FiniteFloat = Field(gt=0, le=20000)
 
+    @field_validator("amount_g", mode="before")
+    @classmethod
+    def finite_amount(cls, value):
+        if isinstance(value, (int, float)) and not math.isfinite(value):
+            raise HTTPException(422, "섭취량은 유한한 숫자여야 합니다.")
+        return value
+
 
 class PublicMeal(BaseModel):
     items: list[PublicMealItem] = Field(min_length=1, max_length=100)
+    reference_context: ReferenceContext | None = None
 
 
 def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
@@ -134,6 +142,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     @app.post("/api/v1/meals/analyze")
     def meal(payload: PublicMeal):
         totals, provenance, excluded, selected = {}, [], [], []
+        matches = []
         with read() as db:
             for item in payload.items:
                 food_id = str(item.food_id)
@@ -142,13 +151,32 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                     if not mapped:
                         raise HTTPException(404, "food is outside the public release; this is not evidence of absence")
                     food_id = mapped[0]
-                food = db.execute("SELECT id,label FROM node WHERE id=? AND kind='food'", (food_id,)).fetchone()
+                food = db.execute("SELECT id,label,metadata_json FROM node WHERE id=? AND kind='food'", (food_id,)).fetchone()
                 if food is None:
                     raise HTTPException(404, "food not in public release")
-                selected.append({"food_id": food_id, "amount_g": item.amount_g, "name": food["label"]})
+                food_info = json.loads(food["metadata_json"])
+                selected.append({"food_id": food_id, "amount_g": item.amount_g,
+                                 "name": food["label"], "food_name": food["label"],
+                                 "preparation_state": food_info.get("preparation_state", food_info.get("preparation")),
+                                 "calculation_mode": "direct"})
+                previous_contributions = len(provenance)
                 for row in db.execute("SELECT * FROM measurement WHERE food=? ORDER BY id", (food_id,)):
-                    if row["amount"] is None or row["basis"] != "source_100g":
-                        excluded.append({"measurement_id": row["id"], "status": row["status"], "reason": "missing_value_or_non_100g_basis"})
+                    reasons = []
+                    raw = json.loads(row["raw_json"]) if row["raw_json"] else {}
+                    if row["status"] not in {"measured", "measured_zero", "quantified"}:
+                        reasons.append("status_not_quantified")
+                    if row["amount"] is None:
+                        reasons.append("amount_missing")
+                    elif not math.isfinite(row["amount"]) or row["amount"] < 0:
+                        reasons.append("amount_invalid")
+                    if row["basis"] not in {"source_100g", "edible_portion_100g", "per_100g_edible_portion"}:
+                        reasons.append("unsupported_or_unverified_mass_basis")
+                    if isinstance(raw, dict) and raw.get("basis_verified") is False:
+                        reasons.append("basis_explicitly_unverified")
+                    if not row["unit"]:
+                        reasons.append("unit_missing")
+                    if reasons:
+                        excluded.append({"measurement_id": row["id"], "status": row["status"], "basis": row["basis"], "reasons": reasons})
                         continue
                     amount = row["amount"] * item.amount_g / 100
                     if not math.isfinite(amount):
@@ -156,12 +184,27 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                     key = (row["component"], row["unit"])
                     totals[key] = totals.get(key, 0.0) + amount
                     provenance.append({"measurement_id": row["id"], "source_id": row["source_id"], "basis": row["basis"], "status": row["status"], "contribution": amount, "unit": row["unit"]})
+                if len(provenance) == previous_contributions:
+                    selected[-1]["calculation_mode"] = "unavailable"
+                match = _match(db, MatchInput(seed_id=food_id, intake_g=item.amount_g,
+                                             reference_context=payload.reference_context or ReferenceContext()))
+                matches.append({"food_id": food_id, "amount_g": item.amount_g, **match})
             components = []
             for (key, unit), value in sorted(totals.items()):
                 node = db.execute("SELECT label,metadata_json FROM node WHERE id=?", (key,)).fetchone()
                 info = json.loads(node["metadata_json"]) if node else {}
                 components.append({"component_key": info.get("component_key", key), "name": node["label"] if node else key, "unit": unit, "amount": value})
+        observed = [{**e, "query_food_id": m["food_id"], "query_intake_g": m["amount_g"]}
+                    for m in matches for e in m["observed_evidence"]]
+        applicability = [{"food_id": e["query_food_id"], "exposure_id": e["id"],
+                          "conditions": e.get("applicability", [])} for e in observed]
+        gaps = list(dict.fromkeys(g for m in matches for g in m["evidence_gaps"]))
+        if excluded:
+            gaps.append("함량·단위·상태·가식부 기준이 미확인인 조성은 섭취량 합계에서 제외했습니다.")
         return {"items": selected, "components": components, "provenance": provenance,
+                "observed_evidence": observed, "evidence_by_food": matches,
+                "applicability": applicability, "mechanistic_hypotheses": [], "evidence_gaps": gaps,
+                "reference_context": (payload.reference_context or ReferenceContext()).model_dump(exclude_none=True),
                 "excluded_measurements": excluded, "individual_prediction": False,
                 "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]}
 

@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
-from .analysis_downloads import verified_analysis_response
+from .analysis_downloads import analysis_auxiliary_response
 from .annotations import search_annotations
 from .bridge import (
     get_provenance,
@@ -890,42 +890,7 @@ def download_analysis_auxiliary_file(
     filename: str,
     session: Session = Depends(get_session),
 ) -> FileResponse:
-    if Path(filename).name != filename or filename in {".", ".."}:
-        raise HTTPException(status_code=404, detail="Analysis output not found")
-    run = session.scalar(
-        select(AnalysisRun).where(
-            AnalysisRun.series_accession == accession.upper(),
-            AnalysisRun.analysis_version == analysis_version,
-        )
-    )
-    auxiliary_files = (run.metadata_json or {}).get("auxiliary_files", []) if run else []
-    if isinstance(auxiliary_files, str):
-        auxiliary_files = [auxiliary_files]
-    if not isinstance(auxiliary_files, list):
-        auxiliary_files = []
-    if filename not in auxiliary_files:
-        raise HTTPException(status_code=404, detail="Analysis output not found")
-    manifest_record = next(
-        (
-            item
-            for item in (run.output_manifest_json or [])
-            if isinstance(item, dict)
-            and Path(str(item.get("path", ""))).name == filename
-        ),
-        None,
-    )
-    if manifest_record is None:
-        raise HTTPException(status_code=404, detail="Analysis output not found")
-    output_path = Path(str(manifest_record.get("path", ""))).resolve()
-    output_root = (DATA_DIR.resolve().parent / "outputs").resolve()
-    if output_root not in output_path.parents or not output_path.is_file():
-        raise HTTPException(status_code=404, detail="Analysis output not found")
-    try:
-        return verified_analysis_response(output_path, filename, manifest_record)
-    except ValueError as error:
-        raise HTTPException(status_code=409, detail=str(error)) from error
-    except OSError as error:
-        raise HTTPException(status_code=503, detail="Analysis output unavailable") from error
+    return analysis_auxiliary_response(accession, analysis_version, filename, session, DATA_DIR)
 
 
 @app.delete("/api/v1/meals/{meal_id}", status_code=204)

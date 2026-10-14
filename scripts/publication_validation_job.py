@@ -28,7 +28,7 @@ def run(root, source, api_pid, candidate_id="nutriomics-data-20261014-candidate-
     manifest = json.loads(manifest_path.read_text())
     manifest["source_directory"] = str(source)
     known = {r["path"] for r in manifest["files"]}
-    for relative in ("nutrigenomics/bridge.py", "tests/test_bridge_index.py", "tests/test_parity_checkpoint.py"):
+    for relative in ("nutrigenomics/bridge.py", "nutrigenomics/analysis_downloads.py", "nutrigenomics/download_budget.py", "tests/test_bridge_index.py", "tests/test_parity_checkpoint.py"):
         if relative not in known:
             manifest["files"].append({"path": relative})
     for row in manifest["files"]:
@@ -57,8 +57,9 @@ def run(root, source, api_pid, candidate_id="nutriomics-data-20261014-candidate-
         if result.returncode:
             raise RuntimeError(name + " failed; inspect its durable receipt and log")
         return time.monotonic() - started
-    seconds = stage("tests", ["-m", "pytest", "-q", "--junitxml=" + str(reports / "tests.xml")])
-    atomic_json(reports / "tests.json", {**common, "verified_at": datetime.now(UTC).isoformat(), "platform": "linux", "returncode": 0, "seconds": seconds})
+    excluded_tests = [{"path": "tests/test_primary_affinity_record.py", "reason": "Private DTI capture tools are outside the NutriOmics Data Descriptor scope; separately covered in their own workflow."}]
+    seconds = stage("tests", ["-m", "pytest", "-q", "--ignore=tests/test_primary_affinity_record.py", "--junitxml=" + str(reports / "tests.xml")])
+    atomic_json(reports / "tests.json", {**common, "verified_at": datetime.now(UTC).isoformat(), "platform": "linux", "returncode": 0, "seconds": seconds, "excluded_test_scope": excluded_tests})
     stage("public-value-parity", ["-m", "scripts.validate_publication_values", "--release", str(candidate), "--core", str(root / "backups/publication-20261014/core-consistent.sqlite3"), "--output", str(reports / "public-value-parity.json")])
     stage("benchmark", ["-m", "scripts.benchmark_explorer_performance", "benchmark", "--base", "http://127.0.0.1:8020", "--spec", str(cases), "--output", str(reports), "--runs", "100", "--concurrent", "--server-pid", str(api_pid), "--source-manifest", str(manifest_path)])
     stage("data-parity", ["-m", "scripts.verify_explorer_performance_parity", "--parent", str(root / "data/explorer/releases/explorer-20261009-v7/explorer.sqlite"), "--candidate", str(root / "data/explorer/releases/explorer-20261010-perf-v2/explorer.sqlite"), "--baseline", str(root / "research/performance/20261010/baseline-v7"), "--measured", str(reports), "--base", "http://127.0.0.1:8020", "--cases", str(cases), "--manifest", str(manifest_path), "--output", str(reports / "data-parity.json")])

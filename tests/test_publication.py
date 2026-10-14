@@ -18,6 +18,11 @@ from scripts.validate_publication_values import validate
 
 def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explorer, tmp_path, monkeypatch):
     _science(explorer)
+    with sqlite3.connect(explorer["db"]) as parent_db:
+        parent_db.executemany("INSERT INTO measurement VALUES(?,?,?,?,?,?,?,?,?)", [
+            ("m-lod", "food:gap", "nutrient:fat", 0, "g", "source_100g", "below_detection", "open", "{}"),
+            ("m-volume", "food:gap", "nutrient:fat", 10, "g", "source_100ml", "measured", "open", "{}"),
+        ])
     parent = explorer["db"].parent
     (parent / "manifest.json").write_text(json.dumps({"release_id": "test-parent", "database_sha256": sha256(explorer["db"])}))
     core = tmp_path / "full-core.sqlite3"
@@ -59,6 +64,10 @@ def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explor
         build_candidate(parent, core, policy, output, "test-public")
     service = tmp_path / "service"
     prepare(output, parent, service, "test-public-service")
+    from nutrigenomics.explorer_scientific import _cached_effects
+    missing_preview = _cached_effects(service / "nutriomics.sqlite3", {
+        "series_accession": "GSE_FIXTURE", "contrast": "withheld contrast", "analysis_version": "v1"}, None, 6)
+    assert missing_preview == ([], None, "not_in_public_release")
     with pytest.raises(ValueError, match="reviewed"):
         create_app(service)
     # Fixture restores process-local paths after this isolated app is closed.
@@ -77,6 +86,25 @@ def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explor
         assert client.get("/api/v1/public/meta").json()["release_id"] == "test-public-service"
         assert client.get("/api/v1/explorer/entities").status_code == 200
         assert client.get("/api/v1/studies/T1").json()["study"]["id"] == "T1"
+        meal = client.post("/api/v1/meals/analyze", json={
+            "items": [{"food_id": 1, "amount_g": 150}],
+            "reference_context": {"tissue": "whole blood", "response_time_h": 6},
+        })
+        assert meal.status_code == 200
+        value = meal.json()
+        assert value["components"][0]["amount"] == 3.75
+        assert value["observed_evidence"][0]["contrasts"][0]["source_effect_total"] == 2
+        assert value["reference_context"]["response_time_h"] == 6
+        assert value["individual_prediction"] is False
+        assert value["observed_evidence"][0]["query_intake_g"] == 150
+        fruit = client.post("/api/v1/meals/analyze", json={"items": [{"food_id": "food:fruit", "amount_g": 100}]}).json()
+        assert fruit["components"][0]["amount"] == 0
+        assert fruit["excluded_measurements"][0]["status"] == "missing"
+        gap = client.post("/api/v1/meals/analyze", json={"items": [{"food_id": "food:gap", "amount_g": 100}]}).json()
+        assert gap["components"] == [] and gap["items"][0]["calculation_mode"] == "unavailable"
+        assert {x["status"] for x in gap["excluded_measurements"]} == {"below_detection", "measured"}
+        assert client.post("/api/v1/meals/analyze", content='{"items":[{"food_id":1,"amount_g":NaN}]}',
+                           headers={"content-type": "application/json"}).status_code == 422
 
 
 def test_human_review_cannot_be_satisfied_by_pending_or_wrong_hash():

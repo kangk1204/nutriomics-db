@@ -16,7 +16,7 @@ def build(audit, output):
     studies = {r["value"]["id"]: r["value"] for r in records if r["kind"] == "study"}
     series_studies = {s: study for study in studies.values() for s in study.get("metadata", {}).get("series", [])}
     decisions, facts = [], []
-    fields = {"study": ["title", "independent_study"],
+    fields = {"study": ["title", "metadata.study_design", "metadata.series_design", "metadata.clinical_cohort_people"],
               "exposure": ["amount", "unit", "dose_basis", "duration_days", "formulation"],
               "contrast": ["design", "tissue", "n_people", "n_samples", "response_time_h", "comparison"]}
     for row in records:
@@ -33,9 +33,13 @@ def build(audit, output):
                           "primary_paper_location": None, "decision": "pending", "reviewer": None,
                           "reviewed_at": None, "reason": None, "record": portable(value)})
         for field in fields.get(row["kind"], []):
+            candidate = value
+            for part in field.split("."):
+                candidate = candidate.get(part) if isinstance(candidate, dict) else None
             facts.append({"fact_id": row["kind"] + ":" + row["id"] + ":" + field,
                           "record_id": row["id"], "record_sha256": record_hash(value),
-                          "field": field, "candidate_value": value.get(field), "source_url": primary,
+                          "field": field, "candidate_value": candidate, "source_url": primary,
+                          "source_reference_type": "repository_record" if primary and "ncbi.nlm.nih.gov/geo/" in primary else "publication_reference_candidate",
                           "primary_paper_location": None, "expert_verified": False,
                           "review_status": "pending", "source_kind": "paper_and_repository_candidate"})
     # Round-robin field strata avoids 200 metadata facts from one large series.

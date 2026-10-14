@@ -33,7 +33,9 @@ def evaluate(metadata, expected_reviews, decisions, evidence, *, evidence_root=N
     if any(d.get("decision") == "exclude" for d in decisions):
         failures.append({"reason": "exclusions_require_rebuilding_and_rechecking_this_release"})
     types = metadata.get("counts", {}).get("effect_types", {})
-    if not any("expression" in k for k in types) or not any("methyl" in k or "cpg" in k for k in types):
+    expression_present = any(types.get(k, 0) > 0 for k in ("gene_expression", "expression", "gene", "transcript"))
+    methylation_present = any(v > 0 and ("methyl" in k or "cpg" in k) for k, v in types.items())
+    if not expression_present or not methylation_present:
         failures.append({"reason": "public_expression_and_DNAm_results_required"})
     for name in REQUIRED_TECHNICAL:
         value = evidence.get("technical", {}).get(name, {})

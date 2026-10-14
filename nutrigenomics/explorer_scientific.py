@@ -484,6 +484,16 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
         args += identifiers
     try:
         with read_connection(core_path) as core:
+            public_total = None
+            if core.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='effect_selector'").fetchone():
+                public_total = core.execute(
+                    "SELECT sum(total) FROM effect_selector WHERE series_accession=? AND contrast=? AND analysis_version=?",
+                    [contrast[k] for k in ("series_accession", "contrast", "analysis_version")],
+                ).fetchone()[0]
+                if public_total is None:
+                    # A curated trial can remain visible when its numeric data
+                    # is withheld. This is not a confirmed zero-result analysis.
+                    raise QueryUnavailable("not_in_public_release")
             selector = selector_key(contrast)
             indexed = projection is not None and indexed_source(projection, core_path)
             summary = projection.execute("SELECT total FROM perf_effect_selector WHERE selector=?", (selector,)).fetchone() if indexed else None
@@ -503,7 +513,7 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
                         raise QueryUnavailable("analysis_key_mismatch")
                     rows.append(r)
             else:
-                total = core.execute("SELECT count(*) FROM study_effect WHERE " + conditions, args).fetchone()[0]
+                total = public_total if public_total is not None and not gene else core.execute("SELECT count(*) FROM study_effect WHERE " + conditions, args).fetchone()[0]
                 if not gene and total == 0 and projection is not None and has_index(projection, "perf_effect_selector"):
                     original_total = projection.execute("SELECT total FROM perf_effect_selector WHERE selector=?", (selector,)).fetchone()
                     if original_total is not None and original_total[0] > 0:

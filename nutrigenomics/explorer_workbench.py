@@ -2,19 +2,25 @@
 
 from __future__ import annotations
 
-import os
 import base64
 import hashlib
 import json
+import os
 import re
-import sqlite3
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
 
 from .explorer import _json, _meta, _public, database
+from .explorer_performance import (
+    QueryUnavailable,
+    canonical,
+    fingerprint,
+    indexed_source,
+    read_connection,
+    selector_key,
+)
 from .settings import DATA_DIR
-from .explorer_performance import QueryUnavailable, canonical, fingerprint, indexed_source, read_connection, selector_key
 
 router = APIRouter(prefix="/api/v1/explorer", tags=["Evidence workbench"])
 LAYERS = {
@@ -355,6 +361,14 @@ def omics_results(
     if not core.is_file():
         return {"release_id": release, "items": [], "total": None, "status": "source_unavailable"}
     with read_connection(core) as db:
+        if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='effect_selector'").fetchone():
+            type_counts = dict(db.execute(
+                "SELECT feature_type,total FROM effect_selector WHERE series_accession=? AND contrast=? AND analysis_version=? ORDER BY feature_type",
+                (series, contrast, analysis_version)))
+            if not type_counts:
+                return {"release_id": release, "items": [], "total": None,
+                        "status": "not_in_public_release",
+                        "note": "연구 맥락은 수록되어 있으나 이 대비의 정량 자료는 공개 범위에 없습니다. 확인된 0건 또는 효과 0을 뜻하지 않습니다."}
         available_types = [
             r[0]
             for r in db.execute(
@@ -398,7 +412,7 @@ def omics_results(
                         raise QueryUnavailable("analysis_key_mismatch")
                     rows.append(row)
         else:
-            total = db.execute("SELECT count(*) FROM study_effect WHERE " + condition, args).fetchone()[0]
+            total = type_counts[native_type] if type_counts is not None and not feature_id else db.execute("SELECT count(*) FROM study_effect WHERE " + condition, args).fetchone()[0]
             rows = [dict(r) for r in db.execute("SELECT * FROM study_effect WHERE " + condition + " ORDER BY feature_id,id LIMIT ? OFFSET ?", [*args, page_size, offset])]
         for row in rows:
             row["metadata"] = _public(_json(row.pop("metadata_json", None)))

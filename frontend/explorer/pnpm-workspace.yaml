@@ -1,0 +1,3 @@
+# Only this locked dependency needs its native build/install hook.
+allowBuilds:
+  esbuild: true

@@ -42,7 +42,7 @@ def render(metadata, review_manifest, performance, output):
     fig, ax = plt.subplots(figsize=(7.2, 3.5)); ax.set(xlim=(0, 10), ylim=(0, 4)); ax.axis("off")
     blocks = [(0.1, 2.3, "Food composition", "food", "Source food ID, state\nquantity, unit, basis"),
               (3.35, 2.3, "Human intervention", "curation", "Exposure, arm, contrast\ntissue, time, participants"),
-              (6.6, 2.3, "Omics results", "omics", "Five-part result key\neffect, uncertainty, P / FDR"),
+              (6.6, 2.3, "Omics results", "omics", "Five-part result key\nEffect, SE, P, FDR"),
               (3.35, 0.25, "Versioned release", "neutral", "SQLite · Parquet · CSV\nmanifest, policy, review")]
     for x, y, title, color, text in blocks:
         ax.add_patch(FancyBboxPatch((x, y), 3, 1.2, boxstyle="round,pad=0.04,rounding_size=.05", facecolor="#f5f7f8", edgecolor=COLORS[color], linewidth=1))
@@ -62,6 +62,10 @@ def render(metadata, review_manifest, performance, output):
         entries = [(k, v) for k, v in entries if k != "curation"]
         labels, values = zip(*entries) if entries else ([], [])
         ax.barh(range(len(values)), values, color=COLORS[color], height=.65)
+        span = max(values, default=1)
+        ax.set_xlim(0, span * 1.4)
+        for i, value in enumerate(values):
+            ax.text(value + span * .025, i, f"{value:,}", va="center", fontsize=7)
         ax.set_yticks(range(len(values)), [x.replace('_', '\n') for x in labels], fontsize=7)
         ax.invert_yaxis(); ax.set_title(panel + "  " + title, loc="left", fontsize=10)
         ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 4)); ax.set_xlabel("Records", fontsize=8)
@@ -75,8 +79,8 @@ def render(metadata, review_manifest, performance, output):
     for i, (name, query, experiment, limitation) in enumerate(examples):
         y = .83 - i * .29
         ax.text(0, y, name, fontweight="bold", color=COLORS["food"], transform=ax.transAxes)
-        ax.text(.2, y, query + "  →  " + experiment, transform=ax.transAxes)
-        ax.text(.2, y - .1, limitation, color=COLORS["neutral"], transform=ax.transAxes, fontsize=8)
+        ax.text(.26, y, query + "  →  " + experiment, transform=ax.transAxes)
+        ax.text(.26, y - .1, limitation, color=COLORS["neutral"], transform=ax.transAxes, fontsize=8)
     save(fig, 3, ["case", "query", "study_condition", "applicability_limit"], examples, "Figure 3. Intended evidence-navigation cases. Serving quantities describe queries and experimental exposures; no molecular response is scaled by their ratio and no clinical improvement is inferred.")
     # Figure 4: only measured latency is plotted; scientific evaluation remains pending.
     fig, ax = plt.subplots(figsize=(7.2, 3.3)); rows = []

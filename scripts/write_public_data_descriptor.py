@@ -23,6 +23,12 @@ Food composition and dietary-intervention omics data are commonly distributed in
 
 Keywords: nutrigenomics; food composition; dietary intervention; transcriptomics; DNA methylation; provenance; data reuse
 
+Dataset title: NutriOmics food composition and human dietary-intervention omics dataset.
+
+Dataset identifier: `{versions}`; exact deposited version DOI pending. Dataset creators and publisher: final author list and repository confirmation required. Repository URL: pending.
+
+Dataset license: CC BY 4.0 for project-authored curation and permitted project-derived results. Upstream composition and external records retain the source-specific terms in the catalog; a blanket third-party license is not asserted.
+
 ## 1. Summary
 
 Connecting a food record with a molecular result requires more than a shared nutrient name. The administered product, dose, duration, tissue, population and comparator determine which result is relevant. A nutritional mixture also changes several constituents together, so a meal comparison rarely identifies the independent effect of every constituent. NutriOmics retains these distinctions in a versioned dataset that connects composition with dietary-study context and processed results.
@@ -108,7 +114,7 @@ Source composition may be unavailable for an input, a study may have insufficien
 
 ## Code and Data Availability
 
-Own code: MIT; repository and tested version tag to be confirmed in the final release. Data and code version DOIs: pending. Public HTTPS URL and operational handover: pending. The public service loads only a specified permitted release and provides no acquisition, write or reanalysis routes. Monthly source checks create change candidates; expert approval and publication are separate operations.
+Own code: MIT; https://github.com/kangk1204/nutriomics-db . The tested candidate tag is recorded in the code-release receipt; the final submission must identify the exact matching tag and version DOI. Data and code version DOIs: pending. Public HTTPS URL and operational handover: pending. The public service loads only a specified permitted release and provides no acquisition, write or reanalysis routes. Monthly source checks create change candidates; expert approval and publication are separate operations.
 
 ## Author Statements
 
