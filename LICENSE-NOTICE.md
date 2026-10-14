@@ -1,0 +1,3 @@
+# License and scope
+
+Project-authored software: MIT (see LICENSE). Project-authored curation/analysis outputs: CC BY 4.0 only where affirmative per-source/output policy permits them (see LICENSE-DATA.md). Third-party dependencies retain their own licenses. No dependency binaries, source data, credentials or private server environment files are bundled. This candidate code archive does not imply scientific review, dataset DOI registration or final submission readiness. Build the frontend from its lock before creating the public container. Server-specific tests requiring excluded transport/deployment helpers are listed in excluded-tests.json; portable tests are retained.

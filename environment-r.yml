@@ -1,0 +1,28 @@
+name: nutrigenomics-r
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.5
+  - bioconductor-limma
+  - bioconductor-edger
+  - bioconductor-affy
+  - bioconductor-preprocesscore=1.72.0
+  - bioconductor-hgu219cdf
+  - bioconductor-hgu219.db
+  - bioconductor-minfi
+  - bioconductor-illuminahumanmethylation450kmanifest
+  - bioconductor-illuminahumanmethylationepicmanifest
+  - bioconductor-illuminahumanmethylation450kanno.ilmn12.hg19
+  - bioconductor-illuminahumanmethylationepicanno.ilm10b4.hg19
+  - bioconductor-flowsorted.blood.450k
+  - bioconductor-flowsorted.blood.epic
+  - bioconductor-oligo
+  - bioconductor-annotationdbi
+  - bioconductor-fgsea
+  - bioconductor-org.hs.eg.db
+  - bioconductor-reactome.db
+  - r-jsonlite
+  - r-renv
+
+

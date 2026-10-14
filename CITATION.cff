@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "Cite the exact software version. A dataset version DOI is pending and must not be inferred from this software citation."
+type: software
+title: "NutriOmics: food composition and human dietary-intervention omics data workbench"
+authors:
+  - family-names: Kang
+    given-names: Keunsoo
+repository-code: "https://github.com/kangk1204/nutriomics-db"
+license: MIT
+keywords:
+  - nutrigenomics
+  - DNA methylation
+  - transcriptomics
+  - data provenance

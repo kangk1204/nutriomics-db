@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "domains": ["blood_pressure", "lipids", "obesity"],
+  "diseases": [
+    {"id":"MESH:D006973","label":"Hypertension","label_ko":"고혈압","domain":"blood_pressure"},
+    {"id":"MESH:D000075222","label":"Essential Hypertension","label_ko":"본태성 고혈압","domain":"blood_pressure"},
+    {"id":"MESH:D050171","label":"Dyslipidemias","label_ko":"이상지질혈증","domain":"lipids"},
+    {"id":"MESH:D006949","label":"Hyperlipidemias","label_ko":"고지혈증","domain":"lipids"},
+    {"id":"MESH:D006937","label":"Hypercholesterolemia","label_ko":"고콜레스테롤혈증","domain":"lipids"},
+    {"id":"MESH:D015228","label":"Hypertriglyceridemia","label_ko":"고중성지방혈증","domain":"lipids"},
+    {"id":"MESH:D009765","label":"Obesity","label_ko":"비만","domain":"obesity"},
+    {"id":"MESH:D056128","label":"Obesity, Abdominal","label_ko":"복부비만","domain":"obesity"},
+    {"id":"MESH:D050177","label":"Overweight","label_ko":"과체중","domain":"obesity"}
+  ],
+  "policy": {
+    "chemical_gene_selection": "Both endpoints must occur in a source-recorded association with a scope disease; every recorded taxon is retained.",
+    "name_correspondence": "Only one-to-one normalized source-label correspondence; candidate only, no molecular equivalence or quantity transfer.",
+    "disease_export_taxon": "unknown; CTD disease exports do not encode species",
+    "composition_domains": "navigation scope only; not disease evidence",
+    "individual_prediction": false
+  }
+}

@@ -1,0 +1,87 @@
+[
+  {
+    "id": "S01",
+    "title": "고지방 식후 혈액 RNA-seq 반복 측정",
+    "description": "5명이 동일 유형의 고지방 식사 challenge를 서로 다른 3일에 수행. 급성 식후 whole-blood RNA-seq.",
+    "pubmed_id": "31473510",
+    "series": ["GSE127530"],
+    "study_design": "5명이 서로 다른 3일에 고지방 식사 challenge를 수행한 반복측정 연구. 식전과 식후 3·6시간 혈액 전사체를 비교한다.",
+    "limitations": "독립 참가자 5명이며 45개 RNA-seq 시료는 45명이 아니다. 급성 whole-blood 반응이며 특정 식품 성분의 독립 효과를 식별하지 않는다.",
+    "primary_sources": [
+      {"label": "GEO GSE127530", "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE127530"},
+      {"label": "원 논문 PMID 31473510", "url": "https://pubmed.ncbi.nlm.nih.gov/31473510/"}
+    ],
+    "series_design": {
+      "GSE127530": {"reported_people": 5, "biological_samples": 45, "sample_count_basis": "GEO overall_design; 3일 반복 채혈", "tissue": "whole blood", "intervention": "고지방 meal challenge", "dose": "급성 식사; 식사 열량은 개인별 연구 설계에 따름", "duration": "식전, 식후 3시간, 6시간"}
+    }
+  },
+  {
+    "id": "S02",
+    "title": "식사 열량·시간·체중 상태에 따른 혈액 발현",
+    "description": "정상체중 7명과 비만 7명이 500/1000/1500 kcal 조건을 수행한 반복 측정 연구.",
+    "pubmed_id": "28319853",
+    "series": ["GSE56960"],
+    "study_design": "정상체중 7명과 비만 7명이 500·1,000·1,500 kcal 고지방 식사 조건을 수행하고 식전 및 식후 2·4·6시간 혈액세포 전사체를 측정했다.",
+    "limitations": "168개 microarray 기록은 반복측정 assay이며 독립 참가자 168명을 뜻하지 않는다. 열량과 음식의 여러 성분이 함께 변하므로 특정 성분의 효과로 분리할 수 없다.",
+    "primary_sources": [
+      {"label": "GEO GSE56960", "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE56960"},
+      {"label": "원 논문 PMID 28319853", "url": "https://pubmed.ncbi.nlm.nih.gov/28319853/"}
+    ],
+    "series_design": {
+      "GSE56960": {"reported_people": 14, "biological_samples": 168, "sample_count_basis": "GEO overall_design; 3열량 조건 × 4시점 반복", "tissue": "혈액세포", "intervention": "고지방 식사 500·1,000·1,500 kcal", "duration": "식전, 식후 2시간, 4시간, 6시간"}
+    }
+  },
+  {
+    "id": "S03",
+    "title": "포도씨 flavanol 중재의 발현·methylation",
+    "description": "200 mg/day, 8주 flavanol 중재. 발현과 DNAm SubSeries의 개인 대응은 별도 감사 대상.",
+    "pubmed_id": "24763279",
+    "series": ["GSE54690", "GSE54325", "GSE54643"],
+    "study_design": "남성 흡연자에게 포도씨 유래 monomeric/oligomeric flavanols 200 mg/day를 8주 제공한 연구. 발현과 methylation은 서로 다른 GEO SubSeries에 보관됐다.",
+    "limitations": "발현 SubSeries는 7명·14개 생물학적 시료를 7개 two-color array로, methylation SubSeries는 10명·20개 시료를 보고한다. 개인 ID 대응은 확인되지 않아 두 오믹스를 개인 단위로 결합하지 않는다. SuperSeries와 SubSeries를 독립 코호트로 합산하지 않는다.",
+    "primary_sources": [
+      {"label": "GEO SuperSeries GSE54690", "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54690"},
+      {"label": "GEO 발현 GSE54325", "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54325"},
+      {"label": "GEO methylation GSE54643", "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54643"},
+      {"label": "원 논문 PMID 24763279", "url": "https://pubmed.ncbi.nlm.nih.gov/24763279/"}
+    ],
+    "series_design": {
+      "GSE54690": {"reported_people": null, "biological_samples": null, "sample_count_basis": "SuperSeries container; child Series counts are separate", "intervention": "포도씨 flavanol 200 mg/day × 8주", "duration": "8주"},
+      "GSE54325": {"reported_people": 7, "biological_samples": 14, "sample_count_basis": "GEO overall_design; 7 paired two-color arrays", "tissue": "혈액 백혈구", "intervention": "포도씨 monomeric/oligomeric flavanols 200 mg/day", "duration": "8주 전후"},
+      "GSE54643": {"reported_people": 10, "biological_samples": 20, "sample_count_basis": "GEO overall_design; 10명 전후", "tissue": "혈액", "intervention": "포도씨 monomeric/oligomeric flavanols 200 mg/day", "duration": "8주 전후"}
+    }
+  },
+  {
+    "id": "S04",
+    "title": "PREDIMED-Navarra 장기 식이군별 DNA methylation",
+    "description": "지중해식+올리브유, 지중해식+nuts, 저지방 대조군의 baseline 대 5년 자료.",
+    "pubmed_id": "29295516",
+    "series": ["GSE107205"],
+    "study_design": "PREDIMED 참여자 중 36명(세 식이군 각 12명)의 baseline 및 5년 말초 백혈구 methylation 자료를 비교한 하위 연구.",
+    "limitations": "하위 연구 표본이며 식이 패턴의 복합 효과를 단일 성분 효과로 해석할 수 없다. 공개 GEO 설계 메타데이터만으로 원 trial의 무작위배정·탈락·하위표본 선정 과정을 모두 평가할 수 없다.",
+    "primary_sources": [
+      {"label": "GEO GSE107205", "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE107205"},
+      {"label": "원 논문 PMID 29295516", "url": "https://pubmed.ncbi.nlm.nih.gov/29295516/"}
+    ],
+    "series_design": {
+      "GSE107205": {"reported_people": 36, "biological_samples": 72, "sample_count_basis": "GEO overall_design; 36명 baseline 및 5년 반복", "tissue": "peripheral white blood cells", "intervention": "지중해식+EVOO, 지중해식+nuts, 저지방 대조군 (각 12명)", "duration": "baseline 및 5년"}
+    }
+  },
+  {
+    "id": "S05",
+    "title": "NAFLD 대상 지중해식·고섬유 식이 전후 methylation",
+    "description": "18명이 0, 1, 2개월에 반복 채혈. 확인된 metadata상 별도 대조군은 없음.",
+    "pubmed_id": "36447285",
+    "series": ["GSE219217"],
+    "study_design": "NAFLD 참가자 18명에게 지중해식과 고섬유 식이 안내를 제공하고 0·1·2개월에 혈액 methylation을 측정한 단일군 반복측정 연구.",
+    "limitations": "확인된 GEO 설계에는 별도 대조군이 없다. 시간 변화·체중 변화·회귀효과를 중재 효과와 분리할 수 없으며, 급성 식후 반응이나 일반 인구에 직접 적용할 수 없다.",
+    "primary_sources": [
+      {"label": "GEO GSE219217", "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE219217"},
+      {"label": "원 논문 PMID 36447285", "url": "https://pubmed.ncbi.nlm.nih.gov/36447285/"}
+    ],
+    "series_design": {
+      "GSE219217": {"reported_people": 18, "biological_samples": 54, "sample_count_basis": "GEO overall_design; 18명 × 3회", "tissue": "whole blood", "intervention": "지중해식·고섬유 식이 안내", "duration": "0, 1, 2개월"}
+    }
+  }
+]
+

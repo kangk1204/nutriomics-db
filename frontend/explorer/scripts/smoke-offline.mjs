@@ -1,0 +1,54 @@
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+const playwrightModule = process.env.EXPLORER_PLAYWRIGHT;
+const { chromium } = await import(playwrightModule ? pathToFileURL(playwrightModule).href : 'playwright');
+const target = process.argv[2];
+if (!target) throw new Error('Pass an exported HTML file or actual source snapshot JSON.');
+await mkdir('artifacts', { recursive: true });
+let htmlPath = path.resolve(target);
+if (target.endsWith('.json')) {
+  const snapshot = JSON.parse((await readFile(target, 'utf8')).replace(/^\uFEFF/, ''));
+  const css = await readFile('dist/offline-runtime.css', 'utf8');
+  const js = (await readFile('dist/offline-runtime.js', 'utf8')).replaceAll('</script', '<\\/script');
+  const serialized = JSON.stringify(snapshot).replaceAll('<', '\\u003c');
+  htmlPath = path.resolve('artifacts/offline-inspection.html');
+  await writeFile(htmlPath, `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NutriOmics Explorer</title><style>${css}</style><script>window.__NUTRIOMICS_SNAPSHOT__=${serialized};</script></head><body><div id="root"></div><script>${js}</script></body></html>`, 'utf8');
+}
+const browser = await chromium.launch({ headless: true, ...(process.env.EXPLORER_BROWSER ? { executablePath: process.env.EXPLORER_BROWSER } : {}) });
+const context = await browser.newContext({ viewport: { width: 1680, height: 1060 }, deviceScaleFactor: 1 });
+const network = []; const errors = [];
+await context.route(/^https?:\/\//, route => { network.push(route.request().url()); return route.abort(); });
+const page = await context.newPage();
+page.on('pageerror', error => errors.push(error.message));
+await page.goto(pathToFileURL(htmlPath).href);
+await page.waitForFunction(() => window.__NUTRIOMICS_CY__?.nodes().length > 0, { timeout: 20000 });
+await page.waitForTimeout(500);
+const counts = await page.evaluate(() => ({ nodes: window.__NUTRIOMICS_CY__.nodes().length, edges: window.__NUTRIOMICS_CY__.edges().length }));
+await page.screenshot({ path: 'artifacts/explorer-desktop.png', fullPage: true });
+const gene = await page.evaluate(() => { const node = window.__NUTRIOMICS_CY__.nodes().filter(node => node.data('kind') === 'gene').first(); if (!node.length) return null; node.emit('tap'); return node.data('label'); });
+if (gene) {
+  await page.waitForFunction(label => document.querySelector('.detail-intro h3')?.textContent === label, gene);
+  if (!(await page.getByRole('tab', { name: '유전자', exact: true }).getAttribute('aria-selected') === 'true')) throw new Error('Node selection failed to synchronize entity tab.');
+}
+const edge = await page.evaluate(() => { const edge = window.__NUTRIOMICS_CY__.edges().first(); if (!edge.length) return null; edge.emit('tap'); return edge.data('evidence').id; });
+if (edge) await page.waitForFunction(id => document.querySelector('.detail-intro code')?.textContent === id, edge);
+await page.screenshot({ path: 'artifacts/explorer-edge-detail.png', fullPage: true });
+const input = page.getByRole('textbox', { name: '음식, 성분, 유전자 이름 또는 식별자 검색' });
+await input.fill('NO_MATCH_EXPECTED_7c352');
+await page.waitForTimeout(400);
+if (!(await page.getByText('검색 결과가 없습니다', { exact: true }).isVisible())) throw new Error('Empty search state missing.');
+await input.fill('');
+await page.waitForTimeout(400);
+await page.setViewportSize({ width: 390, height: 844 });
+await page.getByRole('button', { name: '연결망', exact: true }).click();
+await page.waitForTimeout(300);
+await page.screenshot({ path: 'artifacts/explorer-mobile.png', fullPage: true });
+await page.getByRole('button', { name: '검색 표', exact: true }).click();
+if (!(await input.isVisible())) throw new Error('Responsive table tab missing.');
+await page.getByRole('button', { name: '근거 상세', exact: true }).click();
+if (edge && !(await page.locator('.detail-intro code').isVisible())) throw new Error('Responsive detail tab missing.');
+if (errors.length || network.length) throw new Error(JSON.stringify({ errors, network }, null, 2));
+await writeFile('artifacts/offline-smoke-results.json', JSON.stringify({ status: 'passed', html: htmlPath, counts, node_selection: gene ? 'passed' : 'not_applicable', edge_selection: edge ? 'passed' : 'not_applicable', empty_search: 'passed', responsive_tabs: 'passed', runtime_errors: errors, network_attempts: network }, null, 2));
+console.log(JSON.stringify({ status: 'passed', counts, gene, edge, network: network.length, errors: errors.length }));
+await browser.close();

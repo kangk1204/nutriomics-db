@@ -1,0 +1,27 @@
+[
+  {
+    "path": "tests\\test_extend_omics_release.py",
+    "reason": "depends on project-specific server tooling",
+    "modules": [
+      "extend_omics_release"
+    ]
+  },
+  {
+    "path": "tests\\test_performance_release_gate.py",
+    "reason": "depends on project-specific server tooling",
+    "modules": [
+      "deploy_explorer_performance"
+    ]
+  },
+  {
+    "path": "tests\\test_primary_affinity_record.py",
+    "reason": "private DTI expansion tools are outside the public NutriOmics data package"
+  },
+  {
+    "path": "tests\\test_promote_memory_clone.py",
+    "reason": "depends on project-specific server tooling",
+    "modules": [
+      "promote_memory_clone"
+    ]
+  }
+]

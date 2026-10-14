@@ -1,0 +1,6 @@
+# Replace the domain after the owner chooses a host. Caddy obtains HTTPS certificates.
+nutriomics.example.org {
+    reverse_proxy 127.0.0.1:8000
+    header X-Content-Type-Options nosniff
+    encode zstd gzip
+}

@@ -1,0 +1,3002 @@
+{
+  "schema_version": 1,
+  "version": "scientific-matching-2026-10-03-v1",
+  "verification_actor": "assistant_source_check",
+  "expert_review_status": "pending",
+  "checked_at": "2026-10-03T04:08:19.199678+00:00",
+  "scope": {
+    "study_ids": [
+      "N15",
+      "N06",
+      "N14",
+      "S03",
+      "S04",
+      "N16"
+    ],
+    "source_database_read_only": true,
+    "operational_database_modified": false,
+    "purpose": "Context-preserving food/category-to-human-intervention retrieval; no personal-effect prediction"
+  },
+  "identity_policy": {
+    "exact_product_match_requires": "Verified product/formulation and intervention identity, not a name or source-plant match",
+    "component_group_is_single_molecule": false,
+    "name_correspondence_transfers_quantities": false,
+    "portion_ratio_is_effect_scaling": false,
+    "source_checked_is_expert_approved": false,
+    "component_keys_mean": "Contextual component presence; not independently randomized component effects",
+    "duration_months_or_years_to_days": "Keep reported calendar unit; do not invent an exact day count",
+    "compound_identity_requires": [
+      "verified original identifier mapping",
+      "chemical form / analyte basis",
+      "source record and version"
+    ],
+    "non_molecular_groups": [
+      "total fat",
+      "SFA",
+      "PUFA",
+      "flavanol / total catechin mixtures",
+      "dietary fibre",
+      "niacin equivalents",
+      "total folate / DFE",
+      "GAE total polyphenols"
+    ]
+  },
+  "sources": [
+    {
+      "id": "yogurt-paper",
+      "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0192947",
+      "access_level": "full_text",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:11:47Z",
+      "source_locations": [
+        "Materials and methods > Subjects",
+        "Materials and methods > Study design",
+        "Materials and methods > Study design; overnight-fasted test intake",
+        "Materials and methods > Dairy products",
+        "Materials and methods > Sampling; RNA processing"
+      ],
+      "claims": [
+        {
+          "field": "population",
+          "value": {
+            "enrolled": 14,
+            "clinical_analysis": 13,
+            "rna_subset": 7,
+            "description": "healthy young men"
+          },
+          "source_location": "Materials and methods > Subjects",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "study_design",
+          "value": "randomized double-blind crossover",
+          "source_location": "Materials and methods > Study design",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "acute_dose",
+          "value": {
+            "amount": 800,
+            "unit": "g",
+            "frequency": "single_meal"
+          },
+          "source_location": "Materials and methods > Study design; overnight-fasted test intake",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "repeated_dose",
+          "value": {
+            "amount": 400,
+            "unit": "g",
+            "frequency": "per_day",
+            "duration_days": 14,
+            "administration": "2 x 200g/day"
+          },
+          "source_location": "Materials and methods > Study design",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "products",
+          "value": {
+            "milk_fat_percent": 3.5,
+            "acidified_milk_additive": "D-(+)-glucono-delta-lactone, 2%",
+            "yogurt_cultures": [
+              "Lactobacillus delbrueckii subsp. bulgaricus",
+              "Streptococcus thermophilus",
+              "Lactobacillus rhamnosus GG"
+            ]
+          },
+          "source_location": "Materials and methods > Dairy products",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "sampling",
+          "value": {
+            "tissue": "whole blood",
+            "response_time_h": [
+              2,
+              4,
+              6
+            ]
+          },
+          "source_location": "Materials and methods > Sampling; RNA processing",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0192947",
+      "retrieved_response_sha256": "6595c68ecb4a2bb288fa768d73244d3b3103279b11f194be9edf30a015bf3aa6",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "yogurt_html",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.1371/journal.pone.0192947",
+      "pmid": "29489876",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "GSE98645-metadata",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE98645",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:08:21Z",
+      "source_locations": [
+        "MINiML Series GSE98645 / Summary; Overall-Design; 77 Sample elements",
+        "MINiML Series GSE98645 / Summary; Overall-Design"
+      ],
+      "claims": [
+        {
+          "field": "public_subset",
+          "value": {
+            "people": 7,
+            "biological_samples": 77,
+            "tissue": "whole blood"
+          },
+          "source_location": "MINiML Series GSE98645 / Summary; Overall-Design; 77 Sample elements",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "conditions",
+          "value": {
+            "acute_g": 800,
+            "chronic_g_per_day": 400,
+            "duration_weeks": 2,
+            "postprandial_hours": [
+              0,
+              2,
+              4,
+              6
+            ]
+          },
+          "source_location": "MINiML Series GSE98645 / Summary; Overall-Design",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE98nnn/GSE98645/miniml/GSE98645_family.xml.tgz",
+      "retrieved_response_sha256": "7daf290b2be048de3ce55fc345db7c4b1981c114d619f5239c2cff3eeef0f0e2",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "GSE98645",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "fishoil-clinical-paper",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21429719/",
+      "access_level": "abstract",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:13:57Z",
+      "source_locations": [
+        "Abstract > Methods and results",
+        "Abstract does not establish public PBMC-to-clinical individual linkage"
+      ],
+      "claims": [
+        {
+          "field": "clinical_trial",
+          "value": {
+            "people": 20,
+            "population": "overweight and obese adults",
+            "study_design": "randomized double-blind placebo-controlled intervention"
+          },
+          "source_location": "Abstract > Methods and results",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "dose",
+          "value": {
+            "n3_g_per_day": 3.7,
+            "EPA_g_per_day": 1.7,
+            "DHA_g_per_day": 1.2,
+            "duration_weeks": 6
+          },
+          "source_location": "Abstract > Methods and results",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "omics_person_id_linkage",
+          "value": null,
+          "source_location": "Abstract does not establish public PBMC-to-clinical individual linkage",
+          "support_status": "not_verified",
+          "confidence": "low"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID%3A21429719%20AND%20SRC%3AMED&format=json&resultType=core",
+      "retrieved_response_sha256": "c216cf43b5dd7e3bd132d134b835a78a9c898ebefa193391bd6dc9aa1577950b",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "PMID21429719_abstract",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.1016/j.numecd.2010.12.010",
+      "pmid": "21429719",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "GSE27385-metadata",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27385",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:10:14Z",
+      "source_locations": [
+        "!Series_summary; !Series_overall_design; 33 !Series_sample_id values",
+        "!Series_overall_design",
+        "!Series_summary"
+      ],
+      "claims": [
+        {
+          "field": "public_subset",
+          "value": {
+            "people": 11,
+            "assays": 33,
+            "tissue": "PBMC",
+            "minimum_BMI_kg_m2": 27
+          },
+          "source_location": "!Series_summary; !Series_overall_design; 33 !Series_sample_id values",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "study_design",
+          "value": "randomized double-blind placebo-controlled crossover with fish oil / fenofibrate / placebo periods",
+          "source_location": "!Series_overall_design",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "period",
+          "value": {
+            "duration_weeks": 6,
+            "washout_minimum_weeks": 2
+          },
+          "source_location": "!Series_summary",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27385&targ=self&form=text&view=full",
+      "retrieved_response_sha256": "a6757eb7f195c2b4231f67f7ea9673f7e80e201834d158e6eba0640a8df44dcf",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "GSE27385_self",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "fishoil-product-protocol",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM677241",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:11:43Z",
+      "source_locations": [
+        "!Sample_treatment_protocol_ch1"
+      ],
+      "claims": [
+        {
+          "field": "product",
+          "value": {
+            "name": "Marinol C-38",
+            "capsules_per_day": 8,
+            "n3_g_per_day": 3.7,
+            "EPA_g_per_day": 1.7,
+            "DHA_g_per_day": 1.2
+          },
+          "source_location": "!Sample_treatment_protocol_ch1",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "control",
+          "value": "Eight placebo fish-oil capsules containing 80% high-oleic sunflower oil plus two cellulose capsules; fish-oil arm also received fenofibrate-matching cellulose capsules",
+          "source_location": "!Sample_treatment_protocol_ch1",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "administration",
+          "value": "Half of capsules before breakfast and half before dinner; fish intake restricted to at most one portion per week",
+          "source_location": "!Sample_treatment_protocol_ch1",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM677241&targ=self&form=text&view=full",
+      "retrieved_response_sha256": "13a59637aebd9f4dbebe598bbb09a9284d337528a960c533cd81ea5d7b8c6170",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "GSM677241_self",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "metadata_header_sha256": "4bc88587f2f37621666a6d482f3a21c3210482e4ae41b764cfc81920c3574aa5",
+      "stored_content_scope": "metadata_header_only; numeric platform table excluded",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "SFA-PUFA-paper",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19923369/",
+      "access_level": "abstract",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:14:00Z",
+      "source_locations": [
+        "Abstract > Design",
+        "Exact shake quantity/composition not reported in the accessed abstract"
+      ],
+      "claims": [
+        {
+          "field": "design",
+          "value": {
+            "people": 21,
+            "population": "healthy young men",
+            "study_design": "single-blind randomized-order crossover",
+            "parent_conditions": [
+              "SFA",
+              "MUFA",
+              "PUFA"
+            ]
+          },
+          "source_location": "Abstract > Design",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "public_expression_scope",
+          "value": {
+            "tissue": "PBMC",
+            "conditions": [
+              "SFA",
+              "PUFA"
+            ],
+            "response_time_h": 6
+          },
+          "source_location": "Abstract > Design",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "shake_mass_and_fatty_acid_doses",
+          "value": null,
+          "source_location": "Exact shake quantity/composition not reported in the accessed abstract",
+          "support_status": "not_verified",
+          "confidence": "low"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID%3A19923369%20AND%20SRC%3AMED&format=json&resultType=core",
+      "retrieved_response_sha256": "43db2ce23205fd4b84b388c411a0eceb19e785e595550e5e0883d39ffbae6083",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "PMID19923369_abstract",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.3945/ajcn.2009.28586",
+      "pmid": "19923369",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "GSE13466-metadata",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE13466",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:10:15Z",
+      "source_locations": [
+        "!Series_summary; !Series_overall_design; 84 !Series_sample_id values",
+        "!Series_overall_design"
+      ],
+      "claims": [
+        {
+          "field": "public_subset",
+          "value": {
+            "people": 21,
+            "assays": 84,
+            "tissue": "PBMC",
+            "conditions": [
+              "SFA",
+              "PUFA"
+            ],
+            "hours": [
+              0,
+              6
+            ]
+          },
+          "source_location": "!Series_summary; !Series_overall_design; 84 !Series_sample_id values",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "whole_trial_sampling",
+          "value": "SFA/MUFA/PUFA, baseline and every two hours through eight hours; public microarrays include SFA/PUFA",
+          "source_location": "!Series_overall_design",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE13466&targ=self&form=text&view=full",
+      "retrieved_response_sha256": "f811af737f1386a4430ad8ab61bf17b1bc6d1cd771ea068f91f15823e9c69e33",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "GSE13466_self",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "flavanol-paper",
+      "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0095527",
+      "access_level": "full_text",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:11:48Z",
+      "source_locations": [
+        "Methods > Clinical trial",
+        "Materials and Methods > Clinical trial; Sample collection, total RNA and genomic DNA extraction; compare GEO !Series_overall_design",
+        "Results > Intra- and inter-individual changes in genome-wide DNA methylation analysis of blood samples before and after MOF supplementation"
+      ],
+      "claims": [
+        {
+          "field": "population",
+          "value": {
+            "blood_available_people": 13,
+            "description": "healthy non-obese male smokers aged 30-60; at least 10 cigarettes/day for at least 5 years"
+          },
+          "source_location": "Methods > Clinical trial",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "dose",
+          "value": {
+            "amount": 200,
+            "unit": "mg",
+            "frequency": "per_day",
+            "duration_weeks": 8,
+            "product": "MASQUELIER’s Original OPCs grape-seed extract",
+            "capsules": "2 x 100mg"
+          },
+          "source_location": "Methods > Clinical trial",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "mixture_fractions_mg",
+          "value": {
+            "total_catechins": 51.3,
+            "total_dimers": 55,
+            "tri_tetra_pentameric_proanthocyanidins": 93.8
+          },
+          "source_location": "Methods > Clinical trial",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "public_omics_control",
+          "value": "Active-group before/after comparison; full parent RCT randomized design does not create a public omics placebo arm",
+          "source_location": "Materials and Methods > Clinical trial; Sample collection, total RNA and genomic DNA extraction; compare GEO !Series_overall_design",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "DNAm_people",
+          "value": 10,
+          "source_location": "Results > Intra- and inter-individual changes in genome-wide DNA methylation analysis of blood samples before and after MOF supplementation",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0095527",
+      "retrieved_response_sha256": "b8deadaadee8b06d56cc13ba7c69cf0cc5fbf959abd37a5e1aeeca8ff19819ac",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "flavanol_html",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.1371/journal.pone.0095527",
+      "pmid": "24763279",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "GSE54325-metadata",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54325",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:10:16Z",
+      "source_locations": [
+        "!Series_overall_design; 7 !Series_sample_id values; !Series_title"
+      ],
+      "claims": [
+        {
+          "field": "public_subset",
+          "value": {
+            "people": 7,
+            "arrays": 7,
+            "biological_samples": 14,
+            "two_color": true,
+            "duration_weeks": 8,
+            "tissue": "blood leukocytes"
+          },
+          "source_location": "!Series_overall_design; 7 !Series_sample_id values; !Series_title",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54325&targ=self&form=text&view=full",
+      "retrieved_response_sha256": "1037acb0bedd76da3633b6e9b1e662620d08872cbeef2079a4e4241eb961057c",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "GSE54325_self",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "GSE54643-metadata",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54643",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:10:16Z",
+      "source_locations": [
+        "!Series_overall_design; 20 !Series_sample_id values"
+      ],
+      "claims": [
+        {
+          "field": "public_subset",
+          "value": {
+            "people": 10,
+            "assays": 20,
+            "paired_before_after": true,
+            "tissue": "blood"
+          },
+          "source_location": "!Series_overall_design; 20 !Series_sample_id values",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54643&targ=self&form=text&view=full",
+      "retrieved_response_sha256": "9314c424aab294c15889c6c3adbccf1bcb6fad2831d0c9f0f913a7e8265be547",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "GSE54643_self",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "PREDIMED-DNAm-paper",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5793243/",
+      "access_level": "full_text",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:08:19Z",
+      "source_locations": [
+        "Methods 2.1 Study Design and Participants; XML sec2dot1-nutrients-10-00015, paragraph 3",
+        "Methods 2.2 DNA Extraction and DNA Methylation Analysis; XML sec2dot2-nutrients-10-00015",
+        "Methods 2.3 Treatment of Methylation Raw Data",
+        "Table 2 (nutrients-10-00015-t002), food/component g/day rows EVOO and Nuts; descriptive mean(SD)",
+        "Dose assignment quantity not present in Methods 2.1; Table 2 is observed group intake, not assigned dose"
+      ],
+      "claims": [
+        {
+          "field": "selected_cohort",
+          "value": {
+            "people": 36,
+            "people_per_arm": 12,
+            "age_years": [
+              60,
+              70
+            ],
+            "smoking": "non-smokers or former smokers",
+            "followup_years": 5,
+            "arms": [
+              "MedDiet + EVOO",
+              "MedDiet + mixed nuts",
+              "low-fat dietary advice"
+            ]
+          },
+          "source_location": "Methods 2.1 Study Design and Participants; XML sec2dot1-nutrients-10-00015, paragraph 3",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "tissue",
+          "value": "peripheral white blood cells from buffy coat",
+          "source_location": "Methods 2.2 DNA Extraction and DNA Methylation Analysis; XML sec2dot2-nutrients-10-00015",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "reported_between_arm_analysis",
+          "value": "Changes over five years compared between EVOO or mixed-nut arm and low-fat advice; age/sex/chip adjusted",
+          "source_location": "Methods 2.3 Treatment of Methylation Raw Data",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "observed_intake_at_5y",
+          "value": {
+            "EVOO_arm_EVOO": {
+              "mean": 66.4,
+              "SD": 8.1,
+              "unit": "g/day"
+            },
+            "mixed_nuts_arm_nuts": {
+              "mean": 28.2,
+              "SD": 14.2,
+              "unit": "g/day"
+            }
+          },
+          "source_location": "Table 2 (nutrients-10-00015-t002), food/component g/day rows EVOO and Nuts; descriptive mean(SD)",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "assigned_EVOO_and_nut_doses",
+          "value": null,
+          "source_location": "Dose assignment quantity not present in Methods 2.1; Table 2 is observed group intake, not assigned dose",
+          "support_status": "not_verified",
+          "confidence": "low"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5793243/fullTextXML",
+      "retrieved_response_sha256": "345161b66bb8a9eb51906f78c2508b08dd802111153e5bde7d67df035bd10e0a",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "predimed_xml",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.3390/nu10010015",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "GSE107205-metadata",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE107205",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:10:17Z",
+      "source_locations": [
+        "!Series_overall_design; 72 !Series_sample_id values"
+      ],
+      "claims": [
+        {
+          "field": "public_subset",
+          "value": {
+            "people": 36,
+            "biological_samples": 72,
+            "paired_years": [
+              0,
+              5
+            ]
+          },
+          "source_location": "!Series_overall_design; 72 !Series_sample_id values",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE107205&targ=self&form=text&view=full",
+      "retrieved_response_sha256": "776a141e91525c208be5c2f60eb28fd3add488685cf1d6522e73a2bb326383de",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "GSE107205_self",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "DIRECT-PLUS-trial-paper",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8515100/",
+      "access_level": "full_text",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:08:19Z",
+      "source_locations": [
+        "Abstract > Design; Methods > Study design",
+        "Methods > MED group (XML s2-2-2); Green-MED group (XML s2-2-3)",
+        "Methods > Green-MED group (XML s2-2-3)",
+        "Methods > MED group; Green-MED group"
+      ],
+      "claims": [
+        {
+          "field": "parent_trial",
+          "value": {
+            "people": 294,
+            "population": "abdominal obesity or dyslipidaemia",
+            "study_design": "18-month randomized trial; all arms physical-activity guidance"
+          },
+          "source_location": "Abstract > Design; Methods > Study design",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "MED_and_greenMED_common_walnuts",
+          "value": {
+            "amount": 28,
+            "unit": "g",
+            "frequency": "per_day"
+          },
+          "source_location": "Methods > MED group (XML s2-2-2); Green-MED group (XML s2-2-3)",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "greenMED_extras",
+          "value": {
+            "green_tea_cups_per_day": [
+              3,
+              4
+            ],
+            "Mankai_frozen_cubes_g_per_day": 100,
+            "role": "shake replacing dinner; red/processed meat restricted"
+          },
+          "source_location": "Methods > Green-MED group (XML s2-2-3)",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "polyphenol_assay_basis",
+          "value": {
+            "walnuts": 440,
+            "green_additional": 800,
+            "green_total": 1240,
+            "unit": "mg/day gallic-acid equivalents",
+            "individual_compound_sum": false
+          },
+          "source_location": "Methods > MED group; Green-MED group",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8515100/fullTextXML",
+      "retrieved_response_sha256": "33902fabe07bd27aeec1eb96aa78cf8e2f1c00803bed0c3224f47bdfd479b824",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "direct_trial_xml",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.1136/gutjnl-2020-323106",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "DIRECT-PLUS-methylome-paper",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37236302/",
+      "access_level": "abstract",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:13:58Z",
+      "source_locations": [
+        "Abstract > Methods",
+        "Abstract does not establish downloadable RNA sample-level intersection"
+      ],
+      "claims": [
+        {
+          "field": "reported_molecular_cohort_people",
+          "value": 260,
+          "source_location": "Abstract > Methods",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "reported_followup_months",
+          "value": 18,
+          "source_location": "Abstract > Methods",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "public_RNA_people_and_access",
+          "value": null,
+          "source_location": "Abstract does not establish downloadable RNA sample-level intersection",
+          "support_status": "not_verified",
+          "confidence": "low"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID%3A37236302%20AND%20SRC%3AMED&format=json&resultType=core",
+      "retrieved_response_sha256": "1d0b07cabfe03204be5666acb1bbec8159beb75a6bff1253e9fa79883fa53f73",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "PMID37236302_abstract",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.1016/j.metabol.2023.155594",
+      "pmid": "37236302",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "DIRECT-PLUS-clock-QC-paper",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10519069/",
+      "access_level": "full_text",
+      "source_kind": "primary_publication",
+      "checked_at": "2026-10-03T04:08:19Z",
+      "source_locations": [
+        "Methods > Genome-wide DNA methylation data processing and normalization (XML Sec7)",
+        "Table 1, sex-specific group counts summed; men 78/72/78 plus women 10/9/9",
+        "Availability of data and materials"
+      ],
+      "claims": [
+        {
+          "field": "QC_complete_pairs",
+          "value": {
+            "people": 256,
+            "biological_samples": 512,
+            "remove_failed_sample_and_pair": true
+          },
+          "source_location": "Methods > Genome-wide DNA methylation data processing and normalization (XML Sec7)",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "cohort_by_diet",
+          "value": {
+            "HDG": 88,
+            "MED": 81,
+            "greenMED": 87
+          },
+          "source_location": "Table 1, sex-specific group counts summed; men 78/72/78 plus women 10/9/9",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "public_accession",
+          "value": "E-MTAB-12527",
+          "source_location": "Availability of data and materials",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10519069/fullTextXML",
+      "retrieved_response_sha256": "9227697996eabe844f33d858826cad2f65dea83e2830093f5accce66b8e05517",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "direct_clock_xml",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "doi": "10.1186/s12916-023-03067-3",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "E-MTAB-12527-SDRF",
+      "url": "https://www.ebi.ac.uk/biostudies/files/E-MTAB-12527/E-MTAB-12527.sdrf.txt",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:08:19Z",
+      "source_locations": [
+        "Deduplicate Source Name; group Characteristics[individual] by Factor Value[time]/Factor Value[diet]; Label is Cy3/Cy5",
+        "Characteristics[organism part]",
+        "Characteristics[disease] normal vs primary paper inclusion criteria"
+      ],
+      "claims": [
+        {
+          "field": "public_metadata_counts",
+          "value": {
+            "people": 256,
+            "biological_samples": 512,
+            "IDAT_channel_rows": 1024,
+            "HDG_people": 88,
+            "MED_people": 81,
+            "greenMED_people": 87,
+            "all_pairs_months": [
+              0,
+              18
+            ]
+          },
+          "source_location": "Deduplicate Source Name; group Characteristics[individual] by Factor Value[time]/Factor Value[diet]; Label is Cy3/Cy5",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "tissue",
+          "value": "blood",
+          "source_location": "Characteristics[organism part]",
+          "support_status": "supported",
+          "confidence": "high"
+        },
+        {
+          "field": "disease_field_limit",
+          "value": "SDRF normal label is not evidence of a clinically healthy population; apply parent inclusion criteria",
+          "source_location": "Characteristics[disease] normal vs primary paper inclusion criteria",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/biostudies/files/E-MTAB-12527/E-MTAB-12527.sdrf.txt",
+      "retrieved_response_sha256": "82dfbba771714173ed93fc0499117ff0bb931c7380fc6c5b4bf37aa35d6f4619",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "direct_sdrf",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    },
+    {
+      "id": "E-MTAB-12527-record",
+      "url": "https://www.ebi.ac.uk/biostudies/arrayexpress/studies/E-MTAB-12527",
+      "access_level": "official_dataset",
+      "source_kind": "repository_metadata",
+      "checked_at": "2026-10-03T04:08:19Z",
+      "source_locations": [
+        "BioStudies API acc / section / SDRF file entry"
+      ],
+      "claims": [
+        {
+          "field": "dataset_id",
+          "value": "E-MTAB-12527",
+          "source_location": "BioStudies API acc / section / SDRF file entry",
+          "support_status": "supported",
+          "confidence": "high"
+        }
+      ],
+      "retrieval_url": "https://www.ebi.ac.uk/biostudies/api/v1/studies/E-MTAB-12527",
+      "retrieved_response_sha256": "275ef1a15b955def679e64479752c184d18b969bd2dc3cf8663e86b3f3442258",
+      "snapshot_file": "research/2026-10-03/explorer/scientific_matching/live_source_metadata.json",
+      "snapshot_record_id": "direct_api",
+      "verification_actor": "assistant_source_check",
+      "expert_review_status": "pending",
+      "response_hash_scope": "retrieved HTTP response body bytes before parsing; gzip archive and extracted metadata bytes can differ"
+    }
+  ],
+  "studies": [
+    {
+      "study_id": "N15",
+      "series": [
+        "GSE98645"
+      ],
+      "verified_fields": {
+        "tissue": "whole blood",
+        "population": "healthy young men",
+        "n_parent_people": 14,
+        "n_clinical_analysis_people": 13,
+        "n_omics_people": 7,
+        "n_public_biological_samples": 77,
+        "study_design": "randomized_double_blind_crossover",
+        "response_time_h": [
+          2,
+          4,
+          6
+        ],
+        "component_causality_identified": false
+      },
+      "source_ids": [
+        "yogurt-paper",
+        "GSE98645-metadata"
+      ],
+      "expert_review_status": "pending",
+      "contrast_selectors": [
+        {
+          "id": "GSE98645:gse98645-voom-acute-paired-studyfamily-v2:yogurt_vs_milk_2h_change",
+          "series_accession": "GSE98645",
+          "contrast": "yogurt_vs_milk_2h_change",
+          "analysis_version": "gse98645-voom-acute-paired-studyfamily-v2",
+          "comparison": "yogurt_vs_milk_2h_change",
+          "design": "randomized_double_blind_crossover",
+          "tissue": "whole blood",
+          "response_time_h": 2.0,
+          "n_people": 7,
+          "n_samples": 56,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N15:yogurt_acute:human-intervention-bridge-2026-10-01-v1",
+            "N15:milk_acute:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N15:yogurt:human-intervention-bridge-2026-10-01-v1",
+            "arm:N15:milk:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_person_between_exposure_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 7,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        },
+        {
+          "id": "GSE98645:gse98645-voom-acute-paired-studyfamily-v2:yogurt_vs_milk_4h_change",
+          "series_accession": "GSE98645",
+          "contrast": "yogurt_vs_milk_4h_change",
+          "analysis_version": "gse98645-voom-acute-paired-studyfamily-v2",
+          "comparison": "yogurt_vs_milk_4h_change",
+          "design": "randomized_double_blind_crossover",
+          "tissue": "whole blood",
+          "response_time_h": 4.0,
+          "n_people": 7,
+          "n_samples": 56,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N15:yogurt_acute:human-intervention-bridge-2026-10-01-v1",
+            "N15:milk_acute:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N15:yogurt:human-intervention-bridge-2026-10-01-v1",
+            "arm:N15:milk:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_person_between_exposure_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 7,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        },
+        {
+          "id": "GSE98645:gse98645-voom-acute-paired-studyfamily-v2:yogurt_vs_milk_6h_change",
+          "series_accession": "GSE98645",
+          "contrast": "yogurt_vs_milk_6h_change",
+          "analysis_version": "gse98645-voom-acute-paired-studyfamily-v2",
+          "comparison": "yogurt_vs_milk_6h_change",
+          "design": "randomized_double_blind_crossover",
+          "tissue": "whole blood",
+          "response_time_h": 6.0,
+          "n_people": 7,
+          "n_samples": 56,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N15:yogurt_acute:human-intervention-bridge-2026-10-01-v1",
+            "N15:milk_acute:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N15:yogurt:human-intervention-bridge-2026-10-01-v1",
+            "arm:N15:milk:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_person_between_exposure_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 7,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        },
+        {
+          "id": "GSE98645:gse98645-voom-chronic-paired-studyfamily-v2:yogurt_vs_milk_2week_change",
+          "series_accession": "GSE98645",
+          "contrast": "yogurt_vs_milk_2week_change",
+          "analysis_version": "gse98645-voom-chronic-paired-studyfamily-v2",
+          "comparison": "yogurt_vs_milk_2week_change",
+          "design": "randomized_double_blind_crossover",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 7,
+          "n_samples": 28,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N15:yogurt_chronic:human-intervention-bridge-2026-10-01-v1",
+            "N15:milk_chronic:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N15:yogurt:human-intervention-bridge-2026-10-01-v1",
+            "arm:N15:milk:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_person_between_exposure_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 7,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        }
+      ],
+      "allow_component_causal_interpretation": false
+    },
+    {
+      "study_id": "N06",
+      "series": [
+        "GSE27385"
+      ],
+      "verified_fields": {
+        "tissue": "PBMC",
+        "population": "overweight and obese adults; public subset BMI at least 27",
+        "n_parent_people": 20,
+        "n_omics_people": 11,
+        "n_public_assays": 33,
+        "study_design": "randomized_double_blind_placebo_controlled_crossover",
+        "duration_weeks": 6,
+        "omics_to_clinical_person_id_linkage": "unverified",
+        "component_causality_identified": false
+      },
+      "source_ids": [
+        "fishoil-clinical-paper",
+        "GSE27385-metadata",
+        "fishoil-product-protocol"
+      ],
+      "expert_review_status": "pending",
+      "contrast_selectors": [
+        {
+          "id": "GSE27385:gse27385-rma-limma-paired-period-v2:fishoil_vs_placebo_6weeks",
+          "series_accession": "GSE27385",
+          "contrast": "fishoil_vs_placebo_6weeks",
+          "analysis_version": "gse27385-rma-limma-paired-period-v2",
+          "comparison": "fishoil_vs_placebo_6weeks",
+          "design": "randomized_double_blind_crossover",
+          "tissue": "PBMC",
+          "response_time_h": null,
+          "n_people": 11,
+          "n_samples": 33,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N06:fish_oil:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N06:fishoil:human-intervention-bridge-2026-10-01-v1",
+            "arm:N06:placebo:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "paired_treatment_endpoint_comparison",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 11,
+            "directly_contributing_assays": 22,
+            "fitted_model_people": 11,
+            "fitted_model_assays": 33,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "642677aebb1fce67cf2b68cd30f8f402cc618c98d012a7e55230d2017c2e5589",
+              "source_path": "<project-root>/releases/20261001-final-v1/GSE27385_model_sample_scope_audit.json",
+              "source_sha256": "f58dcda5582502d9e9e9d5030efba3233b586e96ebe5d3b7c45c1d73c97df532",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.642677aebb1fce67cf2b68cd30f8f402cc618c98d012a7e55230d2017c2e5589.sample_scope"
+            }
+          ]
+        }
+      ],
+      "allow_component_causal_interpretation": false
+    },
+    {
+      "study_id": "N14",
+      "series": [
+        "GSE13466"
+      ],
+      "verified_fields": {
+        "tissue": "PBMC",
+        "population": "healthy young men",
+        "n_parent_people": 21,
+        "n_omics_people": 21,
+        "n_public_assays": 84,
+        "study_design": "single_blind_randomized_order_crossover",
+        "response_time_h": [
+          6
+        ],
+        "parent_conditions": [
+          "SFA",
+          "MUFA",
+          "PUFA"
+        ],
+        "public_omics_conditions": [
+          "SFA",
+          "PUFA"
+        ],
+        "component_causality_identified": false
+      },
+      "source_ids": [
+        "SFA-PUFA-paper",
+        "GSE13466-metadata"
+      ],
+      "expert_review_status": "pending",
+      "contrast_selectors": [
+        {
+          "id": "GSE13466:gse13466-rma-customcdf-limma-paired-v2:PUFA_vs_SFA_6h_change",
+          "series_accession": "GSE13466",
+          "contrast": "PUFA_vs_SFA_6h_change",
+          "analysis_version": "gse13466-rma-customcdf-limma-paired-v2",
+          "comparison": "PUFA_vs_SFA_6h_change",
+          "design": "randomized_crossover",
+          "tissue": "PBMC",
+          "response_time_h": 6.0,
+          "n_people": 21,
+          "n_samples": 84,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N14:sfa:human-intervention-bridge-2026-10-01-v1",
+            "N14:pufa:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N14:sfa:human-intervention-bridge-2026-10-01-v1",
+            "arm:N14:pufa:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_person_between_exposure_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 21,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        }
+      ],
+      "allow_component_causal_interpretation": false
+    },
+    {
+      "study_id": "S03",
+      "series": [
+        "GSE54325",
+        "GSE54643"
+      ],
+      "verified_fields": {
+        "tissue": "blood leukocytes / whole-blood DNA",
+        "population": "healthy non-obese male smokers, age 30-60",
+        "n_parent_people": null,
+        "n_available_blood_people": 13,
+        "n_omics_people": {
+          "GSE54325": 7,
+          "GSE54643": 10
+        },
+        "n_public_assays": {
+          "GSE54325": 7,
+          "GSE54643": 20
+        },
+        "n_expression_biological_samples": 14,
+        "study_design": "uncontrolled_public_active_arm_pre_post",
+        "duration_days": 56,
+        "component_causality_identified": false,
+        "paired_cross_omics_ids_verified": false
+      },
+      "source_ids": [
+        "flavanol-paper",
+        "GSE54325-metadata",
+        "GSE54643-metadata"
+      ],
+      "expert_review_status": "pending",
+      "contrast_selectors": [
+        {
+          "id": "GSE54325:gse54325-agilent-limma-v1:Cy5_8w_vs_Cy3_baseline",
+          "series_accession": "GSE54325",
+          "contrast": "Cy5_8w_vs_Cy3_baseline",
+          "analysis_version": "gse54325-agilent-limma-v1",
+          "comparison": "Cy5_8w_vs_Cy3_baseline",
+          "design": "uncontrolled_public_active_arm",
+          "tissue": "blood leukocytes",
+          "response_time_h": null,
+          "n_people": 7,
+          "n_samples": 7,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S03:flavanols:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S03:active_public:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_arm_pre_post",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": false,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 7,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        },
+        {
+          "id": "GSE54643:gse54643-processed-signal-paired-limma-v1:mof_8w_vs_baseline",
+          "series_accession": "GSE54643",
+          "contrast": "mof_8w_vs_baseline",
+          "analysis_version": "gse54643-processed-signal-paired-limma-v1",
+          "comparison": "mof_8w_vs_baseline",
+          "design": "uncontrolled_public_active_arm",
+          "tissue": "blood leukocytes",
+          "response_time_h": null,
+          "n_people": 10,
+          "n_samples": 20,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S03:flavanols:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S03:active_public:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_arm_pre_post",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": false,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 10,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        }
+      ],
+      "allow_component_causal_interpretation": false
+    },
+    {
+      "study_id": "S04",
+      "series": [
+        "GSE107205"
+      ],
+      "verified_fields": {
+        "tissue": "peripheral white blood cells / buffy coat",
+        "population": "selected Navarra subgroup, age 60-70, non/former smokers",
+        "n_parent_people": null,
+        "n_omics_people": 36,
+        "n_omics_people_per_original_arm": 12,
+        "n_public_biological_samples": 72,
+        "study_design": "randomized_parent_trial_selected_subsample_allocation_audit_required",
+        "duration_reported": {
+          "amount": 5,
+          "unit": "years"
+        },
+        "component_causality_identified": false
+      },
+      "source_ids": [
+        "PREDIMED-DNAm-paper",
+        "GSE107205-metadata"
+      ],
+      "expert_review_status": "pending",
+      "contrast_selectors": [
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-between-arm-v4-blood-composition-closed-v2:evoo_vs_lowfat_5y_change",
+          "series_accession": "GSE107205",
+          "contrast": "evoo_vs_lowfat_5y_change",
+          "analysis_version": "gse107205-noob-limma-cpg-between-arm-v4-blood-composition-closed-v2",
+          "comparison": "evoo_vs_lowfat_5y_change",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 22,
+          "n_samples": 62,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:evoo:human-intervention-bridge-2026-10-01-v1",
+            "S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:evoo:human-intervention-bridge-2026-10-01-v1",
+            "arm:S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 22,
+            "directly_contributing_assays": 44,
+            "fitted_model_people": 31,
+            "fitted_model_assays": 62,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "c8c16623e41e18c17a9a864fa99a536d5c7ce52ae559fa149a238785dfd3a973",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/gse107205-between-arm-v4-blood-composition-closed-v2/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "c40df2d4fe0b22374a6acc733d7b1a09e9312bfa14e5884797c8680784dc20f2",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.c8c16623e41e18c17a9a864fa99a536d5c7ce52ae559fa149a238785dfd3a973.sample_scope"
+            },
+            {
+              "attachment_id": "ac8fc4e011104e9cc1988e0ca25f304c68015d7b8b90b1fed48cafb8838591e8",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/GSE107205_closed_composition_audit.json",
+              "source_sha256": "9befe4e68319fe064ebaf985232dd03b5d173dbf1761a153fbef799177288050",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.ac8fc4e011104e9cc1988e0ca25f304c68015d7b8b90b1fed48cafb8838591e8.sample_scope"
+            },
+            {
+              "attachment_id": "88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b",
+              "source_path": "<project-root>/releases/20261001-final-v1/GSE107205_model_sample_scope_audit.json",
+              "source_sha256": "86eed993618faff478df9b322bc19bb26d2357f7347e9b31717be3e5b4218ec3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-between-arm-v4-blood-composition-closed-v2:nuts_vs_lowfat_5y_change",
+          "series_accession": "GSE107205",
+          "contrast": "nuts_vs_lowfat_5y_change",
+          "analysis_version": "gse107205-noob-limma-cpg-between-arm-v4-blood-composition-closed-v2",
+          "comparison": "nuts_vs_lowfat_5y_change",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 20,
+          "n_samples": 62,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:nuts:human-intervention-bridge-2026-10-01-v1",
+            "S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:nuts:human-intervention-bridge-2026-10-01-v1",
+            "arm:S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 20,
+            "directly_contributing_assays": 40,
+            "fitted_model_people": 31,
+            "fitted_model_assays": 62,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "c8c16623e41e18c17a9a864fa99a536d5c7ce52ae559fa149a238785dfd3a973",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/gse107205-between-arm-v4-blood-composition-closed-v2/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "c40df2d4fe0b22374a6acc733d7b1a09e9312bfa14e5884797c8680784dc20f2",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.c8c16623e41e18c17a9a864fa99a536d5c7ce52ae559fa149a238785dfd3a973.sample_scope"
+            },
+            {
+              "attachment_id": "ac8fc4e011104e9cc1988e0ca25f304c68015d7b8b90b1fed48cafb8838591e8",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/GSE107205_closed_composition_audit.json",
+              "source_sha256": "9befe4e68319fe064ebaf985232dd03b5d173dbf1761a153fbef799177288050",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.ac8fc4e011104e9cc1988e0ca25f304c68015d7b8b90b1fed48cafb8838591e8.sample_scope"
+            },
+            {
+              "attachment_id": "88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b",
+              "source_path": "<project-root>/releases/20261001-final-v1/GSE107205_model_sample_scope_audit.json",
+              "source_sha256": "86eed993618faff478df9b322bc19bb26d2357f7347e9b31717be3e5b4218ec3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-between-arm-v4-regions-fixed1000bp-v1:evoo_vs_lowfat_5y_change",
+          "series_accession": "GSE107205",
+          "contrast": "evoo_vs_lowfat_5y_change",
+          "analysis_version": "gse107205-noob-limma-cpg-between-arm-v4-regions-fixed1000bp-v1",
+          "comparison": "evoo_vs_lowfat_5y_change",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 22,
+          "n_samples": 62,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:evoo:human-intervention-bridge-2026-10-01-v1",
+            "S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:evoo:human-intervention-bridge-2026-10-01-v1",
+            "arm:S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 22,
+            "directly_contributing_assays": 44,
+            "fitted_model_people": 31,
+            "fitted_model_assays": 62,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "15c6ad422de29c52f1302d4f58ecf4220a99e20f5a395ff6c1a9d33150b60144",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/gse107205-between-arm-v4-regions-fixed1000bp-v1/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "fd754c7cf7fd238834219b27335df30b37e9854b8f8729a0b91851f0f87b1bcc",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.15c6ad422de29c52f1302d4f58ecf4220a99e20f5a395ff6c1a9d33150b60144.sample_scope"
+            },
+            {
+              "attachment_id": "88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b",
+              "source_path": "<project-root>/releases/20261001-final-v1/GSE107205_model_sample_scope_audit.json",
+              "source_sha256": "86eed993618faff478df9b322bc19bb26d2357f7347e9b31717be3e5b4218ec3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-between-arm-v4-regions-fixed1000bp-v1:nuts_vs_lowfat_5y_change",
+          "series_accession": "GSE107205",
+          "contrast": "nuts_vs_lowfat_5y_change",
+          "analysis_version": "gse107205-noob-limma-cpg-between-arm-v4-regions-fixed1000bp-v1",
+          "comparison": "nuts_vs_lowfat_5y_change",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 20,
+          "n_samples": 62,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:nuts:human-intervention-bridge-2026-10-01-v1",
+            "S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:nuts:human-intervention-bridge-2026-10-01-v1",
+            "arm:S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 20,
+            "directly_contributing_assays": 40,
+            "fitted_model_people": 31,
+            "fitted_model_assays": 62,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "15c6ad422de29c52f1302d4f58ecf4220a99e20f5a395ff6c1a9d33150b60144",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/gse107205-between-arm-v4-regions-fixed1000bp-v1/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "fd754c7cf7fd238834219b27335df30b37e9854b8f8729a0b91851f0f87b1bcc",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.15c6ad422de29c52f1302d4f58ecf4220a99e20f5a395ff6c1a9d33150b60144.sample_scope"
+            },
+            {
+              "attachment_id": "88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b",
+              "source_path": "<project-root>/releases/20261001-final-v1/GSE107205_model_sample_scope_audit.json",
+              "source_sha256": "86eed993618faff478df9b322bc19bb26d2357f7347e9b31717be3e5b4218ec3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-between-arm-v4:evoo_vs_lowfat_5y_change",
+          "series_accession": "GSE107205",
+          "contrast": "evoo_vs_lowfat_5y_change",
+          "analysis_version": "gse107205-noob-limma-cpg-between-arm-v4",
+          "comparison": "evoo_vs_lowfat_5y_change",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 22,
+          "n_samples": 62,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:evoo:human-intervention-bridge-2026-10-01-v1",
+            "S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:evoo:human-intervention-bridge-2026-10-01-v1",
+            "arm:S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 22,
+            "directly_contributing_assays": 44,
+            "fitted_model_people": 31,
+            "fitted_model_assays": 62,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "a4252506852e54eabf3d10183eaf2951f643cecd6d5149ed51d1b15ca739844b",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/gse107205-between-arm-v4/pathways-v1/pathway_status.json",
+              "source_sha256": "52a0ced81cdc3256dd30ee4ab8976b6efd7588db8ac6fd55a431c29a575332f9",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.a4252506852e54eabf3d10183eaf2951f643cecd6d5149ed51d1b15ca739844b.sample_scope"
+            },
+            {
+              "attachment_id": "00586ffbb460d2111eea41a522e6b3d6d54efc298689f5254fd8858b877ffbeb",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/gse107205-between-arm-v4/dmrcate-sensitivity-v1/dmr_status.json",
+              "source_sha256": "84a6b5d7b5bd393414f30b65a21802e8abcbf096093ba6c5a3245da01f464890",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.00586ffbb460d2111eea41a522e6b3d6d54efc298689f5254fd8858b877ffbeb.sample_scope"
+            },
+            {
+              "attachment_id": "88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b",
+              "source_path": "<project-root>/releases/20261001-final-v1/GSE107205_model_sample_scope_audit.json",
+              "source_sha256": "86eed993618faff478df9b322bc19bb26d2357f7347e9b31717be3e5b4218ec3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-between-arm-v4:nuts_vs_lowfat_5y_change",
+          "series_accession": "GSE107205",
+          "contrast": "nuts_vs_lowfat_5y_change",
+          "analysis_version": "gse107205-noob-limma-cpg-between-arm-v4",
+          "comparison": "nuts_vs_lowfat_5y_change",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 20,
+          "n_samples": 62,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:nuts:human-intervention-bridge-2026-10-01-v1",
+            "S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:nuts:human-intervention-bridge-2026-10-01-v1",
+            "arm:S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 20,
+            "directly_contributing_assays": 40,
+            "fitted_model_people": 31,
+            "fitted_model_assays": 62,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "a4252506852e54eabf3d10183eaf2951f643cecd6d5149ed51d1b15ca739844b",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/gse107205-between-arm-v4/pathways-v1/pathway_status.json",
+              "source_sha256": "52a0ced81cdc3256dd30ee4ab8976b6efd7588db8ac6fd55a431c29a575332f9",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.a4252506852e54eabf3d10183eaf2951f643cecd6d5149ed51d1b15ca739844b.sample_scope"
+            },
+            {
+              "attachment_id": "00586ffbb460d2111eea41a522e6b3d6d54efc298689f5254fd8858b877ffbeb",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/gse107205-between-arm-v4/dmrcate-sensitivity-v1/dmr_status.json",
+              "source_sha256": "84a6b5d7b5bd393414f30b65a21802e8abcbf096093ba6c5a3245da01f464890",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.00586ffbb460d2111eea41a522e6b3d6d54efc298689f5254fd8858b877ffbeb.sample_scope"
+            },
+            {
+              "attachment_id": "88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b",
+              "source_path": "<project-root>/releases/20261001-final-v1/GSE107205_model_sample_scope_audit.json",
+              "source_sha256": "86eed993618faff478df9b322bc19bb26d2357f7347e9b31717be3e5b4218ec3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.88dcc3e6733a361630723f83d9ef26bff9d9e448745b197155a184fd2743ec9b.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-v1:lowfat_5y_vs_baseline",
+          "series_accession": "GSE107205",
+          "contrast": "lowfat_5y_vs_baseline",
+          "analysis_version": "gse107205-noob-limma-cpg-v1",
+          "comparison": "lowfat_5y_vs_baseline",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 12,
+          "n_samples": 24,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:lowfat:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_arm_pre_post",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": false,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 12,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-v1:meddiet_evoo_5y_vs_baseline",
+          "series_accession": "GSE107205",
+          "contrast": "meddiet_evoo_5y_vs_baseline",
+          "analysis_version": "gse107205-noob-limma-cpg-v1",
+          "comparison": "meddiet_evoo_5y_vs_baseline",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 12,
+          "n_samples": 24,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:evoo:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:evoo:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_arm_pre_post",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": false,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 12,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        },
+        {
+          "id": "GSE107205:gse107205-noob-limma-cpg-v1:meddiet_nuts_5y_vs_baseline",
+          "series_accession": "GSE107205",
+          "contrast": "meddiet_nuts_5y_vs_baseline",
+          "analysis_version": "gse107205-noob-limma-cpg-v1",
+          "comparison": "meddiet_nuts_5y_vs_baseline",
+          "design": "randomized_parent_selected_subset",
+          "tissue": "peripheral white blood cells",
+          "response_time_h": null,
+          "n_people": 12,
+          "n_samples": 24,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "S04:nuts:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:S04:nuts:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "within_arm_pre_post",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": false,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 12,
+            "directly_contributing_assays": null,
+            "fitted_model_people": null,
+            "fitted_model_assays": null,
+            "independence_unit": "person",
+            "unknown_reason": "No attached sample_scope in this original contrast snapshot; consult original AnalysisRun metadata"
+          }
+        }
+      ],
+      "allow_component_causal_interpretation": false
+    },
+    {
+      "study_id": "N16",
+      "series": [
+        "E-MTAB-12527"
+      ],
+      "verified_fields": {
+        "tissue": "blood",
+        "population": "adults with abdominal obesity or dyslipidaemia",
+        "n_parent_people": 294,
+        "n_reported_molecular_paper_people": 260,
+        "n_omics_people": 256,
+        "n_public_biological_samples": 512,
+        "n_public_channel_records": 1024,
+        "n_public_people_per_arm": {
+          "HDG": 88,
+          "MED": 81,
+          "greenMED": 87
+        },
+        "study_design": "randomized_parent_trial_selected_complete_pair_subset",
+        "duration_reported": {
+          "amount": 18,
+          "unit": "months"
+        },
+        "component_causality_identified": false,
+        "public_RNA_sample_intersection": "unverified"
+      },
+      "source_ids": [
+        "DIRECT-PLUS-trial-paper",
+        "DIRECT-PLUS-methylome-paper",
+        "DIRECT-PLUS-clock-QC-paper",
+        "E-MTAB-12527-SDRF",
+        "E-MTAB-12527-record"
+      ],
+      "expert_review_status": "pending",
+      "contrast_selectors": [
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2-blood-composition-closed-v2:MED_vs_HDG_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "MED_vs_HDG_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2-blood-composition-closed-v2",
+          "comparison": "MED_vs_HDG_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 169,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:HDG:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:MED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 169,
+            "directly_contributing_assays": 338,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "73b07ad99c3c3b32a607e2285ac0735bd29668a6235b8a401e6944370f5a9149",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/direct-plus-idat-v1-blood-composition-closed-v2/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "80acc291eec646480186502d75b6db11c42024f1e86b41cfbfdb75b799b25ff2",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.73b07ad99c3c3b32a607e2285ac0735bd29668a6235b8a401e6944370f5a9149.sample_scope"
+            },
+            {
+              "attachment_id": "6693e8567076f9e9bfced3394e4009cf08fa5259f152e3d6769ce49324b38ee8",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/DIRECT_PLUS_closed_composition_audit.json",
+              "source_sha256": "5f33e7e8e0d878041b4176aa83ccb1f58d31def5746c71d287e7ff4678cf4746",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.6693e8567076f9e9bfced3394e4009cf08fa5259f152e3d6769ce49324b38ee8.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2-blood-composition-closed-v2:greenMED_vs_HDG_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "greenMED_vs_HDG_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2-blood-composition-closed-v2",
+          "comparison": "greenMED_vs_HDG_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 175,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1",
+            "N16:green:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:HDG:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:greenMED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 175,
+            "directly_contributing_assays": 350,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "73b07ad99c3c3b32a607e2285ac0735bd29668a6235b8a401e6944370f5a9149",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/direct-plus-idat-v1-blood-composition-closed-v2/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "80acc291eec646480186502d75b6db11c42024f1e86b41cfbfdb75b799b25ff2",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.73b07ad99c3c3b32a607e2285ac0735bd29668a6235b8a401e6944370f5a9149.sample_scope"
+            },
+            {
+              "attachment_id": "6693e8567076f9e9bfced3394e4009cf08fa5259f152e3d6769ce49324b38ee8",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/DIRECT_PLUS_closed_composition_audit.json",
+              "source_sha256": "5f33e7e8e0d878041b4176aa83ccb1f58d31def5746c71d287e7ff4678cf4746",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.6693e8567076f9e9bfced3394e4009cf08fa5259f152e3d6769ce49324b38ee8.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2-blood-composition-closed-v2:greenMED_vs_MED_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "greenMED_vs_MED_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2-blood-composition-closed-v2",
+          "comparison": "greenMED_vs_MED_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 168,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1",
+            "N16:green:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:MED:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:greenMED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 168,
+            "directly_contributing_assays": 336,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "73b07ad99c3c3b32a607e2285ac0735bd29668a6235b8a401e6944370f5a9149",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/direct-plus-idat-v1-blood-composition-closed-v2/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "80acc291eec646480186502d75b6db11c42024f1e86b41cfbfdb75b799b25ff2",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.73b07ad99c3c3b32a607e2285ac0735bd29668a6235b8a401e6944370f5a9149.sample_scope"
+            },
+            {
+              "attachment_id": "6693e8567076f9e9bfced3394e4009cf08fa5259f152e3d6769ce49324b38ee8",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/DIRECT_PLUS_closed_composition_audit.json",
+              "source_sha256": "5f33e7e8e0d878041b4176aa83ccb1f58d31def5746c71d287e7ff4678cf4746",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.6693e8567076f9e9bfced3394e4009cf08fa5259f152e3d6769ce49324b38ee8.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2-regions-fixed1000bp-v1:MED_vs_HDG_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "MED_vs_HDG_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2-regions-fixed1000bp-v1",
+          "comparison": "MED_vs_HDG_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 169,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:HDG:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:MED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 169,
+            "directly_contributing_assays": 338,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "d83ef8de9c25ffb0d3f46eb53903d8464ad34ed79e213613bd314a0b3bff9d0f",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/direct-plus-idat-v1-regions-fixed1000bp-v1/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "a0e6bdf3fc8e60f1f4b0370dd162281b2768054f7b2448032ca058f2093091d9",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.d83ef8de9c25ffb0d3f46eb53903d8464ad34ed79e213613bd314a0b3bff9d0f.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2-regions-fixed1000bp-v1:greenMED_vs_HDG_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "greenMED_vs_HDG_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2-regions-fixed1000bp-v1",
+          "comparison": "greenMED_vs_HDG_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 175,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1",
+            "N16:green:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:HDG:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:greenMED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 175,
+            "directly_contributing_assays": 350,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "d83ef8de9c25ffb0d3f46eb53903d8464ad34ed79e213613bd314a0b3bff9d0f",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/direct-plus-idat-v1-regions-fixed1000bp-v1/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "a0e6bdf3fc8e60f1f4b0370dd162281b2768054f7b2448032ca058f2093091d9",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.d83ef8de9c25ffb0d3f46eb53903d8464ad34ed79e213613bd314a0b3bff9d0f.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2-regions-fixed1000bp-v1:greenMED_vs_MED_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "greenMED_vs_MED_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2-regions-fixed1000bp-v1",
+          "comparison": "greenMED_vs_MED_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 168,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1",
+            "N16:green:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:MED:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:greenMED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 168,
+            "directly_contributing_assays": 336,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "d83ef8de9c25ffb0d3f46eb53903d8464ad34ed79e213613bd314a0b3bff9d0f",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/secondary_producer_outputs/direct-plus-idat-v1-regions-fixed1000bp-v1/PRODUCTION_OUTPUT_AUDIT.json",
+              "source_sha256": "a0e6bdf3fc8e60f1f4b0370dd162281b2768054f7b2448032ca058f2093091d9",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.d83ef8de9c25ffb0d3f46eb53903d8464ad34ed79e213613bd314a0b3bff9d0f.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2:MED_vs_HDG_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "MED_vs_HDG_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2",
+          "comparison": "MED_vs_HDG_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 169,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:HDG:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:MED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 169,
+            "directly_contributing_assays": 338,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "666f9b187b1eaba4f9c4e31b89f2d73c805e8bf64a6e37b35e139fc45d59f54f",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/direct_plus_primary_results_audit.json",
+              "source_sha256": "d916b02c78e8f2203f7d91cd9dfeefb21bd03f7b6f9815b9db2e26ed6f8a8cb8",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.666f9b187b1eaba4f9c4e31b89f2d73c805e8bf64a6e37b35e139fc45d59f54f.sample_scope"
+            },
+            {
+              "attachment_id": "0e92cf449d5181ac4d84f0488073c83498dc854116a13752e881ef15c2cca06e",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/direct-plus-idat-v1/pathways-v1/pathway_status.json",
+              "source_sha256": "c53c0ca0fbf5c2d7040c0163400919039e454a63f2a80417fc0cef19d324e456",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.0e92cf449d5181ac4d84f0488073c83498dc854116a13752e881ef15c2cca06e.sample_scope"
+            },
+            {
+              "attachment_id": "a2bdf6be3b5a4e98a9255ae21088132de3840c33474cce0e1acf66f1021026a3",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/direct-plus-idat-v1/dmrcate-sensitivity-v1/dmr_status.json",
+              "source_sha256": "22ced05e143d22a86228e6fa9e0597177d76fc362a7e7d74c8553f3a192385f3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.a2bdf6be3b5a4e98a9255ae21088132de3840c33474cce0e1acf66f1021026a3.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2:greenMED_vs_HDG_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "greenMED_vs_HDG_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2",
+          "comparison": "greenMED_vs_HDG_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 175,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1",
+            "N16:green:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:HDG:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:greenMED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 175,
+            "directly_contributing_assays": 350,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "666f9b187b1eaba4f9c4e31b89f2d73c805e8bf64a6e37b35e139fc45d59f54f",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/direct_plus_primary_results_audit.json",
+              "source_sha256": "d916b02c78e8f2203f7d91cd9dfeefb21bd03f7b6f9815b9db2e26ed6f8a8cb8",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.666f9b187b1eaba4f9c4e31b89f2d73c805e8bf64a6e37b35e139fc45d59f54f.sample_scope"
+            },
+            {
+              "attachment_id": "0e92cf449d5181ac4d84f0488073c83498dc854116a13752e881ef15c2cca06e",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/direct-plus-idat-v1/pathways-v1/pathway_status.json",
+              "source_sha256": "c53c0ca0fbf5c2d7040c0163400919039e454a63f2a80417fc0cef19d324e456",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.0e92cf449d5181ac4d84f0488073c83498dc854116a13752e881ef15c2cca06e.sample_scope"
+            },
+            {
+              "attachment_id": "a2bdf6be3b5a4e98a9255ae21088132de3840c33474cce0e1acf66f1021026a3",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/direct-plus-idat-v1/dmrcate-sensitivity-v1/dmr_status.json",
+              "source_sha256": "22ced05e143d22a86228e6fa9e0597177d76fc362a7e7d74c8553f3a192385f3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.a2bdf6be3b5a4e98a9255ae21088132de3840c33474cce0e1acf66f1021026a3.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        },
+        {
+          "id": "E-MTAB-12527:direct-plus-ssnoob-limma-between-arm-v2:greenMED_vs_MED_18month_change",
+          "series_accession": "E-MTAB-12527",
+          "contrast": "greenMED_vs_MED_18month_change",
+          "analysis_version": "direct-plus-ssnoob-limma-between-arm-v2",
+          "comparison": "greenMED_vs_MED_18month_change",
+          "design": "randomized_parallel_selected_paired_subset",
+          "tissue": "whole blood",
+          "response_time_h": null,
+          "n_people": 168,
+          "n_samples": 512,
+          "analysis_status": "reanalyzed",
+          "exposure_ids": [
+            "N16:walnuts:human-intervention-bridge-2026-10-01-v1",
+            "N16:green:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "arm_ids": [
+            "arm:N16:MED:human-intervention-bridge-2026-10-01-v1",
+            "arm:N16:greenMED:human-intervention-bridge-2026-10-01-v1"
+          ],
+          "count_source": "Original contrast record. n_samples is source-reported assay count; it is not automatically the directly contributing contrast assay count.",
+          "comparison_kind": "between_arm_change_difference",
+          "comparison_kind_basis": "Exact contrast formula and publicly available arm scope; original core design is preserved separately",
+          "public_control_assays_available_for_contrast": true,
+          "n_samples_scope": "source_reported_assay_count; consult analysis metadata for fitted/contrast scope",
+          "sample_scope": {
+            "contrast_people": 168,
+            "directly_contributing_assays": 336,
+            "fitted_model_people": 256,
+            "fitted_model_assays": 512,
+            "independence_unit": "person"
+          },
+          "sample_scope_provenance": [
+            {
+              "attachment_id": "666f9b187b1eaba4f9c4e31b89f2d73c805e8bf64a6e37b35e139fc45d59f54f",
+              "source_path": "<project-root>/expansion/2026-10-01/work/provenance_audits/direct_plus_primary_results_audit.json",
+              "source_sha256": "d916b02c78e8f2203f7d91cd9dfeefb21bd03f7b6f9815b9db2e26ed6f8a8cb8",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.666f9b187b1eaba4f9c4e31b89f2d73c805e8bf64a6e37b35e139fc45d59f54f.sample_scope"
+            },
+            {
+              "attachment_id": "0e92cf449d5181ac4d84f0488073c83498dc854116a13752e881ef15c2cca06e",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/direct-plus-idat-v1/pathways-v1/pathway_status.json",
+              "source_sha256": "c53c0ca0fbf5c2d7040c0163400919039e454a63f2a80417fc0cef19d324e456",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.0e92cf449d5181ac4d84f0488073c83498dc854116a13752e881ef15c2cca06e.sample_scope"
+            },
+            {
+              "attachment_id": "a2bdf6be3b5a4e98a9255ae21088132de3840c33474cce0e1acf66f1021026a3",
+              "source_path": "<project-root>/expansion/2026-10-01/outputs/direct-plus-idat-v1/dmrcate-sensitivity-v1/dmr_status.json",
+              "source_sha256": "22ced05e143d22a86228e6fa9e0597177d76fc362a7e7d74c8553f3a192385f3",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.a2bdf6be3b5a4e98a9255ae21088132de3840c33474cce0e1acf66f1021026a3.sample_scope"
+            },
+            {
+              "attachment_id": "533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4",
+              "source_path": "<project-root>/releases/20261001-final-v1/E_MTAB_12527_model_sample_scope_audit.json",
+              "source_sha256": "06a8cfda7ecb532494ffc1be2780d30da8d8bc4bd6b1b620457b6761b10ddccf",
+              "hash_scope": "external_audit_snapshot",
+              "source_location": "ng_contrast.metadata_json.audit_attachments.533a80d44ef729af12de02c424a364e8239b9a101a4af24ef484e4057a5211c4.sample_scope"
+            }
+          ]
+        }
+      ],
+      "allow_component_causal_interpretation": false
+    }
+  ],
+  "exposures": [
+    {
+      "core_exposure_id": "N06:fish_oil:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N06",
+      "exposure_key": "fish_oil",
+      "food_category_codes": [
+        "fish_oil"
+      ],
+      "actual_product_description": "Eight Marinol C-38 capsules/day providing n-3 LCPUFA mixture; fenofibrate-matching placebo capsules coadministered",
+      "dose": {
+        "amount": 3.7,
+        "unit": "g",
+        "frequency": "per_day",
+        "duration_days": 42,
+        "analyte_basis": "total n-3 LCPUFA active mass, not bulk fish-oil product mass"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "fishoil-clinical-paper",
+        "GSE27385-metadata",
+        "fishoil-product-protocol"
+      ],
+      "source_location": "GSE27385-metadata: !Series_summary; fishoil-product-protocol: !Sample_treatment_protocol_ch1",
+      "known_mismatches": [
+        "3.7g n-3 LCPUFA is neither bulk fish-oil mass nor 3.7g EPA or DHA",
+        "EPA+DHA total 2.9g does not license identification of the remaining 0.8g",
+        "Food fish or other supplement formulation is not exact product identity",
+        "Do not use the separate fenofibrate contrast as a dietary effect",
+        "Clinical 20 and public PBMC 11 are different count scopes; participant mapping unverified"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "component_doses": [
+          {
+            "name": "EPA",
+            "amount": 1.7,
+            "unit": "g",
+            "frequency": "per_day",
+            "analyte_basis": "reported EPA active mass"
+          },
+          {
+            "name": "DHA",
+            "amount": 1.2,
+            "unit": "g",
+            "frequency": "per_day",
+            "analyte_basis": "reported DHA active mass"
+          }
+        ],
+        "capsules_per_day": 8,
+        "control": "high-oleic sunflower oil capsules plus cellulose capsules",
+        "tissue": "PBMC"
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "n-3 지방산 혼합 보충제 · 활성 n-3 3.7 g/day · 6주 (제품 질량 아님)",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N14:pufa:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N14",
+      "exposure_key": "pufa",
+      "food_category_codes": [
+        "high_fat_meal",
+        "PUFA_meal"
+      ],
+      "actual_product_description": "Trial PUFA-enriched shake; exact recipe and quantitative fatty-acid doses not verified",
+      "dose": {
+        "amount": null,
+        "unit": null,
+        "frequency": "single_meal",
+        "duration_days": 0,
+        "analyte_basis": "whole assigned shake; exact mass / fat composition unresolved"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "SFA-PUFA-paper",
+        "GSE13466-metadata"
+      ],
+      "source_location": "SFA-PUFA-paper: Abstract > Design; GSE13466-metadata: !Series_overall_design",
+      "known_mismatches": [
+        "A high-fat food is not the trial shake",
+        "SFA/PUFA are compositional classes, not a single molecular species",
+        "Public whole-genome data do not provide a MUFA treatment arm",
+        "In-vitro free-fatty-acid experiments are separate evidence from ingestion"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "tissue": "PBMC",
+        "response_time_h": 6,
+        "dose_support_status": "not_verified",
+        "parent_conditions": [
+          "SFA",
+          "MUFA",
+          "PUFA"
+        ],
+        "public_omics_conditions": [
+          "SFA",
+          "PUFA"
+        ]
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "PUFA 중심 시험용 셰이크 · 단회 (정량 용량 미확인)",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N14:sfa:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N14",
+      "exposure_key": "sfa",
+      "food_category_codes": [
+        "high_fat_meal",
+        "SFA_meal"
+      ],
+      "actual_product_description": "Trial SFA-enriched shake; exact recipe and quantitative fatty-acid doses not verified",
+      "dose": {
+        "amount": null,
+        "unit": null,
+        "frequency": "single_meal",
+        "duration_days": 0,
+        "analyte_basis": "whole assigned shake; exact mass / fat composition unresolved"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "SFA-PUFA-paper",
+        "GSE13466-metadata"
+      ],
+      "source_location": "SFA-PUFA-paper: Abstract > Design; GSE13466-metadata: !Series_overall_design",
+      "known_mismatches": [
+        "A high-fat food is not the trial shake",
+        "SFA/PUFA are compositional classes, not a single molecular species",
+        "Public whole-genome data do not provide a MUFA treatment arm",
+        "In-vitro free-fatty-acid experiments are separate evidence from ingestion"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "tissue": "PBMC",
+        "response_time_h": 6,
+        "dose_support_status": "not_verified",
+        "parent_conditions": [
+          "SFA",
+          "MUFA",
+          "PUFA"
+        ],
+        "public_omics_conditions": [
+          "SFA",
+          "PUFA"
+        ]
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "SFA 중심 시험용 셰이크 · 단회 (정량 용량 미확인)",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N15:milk_acute:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N15",
+      "exposure_key": "milk_acute",
+      "food_category_codes": [
+        "acidified_milk"
+      ],
+      "actual_product_description": "Trial 3.5% fat milk acidified with 2% D-(+)-glucono-delta-lactone",
+      "dose": {
+        "amount": 800,
+        "unit": "g",
+        "frequency": "single_meal",
+        "duration_days": 0,
+        "analyte_basis": "whole trial product mass"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "yogurt-paper",
+        "GSE98645-metadata"
+      ],
+      "source_location": "yogurt-paper: Materials and methods > Study design; Dairy products",
+      "known_mismatches": [
+        "Generic yogurt / ordinary milk is not proven identical to the trial product",
+        "Food fat content, cultures, acidification and formulation may differ",
+        "Run-in/washout non-acidified milk was reported in mL; it is not this assigned product dose",
+        "Acute and repeated-intake contrasts are separate"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "food_fat_percent": 3.5,
+        "tissue": "whole blood",
+        "response_time_h": [
+          2,
+          4,
+          6
+        ]
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "시험용 산성화 우유 · 단회 800 g",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N15:milk_chronic:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N15",
+      "exposure_key": "milk_chronic",
+      "food_category_codes": [
+        "acidified_milk"
+      ],
+      "actual_product_description": "Trial 3.5% fat milk acidified with 2% D-(+)-glucono-delta-lactone",
+      "dose": {
+        "amount": 400,
+        "unit": "g",
+        "frequency": "per_day",
+        "duration_days": 14,
+        "analyte_basis": "whole trial product mass"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "yogurt-paper",
+        "GSE98645-metadata"
+      ],
+      "source_location": "yogurt-paper: Materials and methods > Study design; Dairy products",
+      "known_mismatches": [
+        "Generic yogurt / ordinary milk is not proven identical to the trial product",
+        "Food fat content, cultures, acidification and formulation may differ",
+        "Run-in/washout non-acidified milk was reported in mL; it is not this assigned product dose",
+        "Acute and repeated-intake contrasts are separate"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "food_fat_percent": 3.5,
+        "tissue": "whole blood",
+        "response_time_h": null
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "시험용 산성화 우유 · 400 g/day · 2주",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N15:yogurt_acute:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N15",
+      "exposure_key": "yogurt_acute",
+      "food_category_codes": [
+        "yogurt"
+      ],
+      "actual_product_description": "Trial probiotic yogurt (LGG plus starter cultures) made from same-batch 3.5% fat milk",
+      "dose": {
+        "amount": 800,
+        "unit": "g",
+        "frequency": "single_meal",
+        "duration_days": 0,
+        "analyte_basis": "whole trial product mass"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "yogurt-paper",
+        "GSE98645-metadata"
+      ],
+      "source_location": "yogurt-paper: Materials and methods > Study design; Dairy products",
+      "known_mismatches": [
+        "Generic yogurt / ordinary milk is not proven identical to the trial product",
+        "Food fat content, cultures, acidification and formulation may differ",
+        "Run-in/washout non-acidified milk was reported in mL; it is not this assigned product dose",
+        "Acute and repeated-intake contrasts are separate"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "food_fat_percent": 3.5,
+        "tissue": "whole blood",
+        "response_time_h": [
+          2,
+          4,
+          6
+        ]
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "시험용 프로바이오틱 요구르트 · 단회 800 g",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N15:yogurt_chronic:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N15",
+      "exposure_key": "yogurt_chronic",
+      "food_category_codes": [
+        "yogurt"
+      ],
+      "actual_product_description": "Trial probiotic yogurt (LGG plus starter cultures) made from same-batch 3.5% fat milk",
+      "dose": {
+        "amount": 400,
+        "unit": "g",
+        "frequency": "per_day",
+        "duration_days": 14,
+        "analyte_basis": "whole trial product mass"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "yogurt-paper",
+        "GSE98645-metadata"
+      ],
+      "source_location": "yogurt-paper: Materials and methods > Study design; Dairy products",
+      "known_mismatches": [
+        "Generic yogurt / ordinary milk is not proven identical to the trial product",
+        "Food fat content, cultures, acidification and formulation may differ",
+        "Run-in/washout non-acidified milk was reported in mL; it is not this assigned product dose",
+        "Acute and repeated-intake contrasts are separate"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "food_fat_percent": 3.5,
+        "tissue": "whole blood",
+        "response_time_h": null
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "시험용 프로바이오틱 요구르트 · 400 g/day · 2주",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N16:green:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N16",
+      "exposure_key": "green",
+      "food_category_codes": [],
+      "actual_product_description": "Whole green Mediterranean dietary pattern plus physical-activity guidance; walnuts, tea and Mankai with red/processed-meat restriction",
+      "dose": {
+        "amount": null,
+        "unit": null,
+        "frequency": "per_day",
+        "duration_days": null,
+        "analyte_basis": "whole dietary pattern with multiple cointerventions"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "DIRECT-PLUS-trial-paper",
+        "DIRECT-PLUS-methylome-paper",
+        "DIRECT-PLUS-clock-QC-paper",
+        "E-MTAB-12527-SDRF",
+        "E-MTAB-12527-record"
+      ],
+      "source_location": "DIRECT-PLUS-trial-paper: Methods > MED group / Green-MED group (XML s2-2-2 / s2-2-3)",
+      "known_mismatches": [
+        "One meal / walnut portion is not an 18-month dietary pattern",
+        "MED and greenMED both receive walnuts; their difference is not a randomized walnut effect",
+        "Tea cups cannot become grams without a verified serving/density basis",
+        "100g frozen Mankai is not 100g dry plant or a 500mL shake density conversion",
+        "440/800/1240mg total-polyphenol GAE values are not individual-compound doses",
+        "Public 256 complete pairs differ from the methylome article cohort of 260"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "duration_reported": {
+          "amount": 18,
+          "unit": "months"
+        },
+        "tissue": "blood",
+        "shared_in_arms": [
+          "MED",
+          "greenMED"
+        ],
+        "assigned_food_components": [
+          {
+            "name": "walnuts",
+            "amount": 28,
+            "unit": "g",
+            "frequency": "per_day"
+          },
+          {
+            "name": "green tea",
+            "amount_min": 3,
+            "amount_max": 4,
+            "unit": "cups",
+            "frequency": "per_day"
+          },
+          {
+            "name": "Mankai frozen cubes",
+            "amount": 100,
+            "unit": "g",
+            "frequency": "per_day",
+            "analyte_basis": "frozen food mass; shake replacing dinner"
+          }
+        ],
+        "polyphenol_assay_basis": "gallic-acid-equivalent total assay; not summed individual molecular masses"
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "녹차·Mankai·호두 포함 greenMED 식단 · 18개월",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "N16:walnuts:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "N16",
+      "exposure_key": "walnuts",
+      "food_category_codes": [
+        "walnut"
+      ],
+      "actual_product_description": "28g/day walnuts within the Mediterranean dietary pattern; also provided to greenMED",
+      "dose": {
+        "amount": 28,
+        "unit": "g",
+        "frequency": "per_day",
+        "duration_days": null,
+        "analyte_basis": "walnut food mass within whole dietary pattern"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "DIRECT-PLUS-trial-paper",
+        "DIRECT-PLUS-methylome-paper",
+        "DIRECT-PLUS-clock-QC-paper",
+        "E-MTAB-12527-SDRF",
+        "E-MTAB-12527-record"
+      ],
+      "source_location": "DIRECT-PLUS-trial-paper: Methods > MED group / Green-MED group (XML s2-2-2 / s2-2-3)",
+      "known_mismatches": [
+        "One meal / walnut portion is not an 18-month dietary pattern",
+        "MED and greenMED both receive walnuts; their difference is not a randomized walnut effect",
+        "Tea cups cannot become grams without a verified serving/density basis",
+        "100g frozen Mankai is not 100g dry plant or a 500mL shake density conversion",
+        "440/800/1240mg total-polyphenol GAE values are not individual-compound doses",
+        "Public 256 complete pairs differ from the methylome article cohort of 260"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "duration_reported": {
+          "amount": 18,
+          "unit": "months"
+        },
+        "tissue": "blood",
+        "shared_in_arms": [
+          "MED",
+          "greenMED"
+        ]
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "호두 포함 지중해식 식단 · 호두 28 g/day · 18개월",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "S03:flavanols:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "S03",
+      "exposure_key": "flavanols",
+      "food_category_codes": [
+        "flavanol"
+      ],
+      "actual_product_description": "MASQUELIER’s Original OPCs grape-seed monomeric/oligomeric flavanol extract; two 100mg capsules/day",
+      "dose": {
+        "amount": 200,
+        "unit": "mg",
+        "frequency": "per_day",
+        "duration_days": 56,
+        "analyte_basis": "specified MOF mixture mass"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "flavanol-paper",
+        "GSE54325-metadata",
+        "GSE54643-metadata"
+      ],
+      "source_location": "flavanol-paper: Methods > Clinical trial",
+      "known_mismatches": [
+        "Grape fruit is a source-plant relationship, not this extract",
+        "200mg MOF and 51.3mg total catechins are not an individual epicatechin dose",
+        "Sums differ slightly through reported rounding; do not invent a chemical remainder",
+        "Parent trial design does not turn public active-only omics into a randomized control comparison"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "mixture_fraction_mg": {
+          "total_catechins": 51.3,
+          "total_dimers": 55,
+          "tri_tetra_pentameric_proanthocyanidins": 93.8
+        },
+        "public_omics_design": "active-arm paired pre/post; no public placebo omics comparison",
+        "tissue": "blood leukocytes / blood DNA"
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "포도씨 MOF flavanol 혼합물 · 200 mg/day · 8주",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "S04:evoo:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "S04",
+      "exposure_key": "evoo",
+      "food_category_codes": [
+        "olive_oil"
+      ],
+      "actual_product_description": "Mediterranean whole dietary pattern supplemented with extra-virgin olive oil",
+      "dose": {
+        "amount": null,
+        "unit": null,
+        "frequency": "per_day",
+        "duration_days": null,
+        "analyte_basis": "assigned ingredient quantity unverified; whole dietary pattern"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "PREDIMED-DNAm-paper",
+        "GSE107205-metadata"
+      ],
+      "source_location": "PREDIMED-DNAm-paper: Methods 2.1; Table 2 observed intake is a separate descriptive variable",
+      "known_mismatches": [
+        "One food portion is not a five-year whole dietary intervention",
+        "Mixed-nut intake is not walnut-only intake",
+        "Observed group means must not fill assigned-dose or individual-dose fields",
+        "Generic olive oil need not be extra-virgin or chemically identical",
+        "Reanalyses with different included participant counts are not additional trials"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "duration_reported": {
+          "amount": 5,
+          "unit": "years"
+        },
+        "tissue": "peripheral white blood cells",
+        "assigned_dose_support_status": "not_verified",
+        "observed_group_intake": {
+          "amount": 66.4,
+          "SD": 8.1,
+          "unit": "g/day",
+          "analyte": "EVOO",
+          "basis": "EVOO-arm mean(SD) at five years; not assigned or individual intake",
+          "source_id": "PREDIMED-DNAm-paper",
+          "source_location": "Table 2 EVOO row"
+        }
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "EVOO 포함 지중해식 식단 · 5년 (배정량 미확인)",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "S04:lowfat:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "S04",
+      "exposure_key": "lowfat",
+      "food_category_codes": [],
+      "actual_product_description": "Advice to reduce all fat sources; comparator dietary pattern",
+      "dose": {
+        "amount": null,
+        "unit": null,
+        "frequency": "per_day",
+        "duration_days": null,
+        "analyte_basis": "assigned ingredient quantity unverified; whole dietary pattern"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "PREDIMED-DNAm-paper",
+        "GSE107205-metadata"
+      ],
+      "source_location": "PREDIMED-DNAm-paper: Methods 2.1; Table 2 observed intake is a separate descriptive variable",
+      "known_mismatches": [
+        "One food portion is not a five-year whole dietary intervention",
+        "Mixed-nut intake is not walnut-only intake",
+        "Observed group means must not fill assigned-dose or individual-dose fields",
+        "Generic olive oil need not be extra-virgin or chemically identical",
+        "Reanalyses with different included participant counts are not additional trials"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "duration_reported": {
+          "amount": 5,
+          "unit": "years"
+        },
+        "tissue": "peripheral white blood cells",
+        "assigned_dose_support_status": "not_verified"
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "저지방 식이 권고 · 5년",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    },
+    {
+      "core_exposure_id": "S04:nuts:human-intervention-bridge-2026-10-01-v1",
+      "study_id": "S04",
+      "exposure_key": "nuts",
+      "food_category_codes": [
+        "walnut"
+      ],
+      "actual_product_description": "Mediterranean whole dietary pattern supplemented with mixed nuts",
+      "dose": {
+        "amount": null,
+        "unit": null,
+        "frequency": "per_day",
+        "duration_days": null,
+        "analyte_basis": "assigned ingredient quantity unverified; whole dietary pattern"
+      },
+      "input_match_policy": "exact_exposure_id_only",
+      "source_ids": [
+        "PREDIMED-DNAm-paper",
+        "GSE107205-metadata"
+      ],
+      "source_location": "PREDIMED-DNAm-paper: Methods 2.1; Table 2 observed intake is a separate descriptive variable",
+      "known_mismatches": [
+        "One food portion is not a five-year whole dietary intervention",
+        "Mixed-nut intake is not walnut-only intake",
+        "Observed group means must not fill assigned-dose or individual-dose fields",
+        "Generic olive oil need not be extra-virgin or chemically identical",
+        "Reanalyses with different included participant counts are not additional trials"
+      ],
+      "verified_fields": {
+        "component_causality_identified": false,
+        "expert_review_status": "pending",
+        "duration_reported": {
+          "amount": 5,
+          "unit": "years"
+        },
+        "tissue": "peripheral white blood cells",
+        "assigned_dose_support_status": "not_verified",
+        "observed_group_intake": {
+          "amount": 28.2,
+          "SD": 14.2,
+          "unit": "g/day",
+          "analyte": "mixed nuts",
+          "basis": "nut-arm mean(SD) at five years; not assigned or individual intake",
+          "source_id": "PREDIMED-DNAm-paper",
+          "source_location": "Table 2 Nuts row"
+        }
+      },
+      "expert_review_status": "pending",
+      "category_match_is_exact_product_match": false,
+      "effect_scaling_from_dose_ratio_allowed": false,
+      "display_label": "혼합 견과 포함 지중해식 식단 · 5년 (배정량 미확인)",
+      "display_label_curator_created": true,
+      "display_label_basis": "Source-checked curator paraphrase of product, verified assigned dose and reported duration; original core label is unchanged"
+    }
+  ],
+  "provenance": {
+    "core_snapshot": "research/2026-10-03/explorer/scientific_matching/core_metadata_readonly.json",
+    "core_snapshot_sha256": "4c32a785c2326334c1d8167e43420c88480440a2064cfe05bd00a13d5f763768",
+    "original_bridge_source_sha256_scope": "config/human_exposures.v1.json complete curation manifest; not original publication bytes",
+    "original_bridge_manifest_sha256": "d61ca50d07e3fab26c0614065ee10e5c76ffd5583c411b95396a3476bd11086b",
+    "verified_original_publication_file_hashes": "Only responses captured by this audit have explicit retrieved_response_sha256; do not relabel manifest hashes as article hashes",
+    "source_status": "assistant source check, expert review pending; not a new expert-approved or causal relationship release",
+    "core_join_contract": {
+      "exposure": "ng_exposure.id",
+      "arm": "ng_arm.id from decoded ng_contrast.arm_ids or exposure list membership",
+      "contrast": "ng_contrast.id and exact series_accession/contrast/analysis_version",
+      "effect": "existing original StudyEffect key; feature_type also required"
+    }
+  }
+}

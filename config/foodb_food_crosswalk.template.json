@@ -1,0 +1,6 @@
+{
+  "schema_version": "0.1",
+  "release": "FooDB-2020-04-07",
+  "match_policy": "Only reviewed exact-food or scientifically justified matches; do not use fuzzy matches as final mappings.",
+  "matches": []
+}

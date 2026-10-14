@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { transform } from 'esbuild';
+const source=await readFile('src/evidenceConditions.ts','utf8');
+const compiled=await transform(source,{loader:'ts',format:'esm'});
+const {contrastConditions}=await import('data:text/javascript;base64,'+Buffer.from(compiled.code).toString('base64'));
+const dose={dimension:'dose',status:'mismatch',reason:'150g differs from 800g'};
+const form={dimension:'food_formulation',status:'unknown'};
+const two={dimension:'response_time_h',status:'mismatch',reason:'2h'};
+const six={dimension:'response_time_h',status:'match',reason:'6h'};
+const exposure={applicability:[dose,form,two,six]};
+assert.deepEqual(contrastConditions(exposure,{applicability:[six]}),[dose,form,six]);
+assert.deepEqual(contrastConditions(exposure,{applicability:[]}),[dose,form]);
+assert.deepEqual(contrastConditions(undefined,undefined),[]);
+console.log('3 contrast-context checks passed; unrelated timepoints are excluded');

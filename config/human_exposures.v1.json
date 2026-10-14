@@ -1,0 +1,1052 @@
+{
+  "version": "human-intervention-bridge-2026-10-01-v1",
+  "created_at": "2026-10-01",
+  "expert_review_status": "pending",
+  "scope": "source-backed noncommercial human intervention evidence retrieval",
+  "studies": [
+    {
+      "id": "S01",
+      "title": "고지방 식후 반복 혈액 RNA-seq",
+      "series": [
+        "GSE127530"
+      ],
+      "pubmed_id": "31473510",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/31473510/"
+        },
+        {
+          "label": "GSE127530",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE127530"
+        }
+      ],
+      "description": "고지방 식후 반복 혈액 RNA-seq",
+      "design": "randomized_supplement_crossover",
+      "analysis_design": "repeated_meal_response",
+      "tissue": "whole blood",
+      "allocation": "randomized",
+      "exposures": [
+        {
+          "key": "meal",
+          "label": "고지방 혼합 식사 challenge",
+          "kind": "mixed_meal",
+          "formulation": "study-specific mixed high-fat meal",
+          "dose_basis": "연구 식사 열량; 개인별 양의 정량 연결 미완료",
+          "component_keys": [
+            "FDC-NUTRIENT:1008",
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1003",
+            "FDC-NUTRIENT:1005"
+          ],
+          "food_terms": [],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {
+            "frequency": "single challenge on three visits"
+          }
+        },
+        {
+          "key": "dha",
+          "label": "DHA 단회 보충 조건",
+          "kind": "compound",
+          "formulation": "DHA supplement",
+          "dose_basis": "single 2 g supplement challenge",
+          "component_keys": [
+            "FDC-NUTRIENT:1272"
+          ],
+          "food_terms": [],
+          "amount": 2,
+          "unit": "g",
+          "duration_days": null,
+          "metadata": {
+            "visit_mapping_status": "unresolved"
+          },
+          "contrast_pattern": "a^"
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "RNA-seq 5명·45개 시료; 전체 임상/qPCR 대상자와 다르다.",
+        "blueberry/DHA/placebo 방문–RNA 시료 대응 미확인; 보충제별 효과로 연결하지 않는다.",
+        "보충제 차이의 비유의 결과는 동등성의 증명이 아니다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 5,
+      "n_samples": 45,
+      "arms": [
+        {
+          "key": "placebo",
+          "label": "Placebo visit",
+          "exposure_keys": [
+            "meal"
+          ],
+          "n_people": 5,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "blueberry",
+          "label": "Blueberry visit",
+          "exposure_keys": [
+            "meal"
+          ],
+          "n_people": 5,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "dha",
+          "label": "DHA visit",
+          "exposure_keys": [
+            "meal",
+            "dha"
+          ],
+          "n_people": 5,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "title": "식사 열량·시간·체중군 혈액 발현",
+      "series": [
+        "GSE56960"
+      ],
+      "pubmed_id": "28319853",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/28319853/"
+        },
+        {
+          "label": "GSE56960",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE56960"
+        }
+      ],
+      "description": "식사 열량·시간·체중군 혈액 발현",
+      "design": "randomized_meal_crossover",
+      "analysis_design": "randomized_meal_crossover",
+      "tissue": "whole blood",
+      "allocation": "randomized_meal_order",
+      "exposures": [
+        {
+          "key": "500",
+          "label": "고지방 혼합 식사 500 kcal",
+          "kind": "mixed_meal",
+          "formulation": "study-specific high-fat meal",
+          "dose_basis": "assigned energy per challenge",
+          "component_keys": [
+            "FDC-NUTRIENT:1008",
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1003",
+            "FDC-NUTRIENT:1005"
+          ],
+          "food_terms": [],
+          "amount": 500,
+          "unit": "kcal",
+          "duration_days": null,
+          "metadata": {
+            "allocation_scope": "meal order only",
+            "frequency": "single challenge"
+          },
+          "contrast_pattern": "(?:_500_|500vs500|_vs500_)"
+        },
+        {
+          "key": "1000",
+          "label": "고지방 혼합 식사 1000 kcal",
+          "kind": "mixed_meal",
+          "formulation": "study-specific high-fat meal",
+          "dose_basis": "assigned energy per challenge",
+          "component_keys": [
+            "FDC-NUTRIENT:1008",
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1003",
+            "FDC-NUTRIENT:1005"
+          ],
+          "food_terms": [],
+          "amount": 1000,
+          "unit": "kcal",
+          "duration_days": null,
+          "metadata": {
+            "allocation_scope": "meal order only",
+            "frequency": "single challenge"
+          },
+          "contrast_pattern": "(?:_1000_|1000vs500|a^)"
+        },
+        {
+          "key": "1500",
+          "label": "고지방 혼합 식사 1500 kcal",
+          "kind": "mixed_meal",
+          "formulation": "study-specific high-fat meal",
+          "dose_basis": "assigned energy per challenge",
+          "component_keys": [
+            "FDC-NUTRIENT:1008",
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1003",
+            "FDC-NUTRIENT:1005"
+          ],
+          "food_terms": [],
+          "amount": 1500,
+          "unit": "kcal",
+          "duration_days": null,
+          "metadata": {
+            "allocation_scope": "meal order only",
+            "frequency": "single challenge"
+          },
+          "contrast_pattern": "(?:_1500_|1500vs500|a^)"
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "14명·168개 assay; 정상체중 7명/비만 7명. 체중군은 무작위배정이 아니다.",
+        "식후 시간과 일중 변화의 혼입 가능성이 있어 식사만의 인과 효과로 해석하지 않는다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 14,
+      "n_samples": 168,
+      "arms": [
+        {
+          "key": "500",
+          "label": "500 kcal challenge",
+          "exposure_keys": [
+            "500"
+          ],
+          "n_people": 14,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "1000",
+          "label": "1000 kcal challenge",
+          "exposure_keys": [
+            "1000"
+          ],
+          "n_people": 14,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "1500",
+          "label": "1500 kcal challenge",
+          "exposure_keys": [
+            "1500"
+          ],
+          "n_people": 14,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "title": "포도씨 flavanol 활성군 발현·DNAm",
+      "series": [
+        "GSE54690",
+        "GSE54325",
+        "GSE54643"
+      ],
+      "pubmed_id": "24763279",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0095527"
+        },
+        {
+          "label": "GSE54690",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54690"
+        },
+        {
+          "label": "GSE54325",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54325"
+        },
+        {
+          "label": "GSE54643",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54643"
+        }
+      ],
+      "description": "포도씨 flavanol 활성군 발현·DNAm",
+      "design": "uncontrolled_public_active_arm",
+      "analysis_design": "uncontrolled_public_active_arm",
+      "tissue": "blood leukocytes",
+      "allocation": "parent_randomized_public_active_only",
+      "exposures": [
+        {
+          "key": "flavanols",
+          "label": "포도씨 monomeric/oligomeric flavanols",
+          "kind": "component_group",
+          "formulation": "grape-seed flavanol mixture",
+          "dose_basis": "assigned 200 mg/day mixture",
+          "component_keys": [],
+          "food_terms": [
+            "포도씨 추출물",
+            "grape seed extract",
+            "포도",
+            "grape"
+          ],
+          "amount": 200,
+          "unit": "mg",
+          "duration_days": 56,
+          "metadata": {
+            "reported_components": {
+              "total_catechins_mg": 51.3,
+              "total_dimers_mg": 55,
+              "polymers_mg": 93.8
+            },
+            "food_relation_kind": "source_plant_related",
+            "dose_frequency": "per_day"
+          }
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "공개 활성군 전후 비교에는 무작위 대조군 자료가 없다.",
+        "발현 7명/14개 생물학적 시료/7개 two-color 배열; DNAm 10명/20개 시료.",
+        "개인 ID 대응 미확인; 개인 내 다중오믹스 분석 제외.",
+        "총 catechin·dimer 함량은 개별 catechin 화합물 용량이 아니다.",
+        "식품의 포도와 포도씨 농축 보충제는 투여 형태가 다르다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": null,
+      "n_samples": null,
+      "arms": [
+        {
+          "key": "active_public",
+          "label": "Public flavanol active-arm subset",
+          "exposure_keys": [
+            "flavanols"
+          ],
+          "n_people": null,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "title": "PREDIMED-Navarra 식이군별 장기 DNAm",
+      "series": [
+        "GSE107205"
+      ],
+      "pubmed_id": "29295516",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.mdpi.com/2072-6643/10/1/15"
+        },
+        {
+          "label": "GSE107205",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE107205"
+        }
+      ],
+      "description": "PREDIMED-Navarra 식이군별 장기 DNAm",
+      "design": "randomized_parent_selected_subset",
+      "analysis_design": "randomized_parent_selected_subset",
+      "tissue": "peripheral white blood cells",
+      "allocation": "parent_randomized_subset_audit_required",
+      "exposures": [
+        {
+          "key": "evoo",
+          "label": "지중해식 + EVOO",
+          "kind": "diet_pattern",
+          "formulation": "Mediterranean diet supplemented with EVOO",
+          "dose_basis": "배정 용량 미확인; 관찰 섭취량과 분리",
+          "component_keys": [
+            "FDC-NUTRIENT:1004"
+          ],
+          "food_terms": [
+            "olive oil",
+            "올리브유"
+          ],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {
+            "reported_duration": "5 years"
+          },
+          "contrast_pattern": "(?i)evoo|olive"
+        },
+        {
+          "key": "nuts",
+          "label": "지중해식 + 견과 혼합물",
+          "kind": "diet_pattern",
+          "formulation": "Mediterranean diet supplemented with mixed nuts",
+          "dose_basis": "배정 용량 미확인; 단일 견과 용량 미확인",
+          "component_keys": [
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1079"
+          ],
+          "food_terms": [
+            "호두",
+            "아몬드",
+            "walnut",
+            "almond",
+            "hazelnut"
+          ],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {
+            "reported_duration": "5 years"
+          },
+          "contrast_pattern": "(?i)nut"
+        },
+        {
+          "key": "lowfat",
+          "label": "저지방 안내 대조군",
+          "kind": "diet_pattern",
+          "formulation": "low-fat dietary advice",
+          "dose_basis": "식단 안내; 단일 성분 배정 용량 없음",
+          "component_keys": [
+            "FDC-NUTRIENT:1004"
+          ],
+          "food_terms": [],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {
+            "reported_duration": "5 years"
+          },
+          "contrast_pattern": "(?i)low|control|lf"
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "36명(각 군12명) 완주 하위표본; 원 배정·하위선정·탈락 감사 필요.",
+        "군 내 전후 변화와 군 간 변화 차이는 다른 대비이며 구분한다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 36,
+      "n_samples": 72,
+      "arms": [
+        {
+          "key": "evoo",
+          "label": "MED + EVOO",
+          "exposure_keys": [
+            "evoo"
+          ],
+          "n_people": 12,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "nuts",
+          "label": "MED + mixed nuts",
+          "exposure_keys": [
+            "nuts"
+          ],
+          "n_people": 12,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "lowfat",
+          "label": "Low-fat advice",
+          "exposure_keys": [
+            "lowfat"
+          ],
+          "n_people": 12,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    },
+    {
+      "id": "S05",
+      "title": "NAFLD 지중해식·고섬유 단일군 DNAm",
+      "series": [
+        "GSE219217"
+      ],
+      "pubmed_id": "36447285",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://link.springer.com/article/10.1186/s13148-022-01377-6"
+        },
+        {
+          "label": "GSE219217",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE219217"
+        }
+      ],
+      "description": "NAFLD 지중해식·고섬유 단일군 DNAm",
+      "design": "uncontrolled_before_after",
+      "analysis_design": "uncontrolled_before_after",
+      "tissue": "whole blood",
+      "allocation": "single_arm",
+      "exposures": [
+        {
+          "key": "fiber",
+          "label": "지중해식 상담 + 고섬유 rolls 2개/day",
+          "kind": "diet_pattern",
+          "formulation": "Mediterranean counselling plus high-fibre rolls",
+          "dose_basis": "2 rolls/day; 질량과 fibre g는 미확인",
+          "component_keys": [
+            "FDC-NUTRIENT:1079"
+          ],
+          "food_terms": [],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {
+            "reported_duration": "30 and 60 days",
+            "assigned_food_count": 2,
+            "assigned_count_unit": "rolls/day"
+          }
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "18명·54개 시료; 중재 대조군 없음.",
+        "시간·체중 변화·평균으로의 회귀와 중재를 분리할 수 없다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 18,
+      "n_samples": 54,
+      "arms": [
+        {
+          "key": "single",
+          "label": "Single counselling intervention",
+          "exposure_keys": [
+            "fiber"
+          ],
+          "n_people": 18,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    },
+    {
+      "id": "N14",
+      "title": "SFA/PUFA 식후 PBMC 지방산 종류 비교",
+      "series": [
+        "GSE13466"
+      ],
+      "pubmed_id": "19923369",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/19923369/"
+        },
+        {
+          "label": "GSE13466",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE13466"
+        }
+      ],
+      "description": "SFA/PUFA 식후 PBMC 지방산 종류 비교",
+      "design": "randomized_crossover",
+      "analysis_design": "randomized_crossover",
+      "tissue": "PBMC",
+      "allocation": "randomized",
+      "exposures": [
+        {
+          "key": "sfa",
+          "label": "SFA-rich shake",
+          "kind": "mixed_meal",
+          "formulation": "study-specific SFA-rich shake",
+          "dose_basis": "shake fatty-acid dose pending source extraction",
+          "component_keys": [
+            "FDC-NUTRIENT:1258",
+            "FDC-NUTRIENT:1004"
+          ],
+          "food_terms": [],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {}
+        },
+        {
+          "key": "pufa",
+          "label": "PUFA-rich shake",
+          "kind": "mixed_meal",
+          "formulation": "study-specific PUFA-rich shake",
+          "dose_basis": "shake fatty-acid dose pending source extraction",
+          "component_keys": [
+            "FDC-NUTRIENT:1293",
+            "FDC-NUTRIENT:1004"
+          ],
+          "food_terms": [],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {}
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "21명·84개 배열; 공개 전장 발현은 SFA/PUFA만 해당.",
+        "E-MTAB-65는 동일 자료이며 독립 연구가 아니다.",
+        "NuGO custom CDF를 보존한다; PBMC와 전혈을 합치지 않는다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 21,
+      "n_samples": 84,
+      "arms": [
+        {
+          "key": "sfa",
+          "label": "SFA shake condition",
+          "exposure_keys": [
+            "sfa"
+          ],
+          "n_people": 21,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "pufa",
+          "label": "PUFA shake condition",
+          "exposure_keys": [
+            "pufa"
+          ],
+          "n_people": 21,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    },
+    {
+      "id": "N15",
+      "title": "요구르트/산성화 우유 교차시험 혈액 RNA-seq",
+      "series": [
+        "GSE98645"
+      ],
+      "pubmed_id": "29489876",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0192947"
+        },
+        {
+          "label": "GSE98645",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE98645"
+        }
+      ],
+      "description": "요구르트/산성화 우유 교차시험 혈액 RNA-seq",
+      "design": "randomized_double_blind_crossover",
+      "analysis_design": "randomized_double_blind_crossover",
+      "tissue": "whole blood",
+      "allocation": "randomized",
+      "exposures": [
+        {
+          "key": "yogurt_acute",
+          "label": "요구르트 800g 단회",
+          "kind": "product",
+          "formulation": "trial-specific probiotic yogurt",
+          "dose_basis": "single meal",
+          "component_keys": [
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1005",
+            "FDC-NUTRIENT:1003"
+          ],
+          "food_terms": [
+            "요구르트",
+            "yogurt"
+          ],
+          "amount": 800,
+          "unit": "g",
+          "duration_days": 0,
+          "metadata": {
+            "dose_frequency": "single"
+          },
+          "contrast_pattern": "[246]h_change"
+        },
+        {
+          "key": "yogurt_chronic",
+          "label": "요구르트 400g /day·2주",
+          "kind": "product",
+          "formulation": "trial-specific probiotic yogurt",
+          "dose_basis": "assigned per-day intake",
+          "component_keys": [
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1005",
+            "FDC-NUTRIENT:1003"
+          ],
+          "food_terms": [
+            "요구르트",
+            "yogurt"
+          ],
+          "amount": 400,
+          "unit": "g",
+          "duration_days": 14,
+          "metadata": {
+            "dose_frequency": "per_day"
+          },
+          "contrast_pattern": "2week_change"
+        },
+        {
+          "key": "milk_acute",
+          "label": "우유 800g 단회",
+          "kind": "product",
+          "formulation": "trial-specific acidified milk",
+          "dose_basis": "single meal",
+          "component_keys": [
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1005",
+            "FDC-NUTRIENT:1003"
+          ],
+          "food_terms": [
+            "우유",
+            "milk"
+          ],
+          "amount": 800,
+          "unit": "g",
+          "duration_days": 0,
+          "metadata": {
+            "dose_frequency": "single"
+          },
+          "contrast_pattern": "[246]h_change"
+        },
+        {
+          "key": "milk_chronic",
+          "label": "우유 400g /day·2주",
+          "kind": "product",
+          "formulation": "trial-specific acidified milk",
+          "dose_basis": "assigned per-day intake",
+          "component_keys": [
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1005",
+            "FDC-NUTRIENT:1003"
+          ],
+          "food_terms": [
+            "우유",
+            "milk"
+          ],
+          "amount": 400,
+          "unit": "g",
+          "duration_days": 14,
+          "metadata": {
+            "dose_frequency": "per_day"
+          },
+          "contrast_pattern": "2week_change"
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "임상13명과 RNA-seq7명/77개시료를 구분.",
+        "제품·발효·matrix 효과이며 개별 성분·균주의 독립 효과가 아니다.",
+        "일반 우유/요구르트와 시험 제품의 동일성은 확인되지 않았다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 7,
+      "n_samples": 77,
+      "arms": [
+        {
+          "key": "yogurt",
+          "label": "Probiotic yogurt condition",
+          "exposure_keys": [
+            "yogurt_acute",
+            "yogurt_chronic"
+          ],
+          "n_people": 7,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "milk",
+          "label": "Acidified milk condition",
+          "exposure_keys": [
+            "milk_acute",
+            "milk_chronic"
+          ],
+          "n_people": 7,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ],
+      "clinical_endpoints": [
+        {
+          "id": "N15:clinical:insulin_iauc",
+          "endpoint": "insulin incremental AUC",
+          "contrast": "yogurt versus acidified milk; 800g acute crossover",
+          "contrast_pattern": "[246]h_change",
+          "finding": "greater response after yogurt",
+          "statistical_status": "reported_significant",
+          "effect_estimate": null,
+          "effect_unit": null,
+          "p_value": null,
+          "q_value": null,
+          "n_people": 13,
+          "value_status": "qualitative",
+          "uncertainty_status": "numeric summary not transcribed",
+          "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0192947",
+          "source_location": "Results: Postprandial responses to dairy intake; supplementary S3 Table",
+          "source_table_url": "https://doi.org/10.1371/journal.pone.0192947.s008",
+          "review_status": "source_checked",
+          "expert_review_status": "pending",
+          "health_benefit_label": null,
+          "paired_to_public_rna_individuals": false,
+          "export_allowed": true
+        },
+        {
+          "id": "N15:clinical:glucose",
+          "endpoint": "glucose incremental AUC",
+          "contrast": "yogurt versus acidified milk; 800g acute crossover",
+          "contrast_pattern": "[246]h_change",
+          "finding": "no significant between-product difference reported",
+          "statistical_status": "reported_nonsignificant",
+          "effect_estimate": null,
+          "effect_unit": null,
+          "p_value": null,
+          "q_value": null,
+          "n_people": 13,
+          "value_status": "qualitative",
+          "uncertainty_status": "not an equivalence test; numeric effect not transcribed",
+          "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0192947",
+          "source_location": "Results: Postprandial responses to dairy intake; supplementary S3 Table",
+          "review_status": "source_checked",
+          "expert_review_status": "pending",
+          "health_benefit_label": null,
+          "paired_to_public_rna_individuals": false,
+          "export_allowed": true
+        },
+        {
+          "id": "N15:clinical:lipids",
+          "endpoint": "triglycerides and cholesterol fractions",
+          "contrast": "yogurt versus acidified milk; 800g acute crossover",
+          "contrast_pattern": "[246]h_change",
+          "finding": "no significant between-product difference reported",
+          "statistical_status": "reported_nonsignificant",
+          "effect_estimate": null,
+          "effect_unit": null,
+          "p_value": null,
+          "q_value": null,
+          "n_people": 13,
+          "value_status": "qualitative",
+          "uncertainty_status": "not an equivalence test; numeric effect not transcribed",
+          "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0192947",
+          "source_location": "Results: Postprandial responses to dairy intake; supplementary S3 Table",
+          "review_status": "source_checked",
+          "expert_review_status": "pending",
+          "health_benefit_label": null,
+          "paired_to_public_rna_individuals": false,
+          "export_allowed": true
+        },
+        {
+          "id": "N15:clinical:tnfa",
+          "endpoint": "TNF-alpha incremental AUC",
+          "contrast": "yogurt versus acidified milk; 800g acute crossover",
+          "contrast_pattern": "[246]h_change",
+          "finding": "no significant between-product difference reported",
+          "statistical_status": "reported_nonsignificant",
+          "effect_estimate": null,
+          "effect_unit": null,
+          "p_value": 0.1,
+          "q_value": null,
+          "n_people": 13,
+          "value_status": "qualitative",
+          "uncertainty_status": "not an equivalence test; numeric effect not transcribed",
+          "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0192947",
+          "source_location": "Results: Postprandial responses to dairy intake; supplementary S3 Table",
+          "review_status": "source_checked",
+          "expert_review_status": "pending",
+          "health_benefit_label": null,
+          "paired_to_public_rna_individuals": false,
+          "export_allowed": true
+        }
+      ]
+    },
+    {
+      "id": "N16",
+      "title": "DIRECT PLUS 18개월 식이 중재 DNAm",
+      "series": [
+        "E-MTAB-12527"
+      ],
+      "pubmed_id": "37236302",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.metabolismjournal.com/article/S0026-0495%2823%2900198-1/fulltext"
+        },
+        {
+          "label": "E-MTAB-12527",
+          "url": "https://www.ebi.ac.uk/biostudies/arrayexpress/studies/E-MTAB-12527"
+        }
+      ],
+      "description": "DIRECT PLUS 18개월 식이 중재 DNAm",
+      "design": "randomized_parallel_selected_paired_subset",
+      "analysis_design": "randomized_parallel_selected_paired_subset",
+      "tissue": "whole blood",
+      "allocation": "randomized",
+      "exposures": [
+        {
+          "key": "walnuts",
+          "label": "MED/greenMED의 호두 28g/day",
+          "kind": "diet_pattern",
+          "formulation": "walnuts within calorie-restricted Mediterranean dietary pattern",
+          "dose_basis": "assigned 28 g/day walnuts as part of whole dietary intervention",
+          "component_keys": [
+            "FDC-NUTRIENT:1004",
+            "FDC-NUTRIENT:1293",
+            "FDC-NUTRIENT:1079"
+          ],
+          "food_terms": [
+            "호두",
+            "walnut"
+          ],
+          "amount": 28,
+          "unit": "g",
+          "duration_days": null,
+          "metadata": {
+            "reported_duration": "18 months",
+            "dose_frequency": "per_day"
+          }
+        },
+        {
+          "key": "green",
+          "label": "greenMED: green tea + Mankai + MED",
+          "kind": "diet_pattern",
+          "formulation": "green Mediterranean diet plus physical activity guidance",
+          "dose_basis": "green tea 3–4 cups/day; Mankai100g/day; whole-pattern intervention",
+          "component_keys": [],
+          "food_terms": [
+            "녹차",
+            "green tea",
+            "Mankai"
+          ],
+          "amount": null,
+          "unit": null,
+          "duration_days": null,
+          "metadata": {
+            "reported_duration": "18 months",
+            "polyphenol_assay_basis": "GAE equivalent; not sum of individual compound masses"
+          },
+          "contrast_pattern": "greenMED"
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "公開 SDRF256명·512시료·1024색상 채널. 논문260명과 차이 감사 필요.",
+        "HDG88/MED81/greenMED87명의 완전한 전후 쌍.",
+        "모든 군에 신체활동 안내; 식단 성분별 인과 분리는 불가능.",
+        "RNA-seq166명·개인별 임상자료 접근 미확인. 동일인 다중오믹스 연결은 보류."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 256,
+      "n_samples": 512,
+      "arms": [
+        {
+          "key": "HDG",
+          "label": "Healthy dietary guidance",
+          "exposure_keys": [],
+          "n_people": 88,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "MED",
+          "label": "Mediterranean diet",
+          "exposure_keys": [
+            "walnuts"
+          ],
+          "n_people": 81,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "greenMED",
+          "label": "Green Mediterranean diet",
+          "exposure_keys": [
+            "walnuts",
+            "green"
+          ],
+          "n_people": 87,
+          "role": "study_group",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    },
+    {
+      "id": "N06",
+      "title": "fish oil/fenofibrate 교차시험 PBMC",
+      "series": [
+        "GSE27385"
+      ],
+      "pubmed_id": "21429719",
+      "sources": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27385"
+        },
+        {
+          "label": "GSE27385",
+          "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27385"
+        }
+      ],
+      "description": "fish oil/fenofibrate 교차시험 PBMC",
+      "design": "randomized_double_blind_crossover",
+      "analysis_design": "randomized_double_blind_crossover",
+      "tissue": "PBMC",
+      "allocation": "randomized",
+      "exposures": [
+        {
+          "key": "fish_oil",
+          "label": "fish oil 3.7g/day n-3",
+          "kind": "component_group",
+          "formulation": "fish-oil supplement EPA1.7g+DHA1.2g within3.7g n-3",
+          "dose_basis": "assigned 3.7g/day total n-3,6weeks",
+          "component_keys": [
+            "FDC-NUTRIENT:1278",
+            "FDC-NUTRIENT:1272"
+          ],
+          "food_terms": [],
+          "amount": 3.7,
+          "unit": "g",
+          "duration_days": 42,
+          "metadata": {
+            "quantified_components": {
+              "FDC-NUTRIENT:1278": {
+                "amount": 1.7,
+                "unit": "g/day"
+              },
+              "FDC-NUTRIENT:1272": {
+                "amount": 1.2,
+                "unit": "g/day"
+              }
+            },
+            "dose_frequency": "per_day"
+          },
+          "contrast_pattern": "(?i)fishoil"
+        }
+      ],
+      "limitations": [
+        "음식 matrix·여러 성분이 함께 달라진 중재이며 각 성분의 독립 효과를 식별하지 않는다.",
+        "11명·33개 end-period 배열; 서로 다른3개조직 SubSeries는 같은 대상자 연구.",
+        "생선 한 끼와6주 보충제는 형태·기간이 다르다.",
+        "EPA와DHA의 독립 효과를 식별하지 않는다.",
+        "fenofibrate는 약물 비교이며 음식 중재로 표시하지 않는다."
+      ],
+      "source_location": "Primary publication Methods / intervention design; repository sample metadata; study-specific limitations below.",
+      "n_people": 11,
+      "n_samples": 33,
+      "arms": [
+        {
+          "key": "fishoil",
+          "label": "Fish oil condition",
+          "exposure_keys": [
+            "fish_oil"
+          ],
+          "n_people": 11,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "placebo",
+          "label": "Placebo condition",
+          "exposure_keys": [],
+          "n_people": 11,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        },
+        {
+          "key": "fenofibrate",
+          "label": "Fenofibrate drug condition",
+          "exposure_keys": [],
+          "n_people": 11,
+          "role": "crossover_condition",
+          "n_people_scope": "public_omics_subset; not total parent clinical trial"
+        }
+      ]
+    }
+  ]
+}

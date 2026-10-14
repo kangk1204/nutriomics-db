@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import Module from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
+
+// Exercise the real exported data with the offline adapter, independently of a browser.
+const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const artifact = path.resolve(project, '../../outputs/explorer/scientific-20261003');
+const snapshot = JSON.parse(await fs.readFile(path.join(artifact, 'NutriOmics_Explorer_scientific.json'), 'utf8'));
+const compiled = await build({entryPoints:[path.join(project,'src/api.ts')],bundle:true,write:false,platform:'node',format:'cjs'});
+globalThis.window = {__NUTRIOMICS_SNAPSHOT__:snapshot};
+let fetches = 0;
+globalThis.fetch = async () => { ++fetches; throw new Error('Exported data must not fetch'); };
+const filename = path.join(project, 'src/__production_snapshot_regression.cjs');
+const instance = new Module(filename);
+instance.filename = filename;
+instance.paths = Module._nodeModulePaths(project);
+instance._compile(compiled.outputFiles[0].text,filename);
+const api = instance.exports;
+const result = await api.getScientificMatches({seed_id:'FDC:2647437',intake_g:800,reference_context:{tissue:'whole blood',response_time_h:2}});
+assert.equal(result.release_id,'explorer-20261003-v5');
+assert.equal(result.reference_context.intake_g,150);
+assert.equal(result.reference_context.tissue,'PBMC');
+assert.equal(result.reference_context.response_time_h,6);
+assert.equal(result.offline_context_frozen,true);
+const acute = result.observed_evidence.find(r => r.exposure.id.startsWith('N15:yogurt_acute:'));
+assert.equal(acute.mapping_identity.status,'related_food');
+assert.equal(acute.mapping_identity.quantity_transfer_allowed,false);
+assert.ok(acute.applicability.some(c => c.dimension==='dose' && c.status==='mismatch'));
+assert.equal(acute.contrasts.length,3);
+assert.ok(acute.contrasts.every(c => c.applicability.some(a => a.dimension==='tissue' && a.status==='mismatch')));
+assert.ok(acute.contrasts.every(c => c.analysis_context.sample_scope.RNA_people===7 && c.analysis_context.sample_scope.public_assays===77));
+for(const record of result.observed_evidence) {
+  assert.equal(record.study_evidence.expert_review_status,'pending');
+  assert.equal(record.clinical_results.length,0);
+  assert.ok(record.contrasts.every(c => c.effects.length===0),'Unassessed effect values must remain withheld');
+}
+const rows = await api.getEntities('food','Yogurt',{domain:'all',tier:'all',include_extracted:false},1,20,'label','asc');
+assert.ok(rows.items.some(r => r.id==='FDC:2647437'));
+const graph = await api.getGraph('FDC:2647437',{domain:'all',tier:'all',include_extracted:false},80,200);
+assert.ok(graph.nodes.length<=80 && graph.edges.length<=200);
+assert.equal(fetches,0);
+const html = await fs.readFile(path.join(artifact,'NutriOmics_Explorer_scientific.html'),'utf8');
+assert.ok(html.includes('window.__NUTRIOMICS_SNAPSHOT__='));
+assert.ok(!html.includes('<script src='));
+const receipt = {release_id:result.release_id,source:'actual production UI download',nodes:snapshot.nodes.length,edges:snapshot.edges.length,observed_records:result.observed_evidence.length,fetches,frozen_context:result.reference_context,offline_adapter:'passed',unassessed_numerical_effects:'withheld',direct_file_browser_ui:'not tested; CUA file URL blocked'};
+await fs.writeFile(path.join(artifact,'production-snapshot-verification.json'),JSON.stringify(receipt,null,2));
+console.log(JSON.stringify(receipt));

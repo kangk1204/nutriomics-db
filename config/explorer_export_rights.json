@@ -1,0 +1,15 @@
+{
+  "version": "explorer-export-rights-v1-20261003",
+  "policies": [
+    {
+      "source": "USDA-FDC",
+      "source_id_prefix": "USDA-FDC:",
+      "export_allowed": true,
+      "license": "CC0-1.0",
+      "policy_url": "https://fdc.nal.usda.gov/",
+      "policy_sha256": "e478f4df9f2cb50379eaf2307f8aaea609acef990c9c1bfe20555d7b9d3426b3",
+      "reviewed_at": "2026-10-03",
+      "basis": "Official FoodData Central Licensing section: published under CC0 1.0; attribution retained. Applies only to USDA-FDC source snapshots, not all USDA or CTD records."
+    }
+  ]
+}
