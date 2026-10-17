@@ -216,3 +216,5 @@ if __name__=="__main__":
             r=benchmark(a.base,a.spec,a.output,a.runs,a.baseline,a.concurrent,a.source_manifest)
         (Path(a.output)/"resources.json").write_text(json.dumps({"server_pid":a.server_pid,"sampling_interval_s":.25,"available":Path('/proc').is_dir(),"samples":sampler.samples},indent=2),encoding="utf-8")
     print(json.dumps({k:v for k,v in r.items() if k not in ("results","concurrent","cases","food50")},ensure_ascii=False))
+    if a.mode == 'benchmark' and not a.baseline:
+        raise SystemExit(0 if r['all_warm_pass'] and (not a.concurrent or r['all_concurrent_pass']) else 1)

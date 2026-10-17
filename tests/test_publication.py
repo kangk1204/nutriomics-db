@@ -114,15 +114,22 @@ def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explor
         assert meal.status_code == 200
         value = meal.json()
         assert value["components"][0]["amount"] == 3.75
+        assert value["status"] == "measured"
+        assert value["components"][0]["source_records"][0]["source_id"] == "open"
+        assert value["components"][0]["source_records"][0]["basis"] == "edible_portion_100g"
+        assert value["unquantified"] == []
         assert value["observed_evidence"][0]["contrasts"][0]["source_effect_total"] == 2
         assert value["reference_context"]["response_time_h"] == 6
         assert value["individual_prediction"] is False
         assert value["observed_evidence"][0]["query_intake_g"] == 150
         fruit = client.post("/api/v1/meals/analyze", json={"items": [{"food_id": "food:fruit", "amount_g": 100}]}).json()
         assert fruit["components"][0]["amount"] == 0
+        assert fruit["status"] == "partial"  # A measured zero is still a valid calculation.
+        assert fruit["unquantified"][0]["exclusion_reasons"]
         assert fruit["excluded_measurements"][0]["status"] == "missing"
         gap = client.post("/api/v1/meals/analyze", json={"items": [{"food_id": "food:gap", "amount_g": 100}]}).json()
         assert gap["components"] == [] and gap["items"][0]["calculation_mode"] == "unavailable"
+        assert gap["status"] == "unavailable"
         assert {x["status"] for x in gap["excluded_measurements"]} == {"below_detection", "measured"}
         assert client.post("/api/v1/meals/analyze", content='{"items":[{"food_id":1,"amount_g":NaN}]}',
                            headers={"content-type": "application/json"}).status_code == 422

@@ -40,4 +40,10 @@ def test_high_degree_topk_ties_selfloops_filters(monkeypatch, level, limit, filt
     selected = reader.adjacent('seed', level, limit, hydrate=False)
     assert [r['id'] for r in selected] == expected
     assert all(set(r) == {'id', 'edge_id', 'subject', 'object'} for r in selected)
+    reader.prefetch_adjacent(['seed', 'n1', 'n2', 'not-present'], level, limit)
+    batched = reader.adjacent('seed', level, limit, hydrate=False)
+    assert batched == selected
+    for identifier in ['n1', 'n2', 'not-present']:
+        exact = [r[0] for r in db.execute(baseline, [identifier, *args, identifier, *args, limit])]
+        assert reader.adjacent(identifier, level, limit) == exact
     db.close()

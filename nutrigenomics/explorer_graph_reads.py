@@ -12,6 +12,43 @@ class GraphReads:
         self.covering = self.indexed and bool(db.execute("SELECT 1 FROM sqlite_master WHERE name='perf_adj_object_cover'").fetchone())
         self.traversal_covering = self.indexed and bool(db.execute("SELECT 1 FROM sqlite_master WHERE name='perf_adj_object_traversal_cover'").fetchone())
         self.nodes, self.edges = {}, {}
+        self.kinds = None
+        self.pending = {}
+
+    def prefetch_adjacent(self, identifiers, level, limit):
+        """Batch queued lookups without changing traversal or per-node top K."""
+        if not identifiers or (identifiers[0], level, limit) in self.pending:
+            return
+        identifiers = list(dict.fromkeys(identifiers))[:32]
+        if len(identifiers) < 2:
+            return
+        clause, args = self.clause()
+        placeholders = ','.join('?' for _ in identifiers)
+        selected = {identifier: {} for identifier in identifiers}
+        for direction in ('subject', 'object'):
+            inbound = " AND a.relation NOT IN ('contains','contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')" if direction == 'object' and level > 0 else ''
+            index = ''
+            if self.covering:
+                name = 'perf_adj_object_traversal_cover' if direction == 'object' and level > 0 and self.traversal_covering else 'perf_adj_' + direction + '_cover'
+                index = ' INDEXED BY ' + name
+            sql = ('WITH ranked AS (SELECT a.' + direction + ' AS origin,a.edge_id,a.subject,a.object,a.rank_default,'
+                   'row_number() OVER (PARTITION BY a.' + direction + ' ORDER BY a.rank_default,a.edge_id) AS position '
+                   'FROM perf_adj a' + index + ' WHERE a.' + direction + ' IN (' + placeholders + ')' + clause + inbound + ') '
+                   'SELECT origin,edge_id,subject,object,rank_default FROM ranked WHERE position<=?')
+            for row in self.db.execute(sql, [*identifiers, *args, limit]):
+                selected[row['origin']][row['edge_id']] = dict(row)
+        for identifier, items in selected.items():
+            ordered = sorted(items.values(), key=lambda r: (r['rank_default'], r['edge_id']))[:limit]
+            self.pending[(identifier, level, limit)] = [
+                {'id': r['edge_id'], 'edge_id': r['edge_id'], 'subject': r['subject'], 'object': r['object']}
+                for r in ordered]
+
+    def node_kind(self, identifier):
+        if self.kinds is None:
+            # Existing kind/label and kind/degree indexes cover this small
+            # projection. Anchor lookahead needs no source payload hydration.
+            self.kinds = dict(self.db.execute("SELECT id,kind FROM node"))
+        return self.kinds.get(identifier)
 
     def load_nodes(self, identifiers):
         missing = list(set(identifiers) - self.nodes.keys())
@@ -52,12 +89,19 @@ class GraphReads:
             clauses.append("a.tier!='extracted'")
         return (" AND " + " AND ".join(clauses) if clauses else ""), args
 
-    def outbound(self, current, rank, limit):
+    def outbound(self, current, rank, limit, *, hydrate=True):
         clause, args = self.clause()
+        if not hydrate:
+            return [dict(r) for r in self.db.execute(
+                "SELECT a.edge_id AS id,a.subject,a.object,a.usable FROM perf_adj a WHERE a.subject=?" +
+                clause + " ORDER BY a." + rank + ",a.edge_id LIMIT ?", [current, *args, limit])]
         ids = [r[0] for r in self.db.execute("SELECT a.edge_id FROM perf_adj a WHERE a.subject=?" + clause + " ORDER BY a." + rank + ",a.edge_id LIMIT ?", [current, *args, limit])]
         return self.load_edges(ids)
 
     def adjacent(self, current, level, limit, *, hydrate=True):
+        ready = self.pending.pop((current, level, limit), None)
+        if ready is not None:
+            return self.load_edges([r['id'] for r in ready]) if hydrate else ready
         clause, args = self.clause()
         inbound = " AND a.relation NOT IN ('contains','contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')" if level > 0 else ""
         subject_index = ' INDEXED BY perf_adj_subject_cover' if self.covering else ''

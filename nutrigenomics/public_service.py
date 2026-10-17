@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field, FiniteFloat, field_validator
 
 from .composition_policy import POLICY_VERSION, assess, convert_unit, normalize_unit, select_unique
-from .explorer import MatchInput, ReferenceContext, _match, attach_explorer
+from .explorer import MatchInput, ReferenceContext, _match, _source, attach_explorer
 from .explorer_build import canonical, sha256
 from .explorer_context import ExplorerContextMiddleware
 from .explorer_performance import read_connection
@@ -156,6 +156,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     @app.post("/api/v1/meals/analyze")
     def meal(payload: PublicMeal):
         totals, provenance, excluded, selected = {}, [], [], []
+        component_sources, source_cache = {}, {}
         matches = []
         with read() as db:
             for item in payload.items:
@@ -185,7 +186,10 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                 chosen, omitted = select_unique(candidates)
                 for entry, reasons in omitted:
                     row = entry["row"]
+                    component = db.execute("SELECT label FROM node WHERE id=?", (row["component"],)).fetchone()
                     excluded.append({"measurement_id": row["id"], "food_id": food_id,
+                                     "name": component[0] if component else row["component"],
+                                     "source_id": row["source_id"],
                                      "status": row["status"], "basis": row["basis"],
                                      "reasons": reasons, "assessment": entry["assessment"]})
                 for entry in chosen:
@@ -201,6 +205,16 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                         raise HTTPException(503, "non-finite source value")
                     key = (row["component"], unit)
                     totals[key] = totals.get(key, 0.0) + amount
+                    if row["source_id"] not in source_cache:
+                        source_cache[row["source_id"]] = _source(db, row["source_id"])
+                    source = source_cache[row["source_id"]]
+                    component_sources.setdefault(key, []).append({
+                        "measurement_id": row["id"], "food_id": food_id,
+                        "source_id": row["source_id"], "release": source["version"],
+                        "source_ref": source["url"], "basis": row["basis"],
+                        "status": row["status"], "contribution": amount,
+                        "unit": unit, "source_unit": row["unit"],
+                    })
                     provenance.append({"measurement_id": row["id"], "food_id": food_id,
                                        "source_id": row["source_id"], "basis": row["basis"],
                                        "status": row["status"], "contribution": amount, "unit": unit,
@@ -214,7 +228,8 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
             for (key, unit), value in sorted(totals.items()):
                 node = db.execute("SELECT label,metadata_json FROM node WHERE id=?", (key,)).fetchone()
                 info = json.loads(node["metadata_json"]) if node else {}
-                components.append({"component_key": info.get("component_key", key), "name": node["label"] if node else key, "unit": unit, "amount": value})
+                components.append({"component_key": info.get("component_key", key), "name": node["label"] if node else key, "unit": unit, "amount": value,
+                                   "source_records": component_sources[(key, unit)]})
         observed = [{**e, "query_food_id": m["food_id"], "query_intake_g": m["amount_g"]}
                     for m in matches for e in m["observed_evidence"]]
         applicability = [{"food_id": e["query_food_id"], "exposure_id": e["id"],
@@ -223,6 +238,9 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
         if excluded:
             gaps.append("함량·단위·상태·가식부 기준이 미확인인 조성은 섭취량 합계에서 제외했습니다.")
         return {"items": selected, "components": components, "provenance": provenance,
+                "status": "partial" if components and excluded else "measured" if components else "unavailable",
+                "unquantified": [{**row, "exclusion_reasons": row["reasons"]} for row in excluded],
+                "interpretation": "함량 기준이 확인된 성분의 섭취량 계산입니다. 개인 반응 또는 건강 효과 예측이 아닙니다.",
                 "observed_evidence": observed, "evidence_by_food": matches,
                 "applicability": applicability, "mechanistic_hypotheses": [], "evidence_gaps": gaps,
                 "reference_context": (payload.reference_context or ReferenceContext()).model_dump(exclude_none=True),

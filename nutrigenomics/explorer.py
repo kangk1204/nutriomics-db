@@ -158,10 +158,12 @@ def _extracted_only_ids(path, source_bytes, source_mtime_ns, kinds, wal_identity
                     kinds,
                 )
             )
+        if db.execute("SELECT 1 FROM edge WHERE tier='extracted' LIMIT 1").fetchone() is None:
+            return ()
         return tuple(
             row[0]
             for row in db.execute(
-                "WITH candidates(id) AS (SELECT subject FROM edge WHERE tier='extracted' UNION SELECT object FROM edge WHERE tier='extracted') SELECT n.id FROM candidates c JOIN node n ON n.id=c.id WHERE n.kind IN ("
+                "WITH candidates(id) AS MATERIALIZED (SELECT subject FROM edge WHERE tier='extracted' UNION SELECT object FROM edge WHERE tier='extracted') SELECT n.id FROM candidates c CROSS JOIN node n ON n.id=c.id WHERE n.kind IN ("
                 + ",".join("?" for _ in kinds)
                 + ") "
                 "AND NOT EXISTS(SELECT 1 FROM edge e WHERE (e.subject=n.id OR e.object=n.id) AND e.tier!='extracted')",
@@ -695,18 +697,23 @@ def _health_anchors(db, seed, depth, filter_sql, filter_args, node_budget, reads
             return
         visited.add(current)
         expanded += 1
-        row = reads.node(current) if reads else db.execute("SELECT * FROM node WHERE id=?", (current,)).fetchone()
-        if row is None:
+        indexed = reads is not None and reads.indexed
+        row = None if indexed else db.execute("SELECT * FROM node WHERE id=?", (current,)).fetchone()
+        kind = reads.node_kind(current) if indexed else row["kind"] if row is not None else None
+        if kind is None:
             return
-        if row["kind"] in ("disease", "outcome") and trail_edges:
+        if kind in ("disease", "outcome") and trail_edges:
             added = set(trail_nodes) - set(nodes)
             if len(nodes) + len(added) > node_budget:
                 return
+            if indexed:
+                reads.load_nodes(trail_nodes)
             for level, identifier in enumerate(trail_nodes):
                 n = reads.node(identifier) if reads else db.execute("SELECT * FROM node WHERE id=?", (identifier,)).fetchone()
                 nodes[identifier] = _node(n)
                 levels[identifier] = min(level, levels.get(identifier, level))
-            edges.update({e["id"]: e for e in trail_edges})
+            selected_edges = reads.load_edges([e["id"] for e in trail_edges]) if indexed else trail_edges
+            edges.update({e["id"]: e for e in selected_edges})
             found += 1
             return
         if len(trail_edges) >= depth:
@@ -714,7 +721,7 @@ def _health_anchors(db, seed, depth, filter_sql, filter_args, node_budget, reads
         # A source food can have >60 measurements. Examine them all; lower
         # levels remain bounded and prefer explicit health endpoints.
         limit = 100 if not trail_edges else 24
-        gene_first = row["kind"] in ("chemical", "compound")
+        gene_first = kind in ("chemical", "compound")
         order = (
             "CASE WHEN relation='chemical_gene_influence' THEN 0 WHEN relation LIKE '%disease%' THEN 1 "
             "WHEN relation IN ('candidate_name_correspondence','source_identifier_cross_reference') THEN 2 ELSE 3 END"
@@ -723,7 +730,7 @@ def _health_anchors(db, seed, depth, filter_sql, filter_args, node_budget, reads
             "WHEN relation IN ('candidate_name_correspondence','source_identifier_cross_reference') THEN 1 "
             "WHEN relation='annotated_to_pathway' THEN 4 ELSE 2 END"
         )
-        rows = reads.outbound(current, "rank_gene" if gene_first else "rank_health", limit) if reads and reads.indexed else db.execute(
+        rows = reads.outbound(current, "rank_gene" if gene_first else "rank_health", limit, hydrate=False) if indexed else db.execute(
             "SELECT e.* FROM edge e WHERE e.subject=?"
             + filter_sql
             + " ORDER BY "
@@ -735,7 +742,8 @@ def _health_anchors(db, seed, depth, filter_sql, filter_args, node_budget, reads
             e = e_row if reads and reads.indexed else _edge(e_row)
             if not (reads and reads.indexed):
                 _composition_context(db, e)
-            if _usable_path_edge(e) and e["object"] not in trail_nodes:
+            usable = bool(e["usable"]) if indexed else _usable_path_edge(e)
+            if usable and e["object"] not in trail_nodes:
                 walk(e["object"], [*trail_nodes, e["object"]], [*trail_edges, e])
             if found >= 8 or expanded >= 240:
                 break
@@ -776,6 +784,8 @@ def graph(
                 if identifier != seed_id
             )
         while q and len(chosen) < max_edges:
+            if reads.indexed and q[0][1] < depth:
+                reads.prefetch_adjacent([i for i, level in q if level == q[0][1]], q[0][1], max_edges + 1)
             current, level = q.popleft()
             if level >= depth:
                 continue
@@ -797,6 +807,9 @@ def graph(
                 + "), ranked AS (SELECT * FROM adjacent ORDER BY CASE WHEN relation LIKE '%disease%' THEN 0 WHEN relation IN ('candidate_name_correspondence','source_identifier_cross_reference') THEN 1 WHEN tier='observed_composition' THEN 3 ELSE 2 END,id LIMIT ?) SELECT e.* FROM ranked r JOIN edge e ON e.id=r.id ORDER BY CASE WHEN e.relation LIKE '%disease%' THEN 0 WHEN e.relation IN ('candidate_name_correspondence','source_identifier_cross_reference') THEN 1 WHEN e.tier='observed_composition' THEN 3 ELSE 2 END,e.id",
                 [current, *ea, current, *ea, max_edges + 1],
             ).fetchall()
+            if reads.indexed:
+                candidates = dict.fromkeys(r['object'] if r['subject'] == current else r['subject'] for r in rows)
+                reads.load_nodes([i for i in candidates if i not in seen][:max_nodes - len(seen)])
             for row in rows:
                 e = row if reads.indexed else _edge(row)
                 if not reads.indexed:

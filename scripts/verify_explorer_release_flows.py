@@ -72,6 +72,9 @@ def parse_html_snapshot(html):
 
 
 def exports(base, measured, cases, manifest, output, graph_case='yogurt-max-graph'):
+    # Scientific context can exceed the csv module's 128 KiB default. Retain
+    # complete exported context and still bound parsing to 16 MiB per field.
+    csv.field_size_limit(16 * 1024 * 1024)
     output = Path(output); output.mkdir(parents=True, exist_ok=True)
     spec = json.loads(Path(cases).read_text(encoding='utf-8'))
     selected_case = next(c for c in spec['cases'] if c['id'] == graph_case)
@@ -117,7 +120,7 @@ def exports(base, measured, cases, manifest, output, graph_case='yogurt-max-grap
                         report["validation_errors"].append("csv_selection:" + field)
                 if any(r["release_id"] != graph["release_id"] for r in rows):
                     report["validation_errors"].append("csv_release")
-        except (ValueError, KeyError, TypeError) as exc:
+        except (ValueError, KeyError, TypeError, csv.Error) as exc:
             report["validation_errors"].append("payload:" + fmt + ":" + type(exc).__name__)
     if set(snapshots) == {"json", "html"} and snapshots["json"] != snapshots["html"]:
         report["validation_errors"].append("html_json_mismatch")

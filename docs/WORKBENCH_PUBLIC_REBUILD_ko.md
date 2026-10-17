@@ -53,4 +53,8 @@ python -m scripts.build_reacquired_release --work "$work" --source "$source"
 
 `verify_graph_query_parity`는 같은 release의 색인 경로와 원래 SQL 경로의 전체 JSON을 비교한다. 회전식 디스크에서는 `--cache-mib 4096`을 양쪽에 동일하게 지정할 수 있다. 이 검사는 선택·값·생략 집계의 일치 검사이며 운영 지연 측정과 구분한다.
 
+서비스는 `serve_verified_release --release <release 폴더> --application internal|public --receipt <시작 영수증 JSON> --port <포트>`로 시작할 수 있다. 이식 가능한 실행기는 영구 파일의 manifest SHA-256을 먼저 확인한 뒤 `127.0.0.1`에서 수신한다. 내부 API의 core·별도 식사 저장 환경변수는 위 설정을 사용한다. 공개 후보를 비공개로 점검할 때만 `NUTRIOMICS_ALLOW_CANDIDATE=1`을 지정한다. 시작 시 순차 해시 읽기로 OS 파일 캐시가 준비되므로 시작 검증 시간과 첫 HTTP 조회 시간을 별도로 보고한다. OS 캐시를 강제로 비우지 않는다.
+
+`verify_service_rollback`은 별도의 loopback 포트에서 현재 코드·현재 release → 이전 코드·이전 release → 현재 코드·현재 release를 실제 HTTP로 검증한다. 배포 경로를 직접 바꾸지 않는 복원 연습이며 운영 중인 포트는 유지한다. 이전 코드 디렉터리는 그 버전의 코드 manifest와 일치하는 파일로 준비한다.
+
 실패하면 이전 서비스 release를 유지한다. 새 원본을 자동 전문가 승인 상태로 만들거나 분석 실패를 결과 0건으로 바꾸지 않는다. 서버 내부 서비스는 loopback에 바인딩하고 터널로 확인한다. 이 재구축 코드의 존재 자체는 DOI 등록·기관 검토·논문 제출 준비 완료를 뜻하지 않는다.
