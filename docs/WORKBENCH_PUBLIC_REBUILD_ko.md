@@ -43,4 +43,6 @@ python -m scripts.build_reacquired_release --work "$work" --source "$source"
 
 `freeze_rebuilt_performance`로 실제 release의 조회 조건과 해시를 고정한 뒤 `benchmark_explorer_performance benchmark --runs 100 --concurrent`를 실행한다. `--allow-missing-omics`는 미리보기 전용이며 최종 판정에 사용하지 않는다. API 반복 측정과 별도로 실제 브라우저·최대 HTML/CSV/JSON·서버 접속 없는 HTML 탐색·이전 release 복원을 확인한다. 모든 검증 보고서는 대상 release와 해시를 명시한다.
 
+대형 SQLite의 전체 무결성 검사는 `NUTRIGENOMICS_INTEGRITY_CACHE_MIB`로 읽기 캐시를 64~4096 MiB 범위에서 지정할 수 있다. 기본값은 128 MiB다. 이 설정은 검사 범위나 웹 응답 캐시를 바꾸지 않으며, 닫힌 파일을 새 연결로 여는 전체 `integrity_check`와 `foreign_key_check`는 그대로 수행한다.
+
 실패하면 이전 서비스 release를 유지한다. 새 원본을 자동 전문가 승인 상태로 만들거나 분석 실패를 결과 0건으로 바꾸지 않는다. 서버 내부 서비스는 loopback에 바인딩하고 터널로 확인한다. 이 재구축 코드의 존재 자체는 DOI 등록·기관 검토·논문 제출 준비 완료를 뜻하지 않는다.

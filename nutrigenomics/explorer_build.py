@@ -72,7 +72,10 @@ def verify_closed_sqlite(path: Path) -> None:
     """Read committed pages through a fresh connection, outside the writer cache."""
     connection = read_only(path)
     try:
-        connection.execute("PRAGMA cache_size=-131072")
+        cache_mib = int(os.environ.get('NUTRIGENOMICS_INTEGRITY_CACHE_MIB', '128'))
+        if not 64 <= cache_mib <= 4096:
+            raise ValueError('Integrity read-cache budget must be between 64 and 4096 MiB')
+        connection.execute('PRAGMA cache_size=-' + str(cache_mib * 1024))
         integrity = [row[0] for row in connection.execute("PRAGMA integrity_check")]
         foreign_keys = connection.execute("PRAGMA foreign_key_check").fetchmany(20)
         if integrity != ["ok"] or foreign_keys:
