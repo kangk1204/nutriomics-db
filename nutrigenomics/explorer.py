@@ -24,6 +24,15 @@ from fastapi import APIRouter, FastAPI, HTTPException, Query, Response
 from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, FiniteFloat, field_validator
 
+from .explorer_context import configured_path
+from .explorer_graph_reads import GraphReads
+from .explorer_performance import (
+    ExplorerReadMiddleware,
+    QueryUnavailable,
+    has_index,
+    read_connection,
+)
+from .explorer_performance import fingerprint as source_fingerprint
 from .explorer_scientific import (
     annotate_effect_context,
     edge_scientific,
@@ -32,8 +41,6 @@ from .explorer_scientific import (
     scientific_matches,
 )
 from .settings import DATA_DIR, PROJECT_ROOT
-from .explorer_performance import ExplorerReadMiddleware, QueryUnavailable, fingerprint as source_fingerprint, has_index, read_connection
-from .explorer_graph_reads import GraphReads
 
 router = APIRouter(prefix="/api/v1/explorer", tags=["Explorer"])
 DOMAINS = [
@@ -106,11 +113,7 @@ def _public(value):
 
 
 def _path() -> Path:
-    return Path(
-        os.environ.get(
-            "NUTRIGENOMICS_EXPLORER_DATABASE", DATA_DIR / "explorer" / "current" / "explorer.sqlite"
-        )
-    ).expanduser()
+    return configured_path("NUTRIGENOMICS_EXPLORER_DATABASE", DATA_DIR / "explorer" / "current" / "explorer.sqlite").expanduser()
 
 
 @contextmanager
@@ -362,11 +365,7 @@ def _source(db, identifier):
 
 
 def _export_policies():
-    path = Path(
-        os.environ.get(
-            "NUTRIGENOMICS_EXPLORER_RIGHTS", PROJECT_ROOT / "config" / "explorer_export_rights.json"
-        )
-    )
+    path = configured_path("NUTRIGENOMICS_EXPLORER_RIGHTS", PROJECT_ROOT / "config" / "explorer_export_rights.json")
     if not path.is_file():
         return []
     return _cached_export_policies(str(path.resolve()), source_fingerprint(path))
@@ -393,11 +392,7 @@ def _effects(node, limit=50):
     """Indexed source-feature lookup only. Do not scan/guess CpG-gene links."""
     if node["kind"] != "gene":
         return []
-    core = Path(
-        os.environ.get(
-            "NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db" / "nutrigenomics.sqlite3"
-        )
-    )
+    core = configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db" / "nutrigenomics.sqlite3")
     if not core.is_file():
         raise QueryUnavailable("source_unavailable")
     identifiers = [node["id"], node["id"].split(":", 1)[-1], node["label"]]
@@ -446,11 +441,7 @@ def _methylation_annotations(projection, node, limit=30):
     ).fetchall()
     if not refs:
         return [], total
-    core = Path(
-        os.environ.get(
-            "NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db" / "nutrigenomics.sqlite3"
-        )
-    )
+    core = configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db" / "nutrigenomics.sqlite3")
     if not core.is_file():
         raise QueryUnavailable("source_unavailable")
     try:
@@ -506,12 +497,19 @@ def _node_detail(db, identifier):
         raise HTTPException(404, "항목을 찾을 수 없습니다.")
     item = _node(row)
     measurements = []
+    assessments = {}
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='composition_assessment'").fetchone():
+        assessments = {r[0]: _json(r[1]) for r in db.execute(
+            "SELECT a.measurement_id,a.assessment_json FROM composition_assessment a "
+            "JOIN measurement m ON m.id=a.measurement_id WHERE m.food=?", (identifier,))}
     for r in db.execute(
         "SELECT m.*,n.label AS component_label FROM measurement m JOIN node n ON n.id=m.component WHERE m.food=? ORDER BY n.label,m.id LIMIT 300",
         (identifier,),
     ):
         value = dict(r)
         value.pop("raw_json", None)
+        if value["id"] in assessments:
+            value["assessment"] = assessments[value["id"]]
         measurements.append(value)
     srcs = [m["source_id"] for m in measurements]
     srcs += item["metadata"].get("source_ids", [])
@@ -893,7 +891,7 @@ def _match(db, payload):
     reference = payload.reference_context.model_dump(exclude_none=True)
     if seed["kind"] == "food":
         reference["intake_g"] = payload.intake_g if payload.intake_g is not None else 100
-    core = os.environ.get(
+    core = configured_path(
         "NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db" / "nutrigenomics.sqlite3"
     )
     result = scientific_matches(db, seed, core, reference, gene)
@@ -1300,8 +1298,8 @@ def _dist():
     )
 
 
-def attach_explorer(app: FastAPI):
-    app.add_middleware(ExplorerReadMiddleware)
+def attach_explorer(app: FastAPI, *, public=False):
+    app.add_middleware(ExplorerReadMiddleware, include_public=public)
     app.include_router(router)
     from .explorer_workbench import router as workbench_router
 

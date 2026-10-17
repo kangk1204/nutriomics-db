@@ -14,6 +14,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
 
+from .explorer_context import configured_path
 from .settings import DATA_DIR, PROJECT_ROOT
 
 
@@ -210,9 +211,9 @@ def has_index(db, table):
 
 def source_paths():
     return [
-        Path(os.environ.get("NUTRIGENOMICS_EXPLORER_DATABASE", DATA_DIR / "explorer/current/explorer.sqlite")),
-        Path(os.environ.get("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db/nutrigenomics.sqlite3")),
-        Path(os.environ.get("NUTRIGENOMICS_EXPLORER_RIGHTS", PROJECT_ROOT / "config/explorer_export_rights.json")),
+        configured_path("NUTRIGENOMICS_EXPLORER_DATABASE", DATA_DIR / "explorer/current/explorer.sqlite"),
+        configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db/nutrigenomics.sqlite3"),
+        configured_path("NUTRIGENOMICS_EXPLORER_RIGHTS", PROJECT_ROOT / "config/explorer_export_rights.json"),
     ]
 
 
@@ -240,13 +241,16 @@ def append_profile(path, entry):
 
 class ExplorerReadMiddleware:
     """Cache complete successful JSON; bound concurrent misses and cancel SQL."""
-    def __init__(self, app):
+    def __init__(self, app, include_public=False):
         self.app = app
         self.slots = threading.BoundedSemaphore(4)
+        self.include_public = include_public
 
     async def __call__(self, scope, receive, send):
         path = scope.get("path", "")
-        if scope["type"] != "http" or not path.startswith("/api/v1/explorer/"):
+        if scope["type"] != "http" or not path.startswith(
+            "/api/v1/" if self.include_public else "/api/v1/explorer/"
+        ):
             return await self.app(scope, receive, send)
         export = path.endswith("/export")
         budget = Budget(45 if export else 10)

@@ -4,22 +4,28 @@ import json
 import shutil
 import sqlite3
 from contextlib import closing
+from datetime import UTC, datetime
 from pathlib import Path
 
 from nutrigenomics.explorer_build import canonical, read_only, sha256
-from nutrigenomics.publication import EFFECT_FIELDS, _csv
+from nutrigenomics.public_quality import build_quality
+from nutrigenomics.publication import EFFECT_FIELDS, _csv, _write_review
 from nutrigenomics.source_updates import atomic_json
 
 
 def prepare(candidate, parent, output, release_id):
-    candidate, parent, output = (Path(p).resolve() for p in (candidate, parent, output))
+    # parent is an optional compatibility alias source, never a runtime dependency.
+    candidate, output = (Path(p).resolve() for p in (candidate, output))
+    parent = Path(parent).resolve() if parent is not None else None
     manifest = json.loads((candidate / "manifest.json").read_text())
+    print(json.dumps({"phase": "verify_public_parent", "release_id": release_id}), flush=True)
     if sha256(candidate / "nutriomics.sqlite3") != manifest["database_sha256"]:
         raise ValueError("candidate hash mismatch")
     staging = output.with_name(output.name + ".building")
     if output.exists() or staging.exists():
         raise FileExistsError("service release already exists")
     staging.mkdir(parents=True)
+    print(json.dumps({"phase": "copy_immutable_attachments"}), flush=True)
     for path in candidate.iterdir():
         if path.name in {"manifest.json", "nutriomics.sqlite3"}:
             continue
@@ -27,8 +33,13 @@ def prepare(candidate, parent, output, release_id):
             shutil.copytree(path, staging / path.name)
         else:
             shutil.copy2(path, staging / path.name)
-    with read_only(candidate / "nutriomics.sqlite3") as origin, closing(sqlite3.connect(staging / "nutriomics.sqlite3")) as db, read_only(parent / "explorer.sqlite") as source:
+    with read_only(candidate / "nutriomics.sqlite3") as origin, closing(sqlite3.connect(staging / "nutriomics.sqlite3")) as db:
+        db.row_factory = sqlite3.Row
+        db.execute("PRAGMA cache_size=-262144")
+        origin.execute("PRAGMA cache_size=-131072")
+        print(json.dumps({"phase": "consistent_public_database_copy"}), flush=True)
         origin.backup(db, pages=2048)
+        print(json.dumps({"phase": "public_service_indexes"}), flush=True)
         db.executescript("""
             CREATE TABLE node_domain(node_id TEXT,domain TEXT,PRIMARY KEY(node_id,domain));
             CREATE TABLE edge_domain(edge_id TEXT,domain TEXT,PRIMARY KEY(edge_id,domain));
@@ -40,7 +51,15 @@ def prepare(candidate, parent, output, release_id):
             INSERT OR IGNORE INTO edge_domain SELECT e.id,j.value FROM edge e,json_each(e.domains_json) j;
             UPDATE node SET degree=(SELECT count(*) FROM edge WHERE subject=node.id)+(SELECT count(*) FROM edge WHERE object=node.id);
         """)
-        for row in source.execute("SELECT id,metadata_json FROM node WHERE kind='food'"):
+        aliases = []
+        if parent is not None:
+            with read_only(parent / "explorer.sqlite") as source:
+                aliases = list(source.execute("SELECT id,metadata_json FROM node WHERE kind='food'"))
+        else:
+            # A published alias file/table is optional; namespaced IDs always work.
+            if origin.execute("SELECT 1 FROM sqlite_master WHERE name='food_alias'").fetchone():
+                db.executemany("INSERT INTO food_alias VALUES(?,?)", origin.execute("SELECT legacy_food_id,food_id FROM food_alias"))
+        for row in aliases:
             value = json.loads(row["metadata_json"])
             core_id = value.get("core_food_id")
             present = db.execute("SELECT metadata_json FROM node WHERE id=?", (row["id"],)).fetchone()
@@ -52,7 +71,14 @@ def prepare(candidate, parent, output, release_id):
         columns = [k for k in EFFECT_FIELDS if k != "metadata_json"]
         db.execute("CREATE VIEW study_effect AS SELECT " + ",".join(columns) + ",json_set(metadata_json,'$.export_allowed',json('true'),'$.publication_rights_policy_id',rights_policy_id) AS metadata_json,NULL AS source_file FROM effect")
         metadata = json.loads((staging / "dataset-metadata.json").read_text())
-        metadata.update(release_id=release_id, public_service_parent=manifest["release_id"],
+        quality = build_quality(db)
+        print(json.dumps({"phase": "quality_indexes_complete", "quality": quality}), flush=True)
+        metadata["quality"] = quality
+        metadata["counts"]["science_record"] = db.execute("SELECT count(*) FROM science_record").fetchone()[0]
+        metadata["counts"]["science_kinds"] = dict(db.execute("SELECT kind,count(*) FROM science_record GROUP BY kind"))
+        metadata.update(release_id=release_id, created_at=datetime.now(UTC).isoformat(),
+                        dataset_release_id=manifest["release_id"], service_build_id=release_id,
+                        public_service_parent=manifest["release_id"],
                         public_service_parent_database_sha256=manifest["database_sha256"],
                         food_identifier_policy="Stable source food ID is preferred; legacy numeric IDs are lookup aliases only")
         for k, v in metadata.items():
@@ -61,7 +87,11 @@ def prepare(candidate, parent, output, release_id):
         if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
             raise ValueError("service release integrity failure")
         atomic_json(staging / "dataset-metadata.json", metadata)
-        for table in ("node", "meta", "food_alias", "node_domain", "edge_domain"):
+        _write_review(staging, [dict(r) for r in db.execute("SELECT * FROM science_record ORDER BY kind,id")],
+                      json.loads((staging / "source-catalog.json").read_text(encoding="utf-8")),
+                      json.loads((staging / "review/analysis-audit.json").read_text(encoding="utf-8")))
+        atomic_json(staging / "quality-report.json", {"release_id": release_id, **quality})
+        for table in ("node", "meta", "food_alias", "node_domain", "edge_domain", "science_record", "composition_assessment", "contrast_selector"):
             columns = [r[1] for r in db.execute(f"PRAGMA table_info({table})")]
             _csv(staging / "tables" / (table + ".csv.gz"), columns, db.execute("SELECT * FROM " + table))
         (staging / "schema.sql").write_text("\n".join(r[0] + ";" for r in db.execute("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL ORDER BY type,name")), encoding="utf-8")
@@ -75,8 +105,9 @@ def prepare(candidate, parent, output, release_id):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
-    for name in ("candidate", "parent", "output"):
+    for name in ("candidate", "output"):
         p.add_argument("--" + name, type=Path, required=True)
+    p.add_argument("--parent", type=Path, help="Optional legacy numeric aliases; not required for public-only rebuild")
     p.add_argument("--release-id", required=True)
     a = p.parse_args()
     print(json.dumps(prepare(a.candidate, a.parent, a.output, a.release_id), indent=2))

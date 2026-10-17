@@ -64,6 +64,16 @@ def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explor
         build_candidate(parent, core, policy, output, "test-public")
     service = tmp_path / "service"
     prepare(output, parent, service, "test-public-service")
+    quality = json.loads((service / "quality-report.json").read_text())
+    # sqlite3.Row and tuple have different equality/hash behavior. Compare keys,
+    # so a present quantitative selector is never reported as withheld.
+    assert len(quality["contrast_coverage"]["curated_without_public_values"]) == 0
+    public_only = tmp_path / "public-only-service"
+    prepare(output, None, public_only, "test-public-only")
+    with TestClient(create_app(public_only, allow_candidate=True)) as public_client:
+        assert public_client.get("/api/v1/explorer/entities").status_code == 200
+        assert public_client.post("/api/v1/meals/analyze", json={
+            "items": [{"food_id": "food:rice", "amount_g": 100}]}).status_code == 200
     from nutrigenomics.explorer_scientific import _cached_effects
     missing_preview = _cached_effects(service / "nutriomics.sqlite3", {
         "series_accession": "GSE_FIXTURE", "contrast": "withheld contrast", "analysis_version": "v1"}, None, 6)

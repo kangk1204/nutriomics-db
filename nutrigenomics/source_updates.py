@@ -119,7 +119,8 @@ def fetch_source(source, root, session=None):
             if response.status_code == 304:
                 if not prior:
                     raise ValueError("304 without a verified cached object")
-                return {**prior, "update_status": "unchanged"}
+                return {**prior, "update_status": "unchanged",
+                        "content_observation": "cached_hash_verified_remote_validator_304"}
             response.raise_for_status()
             etag = response.headers.get("ETag")
             # A weak ETag does not guarantee byte identity for If-Range.
@@ -197,6 +198,7 @@ def fetch_source(source, root, session=None):
                 "etag": response.headers.get("ETag"),
                 "last_modified": response.headers.get("Last-Modified"),
                 "retrieved_at": datetime.now(UTC).isoformat(),
+                "content_observation": "downloaded_and_hashed",
                 "terms_url": source.get("terms_url"),
                 "export_allowed": source.get("export_allowed") is True,
                 "update_status": "unchanged"

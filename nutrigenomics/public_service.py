@@ -5,15 +5,17 @@ import base64
 import json
 import math
 import os
-import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field, FiniteFloat, field_validator
 
+from .composition_policy import POLICY_VERSION, assess, convert_unit, normalize_unit, select_unique
 from .explorer import MatchInput, ReferenceContext, _match, attach_explorer
 from .explorer_build import canonical, sha256
+from .explorer_context import ExplorerContextMiddleware
+from .explorer_performance import read_connection
 
 
 class PublicMealItem(BaseModel):
@@ -56,8 +58,6 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
             if (not bound.is_relative_to(release) or not bound.is_file()
                     or sha256(bound) != binding.get("sha256")):
                 raise ValueError("public release review/validation evidence hash mismatch")
-    os.environ["NUTRIGENOMICS_EXPLORER_DATABASE"] = str(database)
-    os.environ["NUTRIGENOMICS_EXPLORER_CORE_DATABASE"] = str(database)
     app = FastAPI(title="NutriOmics public data", version=metadata["release_id"])
 
     @app.middleware("http")
@@ -69,13 +69,8 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
 
     @contextmanager
     def read():
-        db = sqlite3.connect(database.as_uri() + "?mode=ro&immutable=1", uri=True)
-        db.row_factory = sqlite3.Row
-        db.execute("PRAGMA query_only=ON")
-        try:
+        with read_connection(database) as db:
             yield db
-        finally:
-            db.close()
 
     @app.get("/healthz")
     def health():
@@ -84,6 +79,19 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     @app.get("/api/v1/public/meta")
     def meta():
         return metadata
+
+    @app.get("/api/v1/analyses")
+    def analyses(role: str | None = "primary_candidate"):
+        with read() as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name='contrast_selector'").fetchone():
+                return {"items": [], "availability_reason": "context_index_not_built",
+                        "release_id": metadata["release_id"]}
+            rows = db.execute("SELECT * FROM contrast_selector" +
+                              (" WHERE analysis_role=?" if role else "") +
+                              " ORDER BY series_accession,analysis_version,contrast",
+                              (role,) if role else ()).fetchall()
+            return {"items": [dict(r) for r in rows], "expert_review": metadata["expert_review"],
+                    "release_id": metadata["release_id"]}
 
     @app.get("/api/v1/foods")
     def foods(query: str = "", limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)):
@@ -136,7 +144,13 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
             for r in page:
                 r["metadata"] = json.loads(r.pop("metadata_json"))
             total = db.execute("SELECT sum(total) FROM effect_selector WHERE series_accession=? AND contrast=? AND analysis_version=?" + (" AND feature_type=?" if feature_type else ""), [accession, contrast, analysis_version, *([feature_type] if feature_type else [])]).fetchone()[0]
+            context = None
+            if db.execute("SELECT 1 FROM sqlite_master WHERE name='contrast_selector'").fetchone():
+                context = db.execute("SELECT * FROM contrast_selector WHERE series_accession=? AND contrast=? AND analysis_version=?",
+                                     (accession, contrast, analysis_version)).fetchone()
             return {"items": page, "total_selector": total, "effects_status": "available" if total is not None else "not_in_public_release", "next_cursor": base64.urlsafe_b64encode(canonical([scope, page[-1]["feature_type"], page[-1]["feature_id"]]).encode()).decode() if more else None,
+                    "analysis_context": dict(context) if context else None,
+                    "availability_reason": "public_quantitative_results" if total is not None else "not_reported_or_withheld_in_this_release",
                     "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]}
 
     @app.post("/api/v1/meals/analyze")
@@ -160,30 +174,37 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                                  "preparation_state": food_info.get("preparation_state", food_info.get("preparation")),
                                  "calculation_mode": "direct"})
                 previous_contributions = len(provenance)
+                candidates = []
                 for row in db.execute("SELECT * FROM measurement WHERE food=? ORDER BY id", (food_id,)):
-                    reasons = []
                     raw = json.loads(row["raw_json"]) if row["raw_json"] else {}
-                    if row["status"] not in {"measured", "measured_zero", "quantified"}:
-                        reasons.append("status_not_quantified")
-                    if row["amount"] is None:
-                        reasons.append("amount_missing")
-                    elif not math.isfinite(row["amount"]) or row["amount"] < 0:
-                        reasons.append("amount_invalid")
-                    if row["basis"] not in {"source_100g", "edible_portion_100g", "per_100g_edible_portion"}:
-                        reasons.append("unsupported_or_unverified_mass_basis")
-                    if isinstance(raw, dict) and raw.get("basis_verified") is False:
-                        reasons.append("basis_explicitly_unverified")
-                    if not row["unit"]:
-                        reasons.append("unit_missing")
-                    if reasons:
-                        excluded.append({"measurement_id": row["id"], "status": row["status"], "basis": row["basis"], "reasons": reasons})
-                        continue
-                    amount = row["amount"] * item.amount_g / 100
+                    assessment = assess(status=row["status"], amount=row["amount"], unit=row["unit"],
+                                        basis=row["basis"], metadata=raw, food_metadata=food_info,
+                                        source_id=row["source_id"])
+                    candidates.append({"row": row, "key": row["component"], "id": row["id"],
+                                       "unit": row["unit"], "assessment": assessment})
+                chosen, omitted = select_unique(candidates)
+                for entry, reasons in omitted:
+                    row = entry["row"]
+                    excluded.append({"measurement_id": row["id"], "food_id": food_id,
+                                     "status": row["status"], "basis": row["basis"],
+                                     "reasons": reasons, "assessment": entry["assessment"]})
+                for entry in chosen:
+                    row, assessment = entry["row"], entry["assessment"]
+                    node = db.execute("SELECT metadata_json FROM node WHERE id=?", (row["component"],)).fetchone()
+                    component_info = json.loads(node[0]) if node else {}
+                    unit = normalize_unit(component_info.get("canonical_unit")) or normalize_unit(row["unit"])
+                    converted = convert_unit(row["amount"], row["unit"], unit)
+                    if converted is None:
+                        converted, unit = row["amount"], normalize_unit(row["unit"])
+                    amount = converted * item.amount_g / 100
                     if not math.isfinite(amount):
                         raise HTTPException(503, "non-finite source value")
-                    key = (row["component"], row["unit"])
+                    key = (row["component"], unit)
                     totals[key] = totals.get(key, 0.0) + amount
-                    provenance.append({"measurement_id": row["id"], "source_id": row["source_id"], "basis": row["basis"], "status": row["status"], "contribution": amount, "unit": row["unit"]})
+                    provenance.append({"measurement_id": row["id"], "food_id": food_id,
+                                       "source_id": row["source_id"], "basis": row["basis"],
+                                       "status": row["status"], "contribution": amount, "unit": unit,
+                                       "source_unit": row["unit"], "assessment": assessment})
                 if len(provenance) == previous_contributions:
                     selected[-1]["calculation_mode"] = "unavailable"
                 match = _match(db, MatchInput(seed_id=food_id, intake_g=item.amount_g,
@@ -206,9 +227,16 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                 "applicability": applicability, "mechanistic_hypotheses": [], "evidence_gaps": gaps,
                 "reference_context": (payload.reference_context or ReferenceContext()).model_dump(exclude_none=True),
                 "excluded_measurements": excluded, "individual_prediction": False,
+                "composition_policy_version": POLICY_VERSION,
                 "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]}
 
-    attach_explorer(app)
+    attach_explorer(app, public=True)
+    # Outermost context is inherited by endpoint worker threads and all Explorer routes.
+    app.add_middleware(ExplorerContextMiddleware, paths={
+        "NUTRIGENOMICS_EXPLORER_DATABASE": database,
+        "NUTRIGENOMICS_EXPLORER_CORE_DATABASE": database,
+        "NUTRIGENOMICS_EXPLORER_RIGHTS": release / "rights-policy.json",
+    })
     return app
 
 

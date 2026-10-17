@@ -23,19 +23,25 @@ def identifier(name):
 def table_digest(db, table):
     info = db.execute("PRAGMA table_info(" + identifier(table) + ")").fetchall()
     columns = [row[1] for row in info]
-    keys = [r[1] for r in sorted(info, key=lambda r:r[5]) if r[5]]
-    order = ",".join(identifier(k) for k in keys) if keys else "rowid"
-    h = hashlib.sha256()
-    count = 0
-    for row in db.execute("SELECT * FROM " + identifier(table) + " ORDER BY " + order):
+    row_hashes = []
+    # Scan physical rows sequentially. ORDER BY a random text PK makes SQLite
+    # visit millions of scattered pages. Sorting compact row digests preserves
+    # exact multiset equality (including duplicates) without sorting large rows.
+    for row in db.execute("SELECT * FROM " + identifier(table)):
+        h = hashlib.sha256()
         # Preserve binary values as bytes; no unit/statistical value transformation.
         for value in row:
             b = value if isinstance(value, bytes) else json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode()
             h.update(type(value).__name__.encode() + b"\0")
             h.update(len(b).to_bytes(8, "big"))
             h.update(b)
-        count += 1
-    return {"columns":columns, "rows":count, "sha256":h.hexdigest()}
+        row_hashes.append(h.digest())
+    row_hashes.sort()
+    h = hashlib.sha256()
+    for value in row_hashes:
+        h.update(value)
+    return {"columns":columns, "rows":len(row_hashes), "sha256":h.hexdigest(),
+            "algorithm":"sorted-typed-row-sha256-v2"}
 
 
 ADDITIVE_FIELDS = {"release_id", "next_cursor", "effects_status", "source_effects_status"}

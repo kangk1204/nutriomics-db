@@ -52,3 +52,37 @@ release와 source catalog/권리 정책/검수 파일/평가 원시 결과를 �
 ## 제출 조건
 
 공개 가능한 발현 및 DNAm 결과, 연구/대비 맥락, 원문 검수, 음식 50종/조성 1,200건 대조, 새 성능·브라우저·offline·export 검사, 깨끗한 환경의 재현·복원, 봉인 질의 평가, 버전 DOI, 공식 저자·소속·연구비·기관 윤리 판단이 같은 release를 참조해야 한다. 미완료 항목은 `submission-readiness.json`에 남긴다.
+# 2026-10-17 공개 후보 개선
+
+공개 파일만으로 서비스용 색인을 구축할 수 있습니다. 내부 부모 DB는 필요하지
+않으며, 기존 숫자 음식 ID의 호환 별칭이 필요할 때만 `--parent`를 사용합니다.
+
+```powershell
+python -m scripts.prepare_public_service_release --candidate <public-candidate> --output <new-service-release> --release-id <new-release-id>
+```
+
+원본 조성값·효과값은 보존합니다. 새 `quality-report.json`에서 계산 적격 식품 수,
+산출 방식, 제외 이유, 공개 대비의 참조 누락을 확인합니다. 판정 JSON은 source
+상태와 해석을 분리하며, `derived` 값을 일괄 측정값으로 바꾸지 않습니다.
+
+14개 공개 분석의 재실행 준비는 다음 명령으로 시작합니다. 이 명령 자체는
+분석 실행이나 재현 성공을 의미하지 않습니다. 과거 코드·환경 해시가 일치하지
+않으면 미해결로 기록하고, 새 환경의 실행은 별도 분석 버전을 사용해야 합니다.
+
+```powershell
+python -m scripts.prepare_omics_replay --audit <source-audit.json> --policy config/publication_rights_20261014.json --project-root <project-root> --output <new-replay-folder>
+```
+
+갱신 점검에 `--snapshot-root`를 추가하면 등록된 활성 원본을 실제로 다운로드하고
+해시를 비교합니다. HEAD나 304 응답만으로 원격 파일 내용을 재검증했다고
+표현하지 않습니다. 수집·차이 확인 뒤의 과학적 검수와 release 교체는 별도입니다.
+
+```powershell
+python -m scripts.check_publication_updates --registry config/update_sources.json --output <check.json> --snapshot-root <content-addressed-snapshots>
+```
+
+제출 판정에는 검사 유형별 원시 지표, 데이터/코드 해시, 시각, 정확한 분모가
+필요합니다. 범용 성공 JSON, 형식만 맞는 DOI, 단순 `submission_ready` 문자열은
+완료 증거가 아닙니다. 교수님 검수·저자 정보·기관 판단은 실제 입력 전까지
+대기 상태를 유지합니다.
+

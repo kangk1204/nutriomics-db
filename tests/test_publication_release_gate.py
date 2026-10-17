@@ -29,7 +29,8 @@ def test_final_gate_requires_actual_unchanged_reports(tmp_path):
         "funding_and_conflicts_confirmed": True, "institutional_ethics_determination": True,
         "public_https_url": "https://example.org",
     }
-    assert evaluate(metadata, expected, decision, evidence, evidence_root=tmp_path)["submission_ready"]
+    assert not evaluate(metadata, expected, decision, evidence, evidence_root=tmp_path)["submission_ready"]
+    # A generic success report is not any of the required technical checks.
     # Stale success flags cannot approve replaced reports.
     path.write_text(json.dumps({**report, "passed": False}))
     changed = evaluate(metadata, expected, decision, evidence, evidence_root=tmp_path)

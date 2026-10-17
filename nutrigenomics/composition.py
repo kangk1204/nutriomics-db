@@ -6,6 +6,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from .composition_policy import assess, convert_unit, normalize_unit, select_unique
 from .models import (
     CompositionMeasurement,
     Food,
@@ -14,82 +15,17 @@ from .models import (
     RecipeIngredient,
 )
 
-_UNIT_ALIASES = {
-    "g": "g",
-    "mg": "mg",
-    "ug": "ug",
-    "kcal": "kcal",
-    "μg": "ug",
-    "µg": "ug",
-    "mcg": "ug",
-    "μg/100g": "ug",
-    "µg/100g": "ug",
-    "mcg/100g": "ug",
-    "ug/100g": "ug",
-    "mg/100g": "mg",
-    "g/100g": "g",
-    "kj": "kJ",
-    "kcal/100g": "kcal",
-}
-_UNIT_FAMILY = {
-    "g": ("mass", 1.0),
-    "mg": ("mass", 0.001),
-    "ug": ("mass", 0.000001),
-    "kcal": ("energy", 1.0),
-    "kJ": ("energy", 1.0 / 4.184),
-}
-_MASS_BASES = {"edible_portion_100g", "per_100g_edible_portion", "source_100g"}
 Measurement = CompositionMeasurement | FoodCompoundMeasurement
 
 
-def normalize_unit(unit: str | None) -> str | None:
-    if unit is None:
-        return None
-    normalized = unit.strip().replace(" ", "")
-    if not normalized:
-        return None
-    return _UNIT_ALIASES.get(normalized.casefold(), normalized)
-
-
-def convert_unit(value: float, source: str | None, target: str | None) -> float | None:
-    source_unit = normalize_unit(source)
-    target_unit = normalize_unit(target) or source_unit
-    if source_unit is None or target_unit is None:
-        return None
-    if source_unit == target_unit:
-        return value
-    source_meta = _UNIT_FAMILY.get(source_unit)
-    target_meta = _UNIT_FAMILY.get(target_unit)
-    if source_meta is None or target_meta is None or source_meta[0] != target_meta[0]:
-        return None
-    return value * source_meta[1] / target_meta[1]
+def _assessment(row: Measurement) -> dict:
+    return assess(status=row.status, amount=row.amount_per_100g, unit=row.unit,
+                  basis=row.basis, metadata=row.metadata_json,
+                  food_metadata=row.food.metadata_json if row.food else {}, source_id=row.source_id)
 
 
 def _exclusion_reasons(row: Measurement) -> list[str]:
-    """A numeric value is not sufficient evidence for a grams-based calculation."""
-    reasons = []
-    statuses = {"quantified"} if isinstance(row, FoodCompoundMeasurement) else {
-        "measured", "measured_zero"
-    }
-    if row.status not in statuses:
-        reasons.append("status_not_quantified")
-    if row.amount_per_100g is None:
-        reasons.append("amount_missing")
-    elif not math.isfinite(row.amount_per_100g):
-        reasons.append("amount_nonfinite")
-    elif row.amount_per_100g < 0:
-        reasons.append("amount_negative")
-    if normalize_unit(row.unit) is None:
-        reasons.append("unit_missing")
-    if row.basis not in _MASS_BASES:
-        reasons.append(
-            "volume_to_mass_conversion_unverified"
-            if row.basis in {"source_100ml", "per_100ml", "100ml"}
-            else "basis_unsupported_or_unverified"
-        )
-    if (row.metadata_json or {}).get("basis_verified") is False:
-        reasons.append("basis_explicitly_unverified")
-    return reasons
+    return _assessment(row)["exclusion_reasons"]
 
 
 def _active_rows(food: Food) -> list[Measurement]:
@@ -104,14 +40,20 @@ def _active_rows(food: Food) -> list[Measurement]:
     return records
 
 
+def _select_rows(food):
+    return select_unique([{"row": row, "key": row.component_id, "id": row.source_ref,
+                           "unit": row.unit, "assessment": _assessment(row)}
+                          for row in _active_rows(food)])
+
+
 def _numeric_records(food: Food) -> list[CompositionMeasurement]:
-    return [row for row in _active_rows(food)
-            if isinstance(row, CompositionMeasurement) and not _exclusion_reasons(row)]
+    return [e["row"] for e in _select_rows(food)[0]
+            if isinstance(e["row"], CompositionMeasurement)]
 
 
 def _numeric_compound_records(food: Food) -> list[FoodCompoundMeasurement]:
-    return [row for row in _active_rows(food)
-            if isinstance(row, FoodCompoundMeasurement) and not _exclusion_reasons(row)]
+    return [e["row"] for e in _select_rows(food)[0]
+            if isinstance(e["row"], FoodCompoundMeasurement)]
 
 
 def _append_scaled(
@@ -150,6 +92,7 @@ def _append_scaled(
         "source_ref": row.source_ref,
         "release": row.release,
         "basis": row.basis,
+        "composition_assessment": _assessment(row),
     }
     if row.minimum is not None:
         source_record["source_minimum_per_100g"] = row.minimum
@@ -165,10 +108,8 @@ def _append_scaled(
 
 def _unknown_rows(food: Food, factor: float = 1.0) -> list[dict[str, Any]]:
     records = []
-    for row in _active_rows(food):
-        reasons = _exclusion_reasons(row)
-        if not reasons:
-            continue
+    for entry, reasons in _select_rows(food)[1]:
+        row = entry["row"]
         value = row.amount_per_100g
         records.append({
             "component_id": row.component_id,
@@ -224,7 +165,7 @@ def _load_foods(session: Session, food_ids: set[int]) -> dict[int, Food]:
 
 
 def analyze_meal(session: Session, items: list[dict[str, float | int]]) -> dict[str, Any]:
-    """Calculate measured intake only, with recipe fallback when direct values are absent."""
+    """Calculate eligible source quantities; keep estimation methods visible."""
     ids = {int(item["food_id"]) for item in items}
     foods = _load_foods(session, ids)
     missing_ids = ids - foods.keys()
@@ -334,6 +275,10 @@ def analyze_meal(session: Session, items: list[dict[str, float | int]]) -> dict[
         )
     return {
         "status": "measured" if components and not unquantified else "partial" if components else "unavailable",
+        "calculation_status": "available" if components and not unquantified else "partial" if components else "unavailable",
+        "source_methods": sorted({s["composition_assessment"]["derivation_method"]
+                                  for c in components for s in c["source_records"]
+                                  if "composition_assessment" in s}),
         "items": item_results,
         "components": components,
         "unquantified": unquantified,

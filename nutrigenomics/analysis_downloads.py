@@ -160,6 +160,7 @@ def analysis_auxiliary_response(accession, analysis_version, filename, session, 
     """Shared path/manifest checks for the existing auxiliary-file route."""
     from fastapi import HTTPException
     from sqlalchemy import select
+
     from .models import AnalysisRun
 
     if Path(filename).name != filename or filename in {".", ".."}:

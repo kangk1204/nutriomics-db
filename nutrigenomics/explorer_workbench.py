@@ -12,6 +12,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query
 
 from .explorer import _json, _meta, _public, database
+from .explorer_context import configured_path
 from .explorer_performance import (
     QueryUnavailable,
     canonical,
@@ -316,11 +317,7 @@ def omics_results(
     page_size: int = Query(25, ge=1, le=200),
     cursor: str | None = Query(None, max_length=3000),
 ):
-    core = Path(
-        os.environ.get(
-            "NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db/nutrigenomics.sqlite3"
-        )
-    )
+    core = configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db/nutrigenomics.sqlite3")
     with database() as projection:
         release = _meta(projection).get("release_id")
         # A caller cannot turn an unindexed analysis into a result of this release.

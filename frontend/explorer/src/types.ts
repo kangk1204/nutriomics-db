@@ -8,6 +8,8 @@ export interface Entity {
 export interface Measurement {
   id: string; food?: string; component?: string; component_label?: string;
   amount: number | null; unit?: string; basis?: string; status?: string; source_id?: string;
+  assessment?: {eligible: boolean; derivation_method: string; zero_interpretation: string;
+    exclusion_reasons: string[]; policy_version: string; source_status: string};
 }
 export interface EvidenceEdge {
   id: string; subject: string; object: string; relation: string; tier: string;

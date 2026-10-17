@@ -4,6 +4,28 @@ The definitive structural definition is the release's `schema.sql`. This file
 defines the scientific meaning and limits. Use `dataset-metadata.json` for
 actual public counts; internal counts are not substituted.
 
+## Public service candidate changes, 2026-10-17
+
+`composition_assessment` is a derived index keyed by the unchanged measurement ID.
+It stores intake eligibility, method, zero interpretation, exclusion reasons and
+the composition policy version. The original measurement amount/status is not
+edited. A published FNDDS estimate is not relabelled as an analytical measurement.
+The precise per-nutrient derivation can remain unknown while a published reference
+value with a confirmed mass basis is used in arithmetic intake calculation.
+
+`contrast_selector` binds every public numerical selector to a curated contrast,
+study, analysis role, context type and review state. A source-derived missing
+fenofibrate record is a pending pharmacological comparator, never a food effect.
+Fixed 1,000-bp methylation screens are secondary regional endpoints, not claims
+of discovered segmented DMR boundaries. Historical and sensitivity analyses are
+not additional independent trials.
+
+Public service metadata includes separate composition and contrast coverage.
+These counts are machine audits, not human scientific approvals. The default
+`/api/v1/analyses` view selects primary candidates; explicitly requested versions
+remain accessible and retain their role. Numeric legacy food aliases are optional;
+source-namespaced food IDs are sufficient for a public-only rebuild.
+
 | Table | Grain and key | Meaning |
 |---|---|---|
 | node | source entity; `id` | Food/state/release, component, native gene namespace, or other permitted entity |
