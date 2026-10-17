@@ -24,6 +24,9 @@ def verify(release, application, receipt):
              'startup_verification_seconds': time.monotonic() - started,
              'cache_condition': 'Sequential checksum reads warm the OS file cache; caches are not dropped',
              'application': application}
+    if os.environ.get('NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX'):
+        from nutrigenomics.evidence_paging import verify_index
+        value['evidence_query_index'] = verify_index(os.environ['NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX'], database, manifest['release_id'], actual)
     atomic_json(Path(receipt), value)
     return value
 

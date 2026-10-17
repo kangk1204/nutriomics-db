@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from nutrigenomics.evidence_paging import build, page_rows
+from nutrigenomics.evidence_paging import build, page_rows, verify_index
 from nutrigenomics.explorer_performance import QueryUnavailable
 
 
@@ -66,3 +66,15 @@ def test_source_hash_and_existing_index_guard(indexed, tmp_path):
         build(source, tmp_path / 'bad.sqlite', 'bad')
     with pytest.raises(FileExistsError):
         build(source, index, hashlib.sha256(source.read_bytes()).hexdigest())
+
+
+def test_startup_verifies_auxiliary_bytes_and_binding(indexed):
+    source, index, _, receipt = indexed
+    index.with_suffix('.json').write_text(json.dumps(receipt))
+    assert verify_index(index, source, 'release-a', receipt['source_sha256'])['references'] == 5
+    with pytest.raises(ValueError, match='binding mismatch'):
+        verify_index(index, source, 'wrong-release', receipt['source_sha256'])
+    with sqlite3.connect(index) as db:
+        db.execute("UPDATE page_ref SET id='different' WHERE ordinal=1")
+    with pytest.raises(ValueError, match='binding mismatch'):
+        verify_index(index, source, 'release-a', receipt['source_sha256'])

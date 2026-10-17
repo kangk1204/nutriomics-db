@@ -17,6 +17,8 @@ def build(source: Path, output: Path, expected_sha256: str):
     if output.exists():
         raise FileExistsError(output)
     before = fingerprint(source)
+    if before[-1] is not None:
+        raise ValueError('Build from a closed immutable release without a WAL')
     with source.open('rb') as stream:
         actual = hashlib.file_digest(stream, 'sha256').hexdigest()
     if actual != expected_sha256:
@@ -65,6 +67,22 @@ def build(source: Path, output: Path, expected_sha256: str):
     finally:
         memory.close()
     return {**metadata, 'output': str(output), 'index_sha256': hashlib.sha256(output.read_bytes()).hexdigest()}
+
+
+def verify_index(index_path, source_path, release_id, source_sha256):
+    """Verify the auxiliary artifact before accepting requests, just like its parent."""
+    path = Path(index_path).resolve()
+    before = fingerprint(path)
+    receipt = json.loads(path.with_suffix('.json').read_text())
+    with path.open('rb') as stream:
+        actual = hashlib.file_digest(stream, 'sha256').hexdigest()
+    with closing(sqlite3.connect(path.as_uri() + '?mode=ro', uri=True)) as db:
+        binding = json.loads(db.execute("SELECT value FROM header WHERE key='binding'").fetchone()[0])
+    if (before != fingerprint(path) or actual != receipt.get('index_sha256')
+            or binding.get('release_id') != release_id or binding.get('source_sha256') != source_sha256
+            or canonical(binding.get('source_fingerprint')) != canonical(fingerprint(source_path))):
+        raise ValueError('Auxiliary evidence index checksum or source binding mismatch')
+    return {'path': str(path), 'sha256': actual, 'release_id': release_id, 'references': binding['total']}
 
 
 def page_rows(source_db, source_path, release_id, layer, page, page_size):
