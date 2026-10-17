@@ -41,6 +41,8 @@ python -m scripts.build_reacquired_release --work "$work" --source "$source"
 
 `verify_reacquired_accuracy numeric`은 14개 실행 결과의 키·효과·통계·결측을 core DB와 전수 대조한다. `food`는 새 원본의 50종·1,200건과 API의 가중 합계를 대조한다. `validate_publication_values`는 core→공개 SQLite/Parquet 보존을 검증한다. 각 도구의 `--help`로 경로를 지정한다.
 
+`validate_quantitative_ranges --release <공개 release> --output <검사 JSON>`은 전체 Parquet의 비유한 값, P/FDR 범위, 음의 SE, 대상자·시료 수와 결측을 별도로 점검한다. 원본 값을 고치거나 결측을 0으로 바꾸지 않으며 위반이 있으면 실패로 종료한다. 이 검사는 수치 도메인 검사이며 생물학적 타당성·전문가 검수를 대신하지 않는다.
+
 `freeze_rebuilt_performance`로 실제 release의 조회 조건과 해시를 고정한 뒤 `benchmark_explorer_performance benchmark --runs 100 --concurrent`를 실행한다. `--allow-missing-omics`는 미리보기 전용이며 최종 판정에 사용하지 않는다. API 반복 측정과 별도로 실제 브라우저·최대 HTML/CSV/JSON·서버 접속 없는 HTML 탐색·이전 release 복원을 확인한다. 모든 검증 보고서는 대상 release와 해시를 명시한다.
 
 대형 SQLite의 전체 무결성 검사는 `NUTRIGENOMICS_INTEGRITY_CACHE_MIB`로 읽기 캐시를 64~4096 MiB 범위에서 지정할 수 있다. 기본값은 128 MiB다. 이 설정은 검사 범위나 웹 응답 캐시를 바꾸지 않으며, 닫힌 파일을 새 연결로 여는 전체 `integrity_check`와 `foreign_key_check`는 그대로 수행한다.
