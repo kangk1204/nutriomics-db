@@ -35,6 +35,7 @@ LAYERS = {
     "composition",
     "pathway",
     "molecular_measurement",
+    "literature_candidate",
 }
 
 
@@ -154,16 +155,38 @@ def _query(
             + " ORDER BY layer,study_id,tissue,id LIMIT ? OFFSET ?",
             [*args, page_size, (page - 1) * page_size],
         ).fetchall()
+        withheld = 0
+        if layer == 'literature_candidate' and total == 0 and _present(db, 'candidate_document'):
+            withheld = db.execute("SELECT coalesce(sum(candidate_count),0) FROM candidate_document WHERE json_extract(metadata_json,'$.assertion_visibility')='withheld'").fetchone()[0]
         return {
             "release_id": release,
             "items": [record(r, db) for r in rows],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "status": "indexed",
-            "gaps": [] if total else ["조회 조건에 해당하는 수록 근거 없음"],
+            "status": "withheld" if withheld else "indexed",
+            "withheld_candidate_count": withheld,
+            "withheld_count_scope": "release_wide_not_seed_relevance" if withheld else None,
+            "gaps": [f"이 release 전체의 문헌 후보 {withheld}건은 문서별 재배포 조건 미확정으로 상세가 제한됩니다. 선택 항목과의 관련성을 이 공개 자료만으로 판단할 수 없습니다."] if withheld else ([] if total else ["조회 조건에 해당하는 수록 근거 없음"]),
             "note": "근거 수는 독립 대상자 수가 아닙니다. 외부 조절 근거는 식이 반응이나 인과적 건강 효과가 아닙니다.",
         }
+
+@router.get('/candidate-documents')
+def candidate_documents(page: int = Query(1,ge=1),page_size: int = Query(25,ge=1,le=200)):
+    """Citation/availability register, never restricted abstract text or claims."""
+    with database() as db:
+        release=_meta(db).get('release_id')
+        if not _present(db,'candidate_document'):
+            return {'release_id':release,'items':[],'total':0,'status':'not_indexed'}
+        rows=db.execute('SELECT * FROM candidate_document ORDER BY pmid LIMIT ? OFFSET ?',
+                        (page_size,(page-1)*page_size)).fetchall()
+        items=[]
+        for row in rows:
+            items.append({**dict(row),'metadata':_json(row['metadata_json'])})
+            items[-1].pop('metadata_json')
+        return {'release_id':release,'items':items,'total':db.execute('SELECT count(*) FROM candidate_document').fetchone()[0],
+            'page':page,'page_size':page_size,'status':'candidate','expert_approved':0,
+            'note':'Unique PMID documents; candidates are not independently validated studies.'}
 
 
 @router.get("/evidence")

@@ -64,3 +64,11 @@ dependencies retain their own terms; see [LICENSE-DATA.md](../LICENSE-DATA.md).
 
 The software is supplied for research. Dietary study conditions and observed
 gene/CpG changes do not establish individual efficacy or causal health effects.
+# Prediction and literature candidate extension
+
+The optional update pipeline reacquires SCREEN GraphRegLR rows and a frozen PMID
+corpus from PubMed. Computational predictions, automatic text candidates and
+observed human intervention results use distinct layers and review states.
+Source-span preservation is not expert semantic validation. Article-specific
+redistribution restrictions remain enforced in the public dataset and exports.
+See [candidate layer acquisition, interpretation and verification](WORKBENCH_CANDIDATE_LAYERS_ko.md).

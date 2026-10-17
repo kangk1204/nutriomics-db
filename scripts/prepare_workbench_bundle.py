@@ -10,7 +10,7 @@ if __name__ == '__main__':
     p = argparse.ArgumentParser()
     p.add_argument('--output', type=Path, required=True)
     a = p.parse_args()
-    files = [*ROOT.glob('nutrigenomics/*.py'), *ROOT.glob('scripts/*.py'), *ROOT.glob('tests/*.py'),
+    files = [*ROOT.glob('nutrigenomics/*.py'), *ROOT.glob('nutrigenomics/candidate_rules/*.py'), *ROOT.glob('scripts/*.py'), *ROOT.glob('tests/*.py'),
              *ROOT.glob('config/*.json'), *ROOT.glob('docs/WORKBENCH*'),
              ROOT/'docs/MDPI_DATA_SUBMISSION_PREPARATION_ko.md',ROOT/'pyproject.toml',ROOT/'uv.lock']
     for directory in ['frontend/explorer/src','frontend/explorer/scripts','frontend/explorer/dist']:

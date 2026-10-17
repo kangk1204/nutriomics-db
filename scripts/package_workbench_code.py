@@ -57,6 +57,7 @@ def package(output):
     code.mkdir()
     files = [
         *ROOT.glob("nutrigenomics/*.py"),
+        *ROOT.glob("nutrigenomics/candidate_rules/*.py"),
         *ROOT.glob("scripts/*.R"),
         *ROOT.glob("tests/*.py"),
         *ROOT.glob("tests/*.R"),
@@ -81,6 +82,7 @@ def package(output):
     ]
     files += scripts
     files += list(ROOT.glob('source_snapshots/default_path_originals/*.R'))
+    files += list(ROOT.glob('source_snapshots/candidate_layers/*.py'))
     files += [ROOT/'portable-path-changes.json']
     files += [ROOT/'scripts/setup_rebuild_runtime.sh']
     files += list(ROOT.glob('config/rebuild-runtime-*.lock.txt'))
@@ -113,6 +115,8 @@ def package(output):
             "kfind_food_selection.json",
             "study_groups.json",
             "foodb_food_crosswalk.template.json",
+            "literature_reacquisition_pmids.json",
+            "literature_candidate_entities.json",
         )
     ]
     files += list(ROOT.glob("docs/WORKBENCH*"))

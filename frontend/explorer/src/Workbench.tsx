@@ -20,7 +20,7 @@ import './studio.css';
 echarts.use([BarChart, AriaComponent, GridComponent, TooltipComponent, DataZoomComponent, CanvasRenderer]);
 const kinds: Record<Kind,string> = {food:'음식',component:'성분',gene:'유전자',cpg:'CpG·프로브',regulatory_region:'조절 영역',health:'건강',pathway:'경로'};
 const entityKindLabel=(e:Entity)=>e.kind==='diet'?'실험 노출':kinds[normalizeKind(e.kind)];
-const layers: Record<string,string> = {all:'전체 수록 근거',dietary:'사람 식이중재',eqtm:'CpG–발현 연관',regulatory_tested:'조절 실험 · 시험된 쌍',regulatory_predicted:'계산 예측',clinical:'측정 건강지표',molecular_target:'분자 assay',molecular_identity:'식별자 관계'};
+const layers: Record<string,string> = {all:'전체 수록 근거',dietary:'사람 식이중재',eqtm:'CpG–발현 연관',regulatory_tested:'조절 실험 · 시험된 쌍',regulatory_predicted:'계산 예측',literature_candidate:'자동 문헌 후보',clinical:'측정 건강지표',molecular_target:'분자 assay',molecular_identity:'식별자 관계'};
 const f = (value: unknown):string => value == null ? '미보고' : typeof value === 'number' ? (Math.abs(value)>0 && Math.abs(value)<0.001 ? value.toExponential(2) : Number(value.toPrecision(5)).toLocaleString('en-US')) : typeof value === 'object' ? JSON.stringify(value) : String(value);
 const link = (value:unknown) => typeof value==='string' && /^https?:\/\//.test(value) ? value : undefined;
 interface Row {id:string;layer:string;title:string;study:string;tissue?:string;n?:number|null;assays?:number|null;effect?:number|null;unit?:string;p?:unknown;q?:unknown;context?:string;contrast?:ScientificContrast;exposure?:ScientificEvidence;reg?:WorkbenchEvidence;raw?:Record<string,unknown>}
@@ -75,7 +75,7 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
   const [meta,setMeta]=useState<Meta|null>(null),[kind,setKind]=useState<Kind>(scientificSnapshotSeed?'food':'food'),[q,setQ]=useState('');
   const [domain,setDomain]=useState('all'),[page,setPage]=useState(1),[entities,setEntities]=useState<Entity[]>([]),[total,setTotal]=useState(0),[searchError,setSearchError]=useState(''),[searchRetry,setSearchRetry]=useState(0);
   const [seed,setSeed]=useState<Entity|null>(scientificSnapshotSeed||null),[detail,setDetail]=useState<NodeDetail|null>(null);
-  const [matches,setMatches]=useState<ScientificMatchResult|null>(null),[reg,setReg]=useState<WorkbenchEvidence[]>([]),[regTotal,setRegTotal]=useState(0),[regPage,setRegPage]=useState(1);
+  const [matches,setMatches]=useState<ScientificMatchResult|null>(null),[reg,setReg]=useState<WorkbenchEvidence[]>([]),[regTotal,setRegTotal]=useState(0),[regNotice,setRegNotice]=useState(''),[regPage,setRegPage]=useState(1);
   const [layer,setLayer]=useState('all'),[tissue,setTissue]=useState(frozenScientificContext?.reference_context?.tissue||''),[hours,setHours]=useState(frozenScientificContext?.reference_context?.response_time_h==null?'':String(frozenScientificContext.reference_context.response_time_h)),[intake,setIntake]=useState(frozenScientificContext?.intake_g||100);
   const [regBusy,setRegBusy]=useState(false),[regLoaded,setRegLoaded]=useState(false),[browserOpen,setBrowserOpen]=useState(true),[inspectorOpen,setInspectorOpen]=useState(true),[mobilePanel,setMobilePanel]=useState<'search'|'workspace'|'details'>(scientificSnapshotSeed?'workspace':'search');
   const [tab,setTab]=useState('compare'),[selected,setSelected]=useState<Row|null>(null),[pinned,setPinned]=useState<Row[]>([]);
@@ -99,11 +99,11 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
     finally{if(requestId===mealRequest.current)setMealBusy(false)}
   };
   const [results,setResults]=useState<Record<string,unknown>[]>([]),[resultStatus,setResultStatus]=useState(''),[featureType,setFeatureType]=useState('gene_expression'),[resultPage,setResultPage]=useState(1),[resultTotal,setResultTotal]=useState<number|null>(null);
-  const filters:Filters={domain,tier:'all',include_extracted:false};
+  const filters:Filters={domain,tier:'all',include_extracted:layer==='literature_candidate'};
   useEffect(()=>{getMeta().then(setMeta).catch(e=>setError(e.message))},[]);
   useEffect(()=>{const controller=new AbortController();setSearchBusy(true);setSearchError('');setEntities([]);setTotal(0);const timer=setTimeout(()=>{
     getEntities(kind,q,filters,page,25,'label','asc',controller.signal).then(r=>{setEntities(r.items);setTotal(r.total)}).catch(e=>{if(!controller.signal.aborted&&e.name!=='AbortError'){setSearchError(e.message);setError(e.message)}}).finally(()=>{if(!controller.signal.aborted)setSearchBusy(false)});
-  },220);return()=>{clearTimeout(timer);controller.abort()}},[kind,q,domain,page,searchRetry]);
+  },220);return()=>{clearTimeout(timer);controller.abort()}},[kind,q,domain,page,searchRetry,layer]);
   useEffect(()=>{
     if(!seed)return;let active=true;networkRequest.current++;graphRequest.current++;setNetworkNode(null);setNetworkDetail(null);setNetworkRecords([]);setNetworkBusy(false);setDetail(null);setGraph(null);setLoci([]);setSelected(null);setEdge(null);setMeal(null);setError('');
     getNode(seed.id).then(r=>{if(active)setDetail(r)}).catch(e=>{if(active)setError(e.message)});
@@ -111,7 +111,7 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
     setLociStatus('loading');
     getLoci(seed.id).then(r=>{if(active){setLoci(r.items);setLociStatus('available')}}).catch(()=>{if(active){setLoci([]);setLociStatus('error')}});
     return()=>{active=false};
-  },[seed?.id,domain]);
+  },[seed?.id,domain,layer]);
   useEffect(()=>{
     if(!seed)return;const controller=new AbortController();setBusy(true);setMatches(null);
     const context={seed_id:seed.id,intake_g:intake,reference_context:{tissue:tissue||null,response_time_h:hours===''?null:Number(hours)}};
@@ -119,8 +119,8 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
     return()=>{clearTimeout(timer);controller.abort()};
   },[seed?.id,intake,tissue,hours]);
   useEffect(()=>{
-    if(!seed)return;const controller=new AbortController();setReg([]);setRegTotal(0);setRegLoaded(false);setRegBusy(true);
-    getWorkbenchEvidence(seed.id,layer==='dietary'?'all':layer,tissue,regPage,controller.signal).then(r=>{if(!controller.signal.aborted){setReg(r.items);setRegTotal(r.total);setRegLoaded(r.status!=='not_indexed')}}).catch(e=>{if(e.name!=='AbortError')setError(e.message)}).finally(()=>{if(!controller.signal.aborted)setRegBusy(false)});
+    if(!seed)return;const controller=new AbortController();setReg([]);setRegTotal(0);setRegNotice('');setRegLoaded(false);setRegBusy(true);
+    getWorkbenchEvidence(seed.id,layer==='dietary'?'all':layer,tissue,regPage,controller.signal).then(r=>{if(!controller.signal.aborted){setReg(r.items);setRegTotal(r.total);setRegNotice(r.status==='withheld'?(r.gaps||[]).join(' '):'');setRegLoaded(r.status!=='not_indexed')}}).catch(e=>{if(e.name!=='AbortError')setError(e.message)}).finally(()=>{if(!controller.signal.aborted)setRegBusy(false)});
     return()=>controller.abort();
   },[seed?.id,layer,tissue,regPage]);
   useEffect(()=>{setRegPage(1)},[seed?.id,layer,tissue]);
@@ -191,6 +191,7 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
           {tab==='compare'&&<>
             <EvidenceSummary studies={studyCount} contrasts={contrastCount} external={regLoaded?regTotal:null} busy={busy||regBusy}/>
             <div className="wb-evidence-toolbar"><div><h2>조건별 근거</h2><span>서로 다른 실험·통계는 별도 기록으로 표시합니다.</span></div><label>근거 종류 <select aria-label="근거 종류" value={layer} onChange={e=>setLayer(e.target.value)}>{Object.entries(layers).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label></div>
+            {regNotice&&<p className="wb-condition" role="status">{regNotice}</p>}
             <div className="wb-table-scroll" aria-label="조건별 근거 표" tabIndex={0}><table className="wb-evidence-table"><thead>{table.getHeaderGroups().map(g=><tr key={g.id}>{g.headers.map(h=><th scope="col" key={h.id}>{flexRender(h.column.columnDef.header,h.getContext())}</th>)}</tr>)}</thead><tbody>{table.getRowModel().rows.map(r=><tr key={r.id} className={selected?.id===r.original.id?'selected':''} onClick={()=>selectRow(r.original)}>{r.getVisibleCells().map(c=><td key={c.id}>{flexRender(c.column.columnDef.cell,c.getContext())}</td>)}</tr>)}</tbody></table>{!rows.length&&((busy||regBusy)?<LoadingRows label="연구 조건 조회 중"/>:<div className="wb-empty compact"><BookOpen/><h3>{error?'조회가 완료되지 않았습니다':'해당 조건의 수록 근거가 없습니다'}</h3><p>{error?'연결 상태와 표시된 오류를 확인해주세요.':'근거 부재는 효과가 없다는 결과가 아닙니다.'}</p></div>)}</div>
             <div className="wb-table-foot"><span>관계·대비 기록 수이며 독립 대상자 수와 다릅니다.</span><div className="wb-pager"><button aria-label="이전 근거 페이지" disabled={regPage===1||regBusy} onClick={()=>setRegPage(p=>p-1)}><ChevronLeft size={17}/></button><span>{regPage} / {Math.max(1,Math.ceil(regTotal/25))}</span><button aria-label="다음 근거 페이지" disabled={regPage*25>=regTotal||regBusy} onClick={()=>setRegPage(p=>p+1)}><ChevronRight size={17}/></button></div></div>
             <details className="wb-method-note"><summary><Info size={15}/>자료 범위·결측·해석 기준</summary><p>동일 연구의 assay와 반복 방문은 독립 대상자로 집계하지 않습니다. eQTM은 연관, CRISPR 목록은 시험된 쌍, GraphRegLR는 계산 예측입니다. 일부 자원은 공개된 선택 요약만 포함합니다. 전문 검수 대기와 자료 부재를 그대로 보존합니다.</p>{matches?.evidence_gaps.map(g=><p key={g}>{g}</p>)}</details>
@@ -211,6 +212,8 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
           <span className={`ws-evidence-kind ws-layer-${selected.layer}`}>{layers[selected.layer]}</span><h2>{selected.title}</h2><p>{selected.study}</p><details className="ws-record-identity"><summary>원본 근거 ID</summary><code className="ws-record-id">{selected.id}</code></details>
           <div className="ws-review-line">{reviewStatus==='approved'?<Check size={15}/>:<Info size={15}/>}<span>{reviewStatus==='approved'?'전문가 검수 승인':reviewStatus==='pending'?'전문가 검수 대기':reviewStatus||'전문가 검수 미확인'}</span></div>
           <h3>연구 조건</h3><dl><div><dt>조직·세포</dt><dd>{selected.tissue||'미확인'}</dd></div><div><dt>대상자</dt><dd>{f(selected.n)}{selected.contrast?.n_people_scope&&<details className="ws-count-scope"><summary>집계 범위</summary><small>{selected.contrast.n_people_scope}</small></details>}</dd></div><div><dt>Assay</dt><dd>{f(selected.assays)}{selected.contrast?.n_samples_scope&&<details className="ws-count-scope"><summary>집계 범위</summary><small>{selected.contrast.n_samples_scope}</small></details>}</dd></div></dl>
+          {selected.layer==='regulatory_predicted'&&<section className="wb-condition"><h3>계산 예측 · 실험 검증 아님</h3><p>{selected.tissue||'세포주 미확인'}의 cCRE–유전자 연결입니다. 사람 식이중재의 관찰 결과가 아닙니다.</p><dl><div><dt>원본 수치 필드</dt><dd>{f(selected.reg?.context?.source_numeric_fields)}</dd></div><div><dt>방법</dt><dd>{f(selected.reg?.context?.method)}</dd></div><div><dt>원본 위치</dt><dd>{f(selected.reg?.context?.source_interval)}</dd></div></dl><p>thresholded 원본의 필드입니다. 효과량·P/FDR·건강 효과의 확률로 해석하지 않습니다.</p></section>}
+          {selected.layer==='literature_candidate'&&<section className="wb-condition"><h3>자동 추출 후보 · 의미 검수 대기</h3><blockquote>{f(selected.reg?.context?.quote)}</blockquote><p>문자 위치 [{f(selected.reg?.context?.start)}, {f(selected.reg?.context?.end)}) · title/abstract 기준</p><p>원문 문자 일치는 의미 정확도나 인과성 검증이 아닙니다. 용량·조직·대상군·건강 효과는 확정하지 않았습니다.</p></section>}
           {selected.reg&&<><h3>효과와 불확실성</h3><dl><div><dt>효과 정의</dt><dd>{selected.unit||'정량 효과 미보고'}</dd></div><div><dt>효과량</dt><dd>{f(selected.effect)}</dd></div><div><dt>원본 P / FDR</dt><dd>{f(selected.p)} / {f(selected.q)}</dd></div><div><dt>신뢰구간</dt><dd>{selected.reg.ci_low!=null&&selected.reg.ci_high!=null?`${f(selected.reg.ci_low)} – ${f(selected.reg.ci_high)}`:'미보고'}</dd></div><div><dt>가설군</dt><dd>{selected.reg.hypothesis_family||'미보고'}</dd></div><div><dt>원문 위치</dt><dd>{selected.reg.source_ref||'미확인'}</dd></div></dl></>}
           {selected.exposure&&<><h3>실험 노출·적용 조건</h3><MatchingBadge identity={selected.exposure.mapping_identity}/><p className="ws-mapping-note">{selected.exposure.mapping_identity.note||selected.exposure.mapping_identity.label}</p><p>{selected.context}</p>{contrastConditions(selected.exposure,selected.contrast).map((a,i)=><div key={i} className={`wb-condition ${a.status}`}><b>{a.dimension}</b><span>{a.status==='match'?'일치':a.status==='mismatch'?'불일치':'미확인'}</span><p>{a.reason}</p></div>)}<button className="wb-primary" onClick={()=>{setTab('omics');setMobilePanel('workspace')}}><Dna size={16}/>이 대비의 전체 결과</button></>}
           {link(source?.url)&&<a className="wb-source-link" href={link(source?.url)} target="_blank" rel="noreferrer"><ExternalLink size={15}/>원본 자료</a>}<details><summary>출처 버전·한계·원본 필드</summary><dl>{Object.entries(source||{}).filter(([k])=>!k.includes('path')).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{f(v)}</dd></div>)}</dl><p>{f(selected.reg?.context?.limitations||selected.exposure?.limitations)}</p></details>

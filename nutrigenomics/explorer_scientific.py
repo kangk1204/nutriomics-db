@@ -311,6 +311,12 @@ def edge_scientific(edge: dict, subject=None, target=None) -> dict:
         }
     )
     evidence["source_review_status"] = edge.get("review_status", "unknown")
+    if tier == 'predicted':
+        evidence.update(classification='computational_prediction',
+            label='계산 예측 · 식이 반응·임상 효과·실험 검증 아님',experimental_validation=False)
+    elif tier == 'extracted':
+        evidence.update(classification='automated_candidate',
+            label='자동 문헌 추출 후보 · 의미·연구 조건 전문가 검수 대기',experimental_validation=None)
     if tier in {"human_randomized", "human_nonrandomized", "human_observational"}:
         evidence.update(
             classification="human_source_assertion",
