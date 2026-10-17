@@ -399,8 +399,17 @@ def _effects(node, limit=50):
     identifiers = gene_feature_identifiers(node)
     try:
         with read_connection(core) as db:
+            # On the research table SQLite can prefer the broad feature_type
+            # index (millions of rows) over the selective feature_id lookup.
+            # Keep the immutable source unchanged; only pin a verified index.
+            # The public release exposes a view and retains its own planner.
+            feature_index = db.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='index' AND name='ix_study_effect_feature_id' AND tbl_name='study_effect'"
+            ).fetchone()
+            columns = db.execute("PRAGMA index_info(ix_study_effect_feature_id)").fetchall() if feature_index else []
+            source = "study_effect INDEXED BY ix_study_effect_feature_id" if columns and columns[0]["name"] == "feature_id" else "study_effect"
             rows = db.execute(
-                "SELECT series_accession,feature_type,feature_id,feature_label,contrast,tissue,timepoint,intervention,dose,duration,effect_estimate,standard_error,p_value,q_value,effect_unit,status,n_people,n_samples,analysis_version,metadata_json FROM study_effect WHERE feature_type IN ('gene_expression','expression','gene','transcript') AND feature_id IN ("
+                "SELECT series_accession,feature_type,feature_id,feature_label,contrast,tissue,timepoint,intervention,dose,duration,effect_estimate,standard_error,p_value,q_value,effect_unit,status,n_people,n_samples,analysis_version,metadata_json FROM " + source + " WHERE feature_type IN ('gene_expression','expression','gene','transcript') AND feature_id IN ("
                 + ",".join("?" for _ in identifiers)
                 + ") ORDER BY series_accession,analysis_version,contrast LIMIT ?",
                 [*identifiers, limit],

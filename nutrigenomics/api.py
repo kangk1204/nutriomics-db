@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Generator, Literal
@@ -55,7 +56,11 @@ attach_explorer(app)
 
 @app.on_event("startup")
 def _startup() -> None:
-    create_schema()
+    storage = os.environ.get('NUTRIGENOMICS_MEAL_STORAGE_DATABASE_URL')
+    if storage:
+        create_schema(storage)
+    else:
+        create_schema()
 
 
 def get_session() -> Generator[Session, None, None]:
@@ -64,6 +69,16 @@ def get_session() -> Generator[Session, None, None]:
         yield session
     finally:
         session.close()
+
+
+def get_meal_storage_session(research: Session = Depends(get_session)) -> Generator[Session, None, None]:
+    """Optional mutable meal history beside an unchanged research snapshot."""
+    url = os.environ.get('NUTRIGENOMICS_MEAL_STORAGE_DATABASE_URL')
+    if not url:
+        yield research
+        return
+    with get_session_factory(url)() as session:
+        yield session
 
 
 @app.get("/api/v1/personal-impact/status")
@@ -323,14 +338,20 @@ def analyze_meal_endpoint(
 
 
 @app.post("/api/v1/meals", status_code=201)
-def save_meal(payload: MealAnalysisInput, session: Session = Depends(get_session)) -> dict:
-    result = _meal_result(session, payload)
+def save_meal(payload: MealAnalysisInput, session: Session = Depends(get_meal_storage_session),
+              research: Session = Depends(get_session)) -> dict:
+    result = _meal_result(research, payload)
     foods = {
         food.id: food
-        for food in session.scalars(
+        for food in research.scalars(
             select(Food).where(Food.id.in_([item.food_id for item in payload.items]))
         )
     }
+    if session is not research:
+        for food in foods.values():
+            stored = session.get(Food, food.id)
+            if stored is None or (stored.source_id, stored.source_code) != (food.source_id, food.source_code):
+                raise HTTPException(409, '식사 기록의 음식 식별자가 현재 분석자료와 일치하지 않습니다.')
     meal = MealRecord(
         consumed_at=_as_utc_naive(payload.consumed_at),
         note=payload.note,
@@ -355,7 +376,7 @@ def save_meal(payload: MealAnalysisInput, session: Session = Depends(get_session
 def list_meals(
     start: date | None = None,
     end: date | None = None,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_meal_storage_session),
 ) -> dict:
     if start is not None and end is not None and end < start:
         raise HTTPException(status_code=422, detail="end must be the same as or later than start")
@@ -373,7 +394,7 @@ def list_meals(
 def meal_totals(
     start: date,
     end: date,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_meal_storage_session),
 ) -> dict:
     if end < start:
         raise HTTPException(status_code=422, detail="end must be the same as or later than start")
@@ -430,7 +451,7 @@ def export_meals(
     start: date | None = None,
     end: date | None = None,
     format: Literal["json", "csv"] = "json",
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_meal_storage_session),
 ) -> Response:
     if start is not None and end is not None and end < start:
         raise HTTPException(status_code=422, detail="end must be the same as or later than start")

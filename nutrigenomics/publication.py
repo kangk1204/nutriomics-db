@@ -62,6 +62,38 @@ def _copy_row(row):
             else row[k] for k in row.keys()]  # noqa: SIM118 -- sqlite3.Row iterates values.
 
 
+def source_reference(db, row):
+    """Only citation/permission metadata; links and versions use assessed fallbacks."""
+    assessed, value = _source(db, row['id']), decode(row['metadata_json'])
+    entry = {'id': row['id'], 'export_allowed': assessed.get('export_allowed') is True}
+    for key in ('url', 'original_url', 'version', 'sha256', 'license', 'source_location'):
+        entry[key] = portable(value.get(key))
+    entry['url'] = portable(assessed.get('url') or value.get('source_url') or entry['url'])
+    entry['original_url'] = entry['original_url'] or entry['url']
+    entry['version'] = portable(assessed.get('version') or entry['version'])
+    for key in ('license', 'rights_policy_sha256', 'rights_reviewed_at'):
+        if assessed.get(key) is not None:
+            entry[key] = assessed[key]
+    if not entry['url']:
+        entry['url_missing_reason'] = 'No external URL reported; retain identifier, input hashes and source location'
+    if not entry['version']:
+        entry['version_missing_reason'] = 'Not reported in source metadata'
+    return entry
+
+
+def reference_node_metadata(value, references):
+    """An allowed relationship cannot grant redistribution of its node dictionary."""
+    source_id = value.get('source_id')
+    source = references.get(source_id, {})
+    if 'dictionary' not in value or source.get('export_allowed') is True:
+        return value
+    safe = {k: v for k, v in value.items() if k != 'dictionary'}
+    safe['withheld_source_content'] = {'source_id': source_id, 'fields': ['dictionary'],
+        'url': source.get('url'), 'version': source.get('version'),
+        'reason': 'Source payload redistribution unconfirmed; identifier/name references remain'}
+    return safe
+
+
 def audit_run(run):
     output_files = decode(run["output_manifest_json"], [])
     if not isinstance(output_files, list):
@@ -172,17 +204,10 @@ def build_candidate(release, core, policy_path, output, release_id, *, batch_siz
         dest.execute("CREATE TABLE effect_selector(series_accession TEXT,contrast TEXT,analysis_version TEXT,feature_type TEXT,total INTEGER,PRIMARY KEY(series_accession,contrast,analysis_version,feature_type))")
         allowed, nodes = set(), set()
         for row in src.execute("SELECT * FROM source ORDER BY id"):
-            assessed = _source(src, row["id"])
-            permitted = assessed.get("export_allowed") is True
+            entry = source_reference(src, row)
+            permitted = entry['export_allowed']
             if permitted:
                 allowed.add(row["id"])
-            value = decode(row["metadata_json"])
-            entry = {"id": row["id"], "export_allowed": permitted}
-            for k in ("url", "original_url", "version", "sha256", "license", "source_location"):
-                entry[k] = portable(value.get(k))
-            for k in ("license", "rights_policy_sha256", "rights_reviewed_at"):
-                if assessed.get(k) is not None:
-                    entry[k] = assessed[k]
             catalog.append(entry)
             dest.execute("INSERT INTO source VALUES(?,?)", (row["id"], canonical(entry)))
         for table in ("measurement", "edge"):
@@ -196,6 +221,8 @@ def build_candidate(release, core, policy_path, output, release_id, *, batch_siz
                 nodes.update([row["food"], row["component"]] if table == "measurement" else [row["subject"], row["object"]])
                 dest.execute("INSERT INTO " + table + " VALUES(" + ",".join("?" for _ in row) + ")", _copy_row(row))
             exclusions.append({"table": table, "records": skipped, "reason": "redistribution_unconfirmed_or_explicitly_denied"})
+        references = {r['id']: r for r in catalog}
+        redacted_nodes = 0
         for row in src.execute("SELECT * FROM node"):
             info = decode(row["metadata_json"])
             # Approved identifier-only nodes may be isolated in the dietary
@@ -206,7 +233,13 @@ def build_candidate(release, core, policy_path, output, release_id, *, batch_siz
                     and all(value in allowed for value in identifier_sources)):
                 nodes.add(row["id"])
             if row["id"] in nodes:
-                dest.execute("INSERT INTO node VALUES(" + ",".join("?" for _ in row) + ")", _copy_row(row))
+                copied = _copy_row(row)
+                safe = reference_node_metadata(info, references)
+                redacted_nodes += safe != info
+                copied[list(row.keys()).index('metadata_json')] = canonical(portable(safe))
+                dest.execute("INSERT INTO node VALUES(" + ",".join("?" for _ in row) + ")", copied)
+        exclusions.append({'table': 'node.metadata_json', 'records': redacted_nodes,
+            'reason': 'unassessed_dictionary_payload_replaced_with_source_reference'})
         records = [dict(r) for r in src.execute("SELECT * FROM science_record ORDER BY kind,id")]
         for row in records:
             # Project-authored curation is factual metadata; its review remains pending.

@@ -111,7 +111,7 @@ def exports(base, measured, cases, manifest, output, graph_case='yogurt-max-grap
                 if data.get("positions") != payload["positions"] or data.get("filters") != payload["filters"]:
                     report["validation_errors"].append("frozen_context:" + fmt)
             else:
-                rows = list(csv.DictReader(io.StringIO(body.decode("utf-8"))))
+                rows = list(csv.DictReader(io.StringIO(body.decode("utf-8-sig"))))
                 for field, kind in (("nodes", "node"), ("edges", "edge")):
                     if [r["id"] for r in rows if r["record_type"] == kind] != [r["id"] for r in graph[field]]:
                         report["validation_errors"].append("csv_selection:" + field)

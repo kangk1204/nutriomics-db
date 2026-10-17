@@ -45,4 +45,12 @@ python -m scripts.build_reacquired_release --work "$work" --source "$source"
 
 대형 SQLite의 전체 무결성 검사는 `NUTRIGENOMICS_INTEGRITY_CACHE_MIB`로 읽기 캐시를 64~4096 MiB 범위에서 지정할 수 있다. 기본값은 128 MiB다. 이 설정은 검사 범위나 웹 응답 캐시를 바꾸지 않으며, 닫힌 파일을 새 연결로 여는 전체 `integrity_check`와 `foreign_key_check`는 그대로 수행한다.
 
+운영 조회에는 고정된 core snapshot을 `NUTRIGENOMICS_DATABASE_URL`과 `NUTRIGENOMICS_EXPLORER_CORE_DATABASE`에 지정한다. 식사 이력 저장이 필요하면 `NUTRIGENOMICS_MEAL_STORAGE_DATABASE_URL`에 별도 쓰기 가능한 DB를 지정한다. 성분 계산은 조회 snapshot을 사용하며 저장 DB의 조성으로 바꾸지 않는다. 이 설정을 생략하면 기존 단일 DB 동작을 유지한다.
+
+공개 패키지는 관계의 이용조건뿐 아니라 노드 안의 사전 설명도 점검한다. 자체 작성한 이름 대응이 외부 사전 내용의 재배포 허가를 뜻하지 않는다. `sanitize_public_references`는 기존 공개 후보를 새 release로 복사해 미허용 설명을 출처 링크·제한 사유로 바꾸고, 효과 테이블 변경을 SQLite authorizer로 차단한다. 기존 버전은 보존하며 새 공개 release에 `validate_publication_values`를 다시 실행한다.
+
+`verify_explorer_release_flows exports --graph-case <고정 사례 ID>`로 최대 요청의 실제 선택 노드·관계를 내보낸다. 공개 범위가 두 상한을 채울 수 없을 때만 `--allow-unsaturated-selection`을 사용하고 실제 개수를 보고한다. `serve_offline_snapshot`은 단일 HTML만 제공하고 CSP로 외부 리소스·API 접속을 차단하는 브라우저 시험 도구다. 실제 검색·확대·선택·출처 표시는 별도로 확인한다.
+
+`verify_graph_query_parity`는 같은 release의 색인 경로와 원래 SQL 경로의 전체 JSON을 비교한다. 회전식 디스크에서는 `--cache-mib 4096`을 양쪽에 동일하게 지정할 수 있다. 이 검사는 선택·값·생략 집계의 일치 검사이며 운영 지연 측정과 구분한다.
+
 실패하면 이전 서비스 release를 유지한다. 새 원본을 자동 전문가 승인 상태로 만들거나 분석 실패를 결과 0건으로 바꾸지 않는다. 서버 내부 서비스는 loopback에 바인딩하고 터널로 확인한다. 이 재구축 코드의 존재 자체는 DOI 등록·기관 검토·논문 제출 준비 완료를 뜻하지 않는다.

@@ -19,6 +19,8 @@ from scripts.validate_publication_values import validate
 def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explorer, tmp_path, monkeypatch):
     _science(explorer)
     with sqlite3.connect(explorer["db"]) as parent_db:
+        parent_db.execute('UPDATE node SET metadata_json=? WHERE id=?',
+            (json.dumps({'source_id': 'closed', 'dictionary': {'Definition': 'RESTRICTED_DICTIONARY_SENTINEL'}}), 'MESH:C001'))
         parent_db.executemany("INSERT INTO measurement VALUES(?,?,?,?,?,?,?,?,?)", [
             ("m-lod", "food:gap", "nutrient:fat", 0, "g", "source_100g", "below_detection", "open", "{}"),
             ("m-volume", "food:gap", "nutrient:fat", 10, "g", "source_100ml", "measured", "open", "{}"),
@@ -54,6 +56,10 @@ def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explor
         assert rows == [("A", None, 0.72), ("B", -0.25, 0.72)]
         assert db.execute("SELECT count(*) FROM science_record").fetchone()[0] == 4
         assert not db.execute("SELECT 1 FROM edge WHERE source_ids_json LIKE '%closed%'").fetchone()
+        value = json.loads(db.execute("SELECT metadata_json FROM node WHERE id='MESH:C001'").fetchone()[0])
+        assert 'dictionary' not in value
+        assert value['withheld_source_content']['source_id'] == 'closed'
+        assert b'RESTRICTED_DICTIONARY_SENTINEL' not in (output / 'nutriomics.sqlite3').read_bytes()
     table = pq.read_table(next((output / "effects").glob("*.parquet")))
     assert table["effect_estimate"].to_pylist() == [None, -0.25]
     assert "/home/research/private" not in (output / "source-catalog.json").read_text()

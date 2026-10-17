@@ -494,6 +494,36 @@ def test_absent_gene_effect_is_missing_not_a_zero_prediction(explorer):
     assert any("오믹스" in gap for gap in result["gaps"])
 
 
+@pytest.mark.parametrize("index_column", [None, "feature_id", "feature_type"])
+def test_gene_preview_pins_only_verified_selective_index(explorer, monkeypatch, index_column):
+    from nutrigenomics.explorer import _effects
+    from nutrigenomics.explorer_performance import ProfileCursor
+
+    node = {"id": "NCBIGene:41", "kind": "gene", "label": "ENTPD1",
+            "metadata": {"verified_feature_ids": ["ENSG_FIXTURE"]}}
+    expected = _effects(node)
+    with sqlite3.connect(explorer["core"]) as db:
+        db.execute("CREATE INDEX broad_type ON study_effect(feature_type)")
+        if index_column:
+            db.execute("CREATE INDEX ix_study_effect_feature_id ON study_effect(" + index_column + ")")
+    captured = []
+    original = ProfileCursor.execute
+
+    def capture(cursor, sql, parameters=()):
+        if "SELECT series_accession,feature_type,feature_id" in sql:
+            captured.append((sql, parameters))
+        return original(cursor, sql, parameters)
+
+    monkeypatch.setattr(ProfileCursor, "execute", capture)
+    assert _effects(node) == expected
+    sql, args = captured[-1]
+    assert ("INDEXED BY ix_study_effect_feature_id" in sql) == (index_column == "feature_id")
+    if index_column == "feature_id":
+        with sqlite3.connect(explorer["core"]) as db:
+            plan = str(db.execute("EXPLAIN QUERY PLAN " + sql, args).fetchall())
+        assert "ix_study_effect_feature_id (feature_id=?)" in plan
+
+
 def frozen_cpg_reference(explorer, export_allowed=False):
     """Create one reference to an actual frozen core row, with five-key identity."""
     with sqlite3.connect(explorer["core"]) as core:
