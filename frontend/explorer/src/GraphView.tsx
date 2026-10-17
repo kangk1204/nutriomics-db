@@ -19,6 +19,9 @@ export const relationLabel = (value: string) => ({
   exposure_gene_effect: '중재 발현 관찰', exposure_outcome: '건강지표 관찰',
   candidate_name_correspondence: '후보 이름 대응', component_of_intervention: '중재 구성 성분',
   eqtm_association:'CpG–발현 연관', enhancer_gene_prediction:'enhancer–gene 예측',
+  predicted_ccre_gene_link:'cCRE–유전자 계산 예측',
+  experimentally_tested_ccre_gene_pair:'조절 실험의 시험된 쌍',
+  increases:'증가',decreases:'감소',associated_with:'연관',affects:'영향 관계',
 }[value] || value.replaceAll('_', ' '));
 const STYLES:StylesheetJson=[
   {selector:'node',style:{width:36,height:36,shape:'ellipse','background-color':'#edf1f7','border-width':1.6,'border-color':'#62758c',label:'data(label)',color:'#263b51','font-family':'Segoe UI, Malgun Gothic, sans-serif','font-size':14,'font-weight':500,'text-valign':'bottom','text-margin-y':10,'text-wrap':'wrap','text-max-width':'172px','text-background-color':'#fff','text-background-opacity':0.85,'text-background-padding':'2px','overlay-opacity':0}},

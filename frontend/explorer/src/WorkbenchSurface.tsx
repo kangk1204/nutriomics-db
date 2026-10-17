@@ -41,6 +41,6 @@ export function MatchingBadge({identity}:{identity:MappingIdentity}) {
 
 export function EvidenceSummary({studies,contrasts,external,busy}:{studies:number|null;contrasts:number|null;external:number|null;busy:boolean}) {
   return <div className="ws-evidence-summary" aria-label="조회 범위" aria-busy={busy}>
-    {[['관련 사람 연구',studies,'연구 ID 중복 제거'],['중재 대비',contrasts,'원본 대비 ID 중복 제거'],['외부·임상 관계',external,'현재 필터의 관계 기록']].map(([name,value,note])=><div key={String(name)}><span>{name}</span><strong>{value==null?'—':Number(value).toLocaleString('ko-KR')}</strong><small>{note}</small></div>)}
+    {[['중재 대응 연구',studies,'음식·성분 대응 · 연구 ID 중복 제거'],['중재 대비',contrasts,'원본 대비 ID 중복 제거'],['수록 외부 관계',external,'현재 필터의 관계 기록 · 임상 검증과 구분']].map(([name,value,note])=><div key={String(name)}><span>{name}</span><strong>{value==null?'—':Number(value).toLocaleString('ko-KR')}</strong><small>{note}</small></div>)}
   </div>;
 }

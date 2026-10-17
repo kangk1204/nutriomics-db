@@ -44,6 +44,9 @@ def bridge(parent,root,hgnc,output,release_id,public=False):
         derived_from={'release_id':original['release_id'],'database_sha256':original['database_sha256']},
         gene_identifier_bridge=proof,identifier_bridge_builder_sha256=sha256(Path(__file__)),
         identifier_bridge_rules_sha256=sha256(Path(__file__).parents[1]/'nutrigenomics/candidate_layers.py'))
+    meta['candidate_layers']={**meta['candidate_layers'],
+        'exact_gene_cross_references':meta['candidate_layers'].get('exact_gene_cross_references',0)+proof['added_exact_gene_identity_links'],
+        'gene_identity_bridges':proof}
     meta.pop('files',None)
     for key in ('performance','graph_performance'):
         if key in meta:meta[key]={**meta[key],'indexed_for_release':release_id}

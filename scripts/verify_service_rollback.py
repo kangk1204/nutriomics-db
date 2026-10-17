@@ -28,7 +28,8 @@ def verify(current_code, previous_code, current_release, previous_release, outpu
         if sha256(database) != manifest['database_sha256']:
             raise ValueError('Rollback input checksum mismatch')
         env = os.environ.copy()
-        env.update(PYTHONPATH=str(code), NUTRIGENOMICS_EXPLORER_DATABASE=str(database))
+        env.update(PYTHONPATH=str(code), NUTRIGENOMICS_SOURCE_ROOT=str(code),
+                   NUTRIGENOMICS_EXPLORER_DATABASE=str(database))
         env['NUTRIGENOMICS_EXPLORER_PROFILE'] = str(output.with_name(label + '.profile.jsonl'))
         child = ("from fastapi import FastAPI;from nutrigenomics.explorer import attach_explorer;"
                  "import uvicorn;app=FastAPI();attach_explorer(app);"
@@ -56,7 +57,8 @@ def verify(current_code, previous_code, current_release, previous_release, outpu
                             'graph_sha256': hashlib.sha256(canonical(graph).encode()).hexdigest(),
                             'nodes': len(graph['nodes']), 'edges': len(graph['edges']),
                             'runtime_code_sha256': {name: sha256(code / name) for name in
-                                ['nutrigenomics/explorer.py', 'nutrigenomics/explorer_graph_reads.py']}})
+                                ['nutrigenomics/explorer.py', 'nutrigenomics/explorer_graph_reads.py',
+                                 'nutrigenomics/explorer_scientific.py','nutrigenomics/explorer_workbench.py']}})
         finally:
             job.terminate()
             try:

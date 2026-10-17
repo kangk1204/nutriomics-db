@@ -71,3 +71,6 @@
 @media(min-width:761px){.wb-studio .wb-network-layout .wb-main{overflow-y:auto}.wb-studio .wb-network-layout .wb-graph{flex:0 0 auto;height:auto;min-height:640px}.wb-studio .wb-network-layout .ng-workspace{min-height:640px;flex:none}.wb-studio .wb-network-layout .ng-body,.wb-studio .wb-network-layout .ng-canvas-wrap{min-height:420px}.wb-studio .wb-network-layout .ng-expanded{min-height:0}.wb-studio .wb-network-layout .ng-expanded .ng-body,.wb-studio .wb-network-layout .ng-expanded .ng-canvas-wrap{min-height:0}}
 
 .wb-studio .wb-network-layout .wb-inputs{display:none}
+.wb-studio .wb-evidence-table td:nth-child(n+4){white-space:nowrap;word-break:normal;overflow-wrap:normal;min-width:76px}
+.wb-studio .wb-evidence-table td:nth-child(4){min-width:100px}
+.wb-studio .wb-evidence-table td:nth-child(8){min-width:115px}

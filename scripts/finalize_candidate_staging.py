@@ -34,7 +34,8 @@ def verify_large_closed(path,proof_path):
         after=path.stat()
         if (before.st_size,before.st_mtime_ns)!=(after.st_size,after.st_mtime_ns) or sha256(path)!=original:
             raise ValueError('Permanent database changed during closed-copy integrity')
-        proof={'source_database':str(path),'database_sha256':original,'ram_copy_sha256':copied,
+        proof={'source_database':path.name,'source_reference':'Relative to this immutable release',
+            'database_sha256':original,'ram_copy_sha256':copied,
             'bytes':size,'integrity_check':'ok','foreign_key_check':[],
             'verification_scope':'Entire closed SQLite file on a SHA-identical RAM copy',
             'not_an_http_performance_measurement':True,'permanent_source_unchanged':True}
