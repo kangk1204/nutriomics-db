@@ -22,6 +22,7 @@ def indexed(tmp_path, monkeypatch):
             ('c', 'literature', None, None, '{"candidate":true}'),
             ('e', 'predicted', 's1', None, '{"value":3}')])
     receipt = build(source, index, hashlib.sha256(source.read_bytes()).hexdigest())
+    index.with_suffix('.json').write_text(json.dumps(receipt))
     monkeypatch.setenv('NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX', str(index))
     with sqlite3.connect(source) as db:
         db.row_factory = sqlite3.Row
@@ -78,3 +79,14 @@ def test_startup_verifies_auxiliary_bytes_and_binding(indexed):
         db.execute("UPDATE page_ref SET id='different' WHERE ordinal=1")
     with pytest.raises(ValueError, match='binding mismatch'):
         verify_index(index, source, 'release-a', receipt['source_sha256'])
+
+
+def test_index_change_after_startup_cannot_silently_reorder_real_records(indexed):
+    source, index, db, receipt = indexed
+    verify_index(index, source, 'release-a', receipt['source_sha256'])
+    with sqlite3.connect(index) as writer:
+        writer.execute("UPDATE page_ref SET id='temporary' WHERE id='a'")
+        writer.execute("UPDATE page_ref SET id='a' WHERE id='b'")
+        writer.execute("UPDATE page_ref SET id='b' WHERE id='temporary'")
+    with pytest.raises(QueryUnavailable, match='source_mismatch'):
+        page_rows(db, source, 'release-a', 'predicted', 1, 2)

@@ -11,6 +11,8 @@ from pathlib import Path
 
 from .explorer_performance import QueryUnavailable, canonical, fingerprint, read_connection
 
+_VERIFIED_INDEXES = {}
+
 
 def build(source: Path, output: Path, expected_sha256: str):
     source, output = Path(source).resolve(), Path(output).resolve()
@@ -82,6 +84,7 @@ def verify_index(index_path, source_path, release_id, source_sha256):
             or binding.get('release_id') != release_id or binding.get('source_sha256') != source_sha256
             or canonical(binding.get('source_fingerprint')) != canonical(fingerprint(source_path))):
         raise ValueError('Auxiliary evidence index checksum or source binding mismatch')
+    _VERIFIED_INDEXES[str(path)] = before
     return {'path': str(path), 'sha256': actual, 'release_id': release_id, 'references': binding['total']}
 
 
@@ -92,6 +95,14 @@ def page_rows(source_db, source_path, release_id, layer, page, page_size):
         return None
     path = Path(configured)
     try:
+        current_index = fingerprint(path)
+        verified_index = _VERIFIED_INDEXES.get(str(path.resolve()))
+        if verified_index is None:
+            receipt = json.loads(path.with_suffix('.json').read_text())
+            verify_index(path, source_path, release_id, receipt['source_sha256'])
+            verified_index = _VERIFIED_INDEXES[str(path.resolve())]
+        if current_index != verified_index:
+            raise QueryUnavailable('source_mismatch')
         with read_connection(path) as index:
             row = index.execute("SELECT value FROM header WHERE key='binding'").fetchone()
             binding = json.loads(row[0]) if row else {}
