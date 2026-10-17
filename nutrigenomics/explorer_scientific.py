@@ -177,6 +177,17 @@ def exposure_match_identity(seed: dict, exposure: dict, component_ids: list[str]
     }
 
 
+def gene_feature_identifiers(node: dict) -> list[str]:
+    """Namespace-aware candidates; HGNC numeric suffixes are not Entrez IDs."""
+    identifier = str(node["id"])
+    values = [identifier, node.get("label")]
+    namespace, _, suffix = identifier.partition(":")
+    if namespace.lower() in {"ncbigene", "entrez", "ensembl", "hgncsymbol"}:
+        values.append(suffix)
+    values.extend(node.get("metadata", {}).get("verified_feature_ids", []))
+    return list(dict.fromkeys(str(value) for value in values if value))[:100]
+
+
 def feature_match_identity(node: dict, effect: dict) -> dict:
     """A label or untyped legacy verified_feature_ids never proves gene identity."""
     for proof in node.get("metadata", {}).get("feature_identifier_mappings", []):
@@ -475,7 +486,7 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
     conditions = "series_accession=? AND contrast=? AND analysis_version=?"
     args = [contrast[k] for k in ("series_accession", "contrast", "analysis_version")]
     if gene:
-        identifiers = list(dict.fromkeys([gene["id"], gene["id"].split(":", 1)[-1], gene["label"]]))
+        identifiers = gene_feature_identifiers(gene)
         conditions += (
             " AND feature_type IN ('gene_expression','expression','gene','transcript') AND feature_id IN ("
             + ",".join("?" for _ in identifiers)

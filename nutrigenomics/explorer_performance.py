@@ -204,7 +204,13 @@ def indexed_source(db, core_path):
 def has_index(db, table):
     row = db.execute("SELECT value_json FROM meta WHERE key='performance'").fetchone()
     release = db.execute("SELECT value_json FROM meta WHERE key='release_id'").fetchone()
-    if not row or not release or json.loads(row[0]).get("indexed_for_release") != json.loads(release[0]):
+    if not release:
+        return False
+    ready = row is not None and json.loads(row[0]).get("indexed_for_release") == json.loads(release[0])
+    if not ready and table in {"perf_adj", "perf_exposure_match", "perf_search"}:
+        graph = db.execute("SELECT value_json FROM meta WHERE key='graph_performance'").fetchone()
+        ready = graph is not None and json.loads(graph[0]).get("indexed_for_release") == json.loads(release[0])
+    if not ready:
         return False
     return bool(db.execute("SELECT 1 FROM sqlite_master WHERE name=?", (table,)).fetchone())
 

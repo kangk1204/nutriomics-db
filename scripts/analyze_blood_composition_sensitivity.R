@@ -20,7 +20,7 @@ if(direct) {
  targets$Basename<-file.path(root,"raw/E-MTAB-12527/idat",samples$base)
  raw_files<-as.vector(outer(targets$Basename,c("_Grn.idat","_Red.idat"),paste0))
 } else {
- raw_dir<-file.path(dirname(dirname(root)),"data/processed/geo/GSE107205/raw_files")
+ raw_dir<-file.path(arg_value("--data-dir",file.path(dirname(dirname(root)),"data")),"processed/geo/GSE107205/raw_files")
  for(i in seq_len(nrow(targets))) {
   files<-list.files(raw_dir,pattern=paste0("^",targets$Sample_Name[i],"_.*_(Gn|Grn|Red)[.]idat[.]gz$"),full.names=TRUE)
   stopifnot(length(files)==2L)

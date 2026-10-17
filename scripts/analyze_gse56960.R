@@ -259,7 +259,7 @@ pathway_tables <- lapply(seq_len(ncol(contrast_matrix)), function(index) {
   ranks <- ranks[order(-abs(ranks$t), ranks$entrez, ranks$symbol), ]
   ranks <- ranks[!duplicated(ranks$entrez), ]
   stats <- sort(setNames(ranks$t, ranks$entrez), decreasing = TRUE)
-  enrichment <- fgsea(pathways = pathway_sets, stats = stats, minSize = 10L, maxSize = 500L)
+  enrichment <- fgsea(pathways = pathway_sets, stats = stats, minSize = 10L, maxSize = 500L, nproc = 1L)
   if (!nrow(enrichment)) return(NULL)
   enrichment$pathway_name <- unname(pathway_names[enrichment$pathway])
   enrichment$leading_edge <- vapply(enrichment$leadingEdge, paste, collapse = ";", character(1))

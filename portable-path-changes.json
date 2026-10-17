@@ -1,38 +1,44 @@
 [
   {
-    "file": "scripts\\adjust_gse98645_study_family.R",
-    "original_sha256": "6e9e6d1f7975183883c13be6fde3da8f9c4030a32a829fdef80723cc92741d32",
-    "portable_sha256": "0485b71bd350c1ea21d49335c35fc6db365c5365eef7434fc71514a8a115ad48",
-    "change": "default root argument only; --root retains the same analytical code"
+    "file": "scripts/adjust_gse98645_study_family.R",
+    "original_sha256": "e840abfb808a9a04b303c44484076fb417d67fc05a72e1a72079d5f9ae195dea",
+    "original_bytes_path": "source_snapshots/default_path_originals/adjust_gse98645_study_family.R",
+    "portable_sha256": "d66b67546ca14091942a9c669238d4dcb37009ccab4ebd6358a13453b5dd64c5",
+    "change": "default root argument only; exact original producer bytes archived separately"
   },
   {
-    "file": "scripts\\analyze_blood_composition_sensitivity.R",
-    "original_sha256": "803cef72f0b64526f3f86a068092a7d5b198fab9052437cb7ee7e92ed586aa8d",
-    "portable_sha256": "f2e6cdcfa91556bf1d75e4acda4ddd189d14aa70b7d69d2e38cfd32d89aa98d8",
-    "change": "default root argument only; --root retains the same analytical code"
+    "file": "scripts/analyze_blood_composition_sensitivity.R",
+    "original_sha256": "4baa959ad2cba428c6c97f7670ff787e749ad2a76d5978084193d3f89e565043",
+    "original_bytes_path": "source_snapshots/default_path_originals/analyze_blood_composition_sensitivity.R",
+    "portable_sha256": "cf5751cec11861269760c956acb63ca33c1f460e11f25242f1638856b6c02c88",
+    "change": "default root argument only; exact original producer bytes archived separately"
   },
   {
-    "file": "scripts\\analyze_direct_plus.R",
+    "file": "scripts/analyze_direct_plus.R",
     "original_sha256": "204ad4a94bea6d4cc0d41e32d2c127aa6ad1060734ccd5421b53b54d66db3591",
+    "original_bytes_path": "source_snapshots/default_path_originals/analyze_direct_plus.R",
     "portable_sha256": "8e936058e6ba1b7074605343341c13b7be5114a71a131643e21a37a1f08ab12f",
-    "change": "default root argument only; --root retains the same analytical code"
+    "change": "default root argument only; exact original producer bytes archived separately"
   },
   {
-    "file": "scripts\\analyze_gse13466.R",
+    "file": "scripts/analyze_gse13466.R",
     "original_sha256": "ab8e2e14a9d728a3b18684764a34647449a0c5d4d476682696b586eac3628f94",
+    "original_bytes_path": "source_snapshots/default_path_originals/analyze_gse13466.R",
     "portable_sha256": "a1b6ab6b78082734e5ee4285051d535554b5d268c6d3231a23b1e1f1274c5b79",
-    "change": "default root argument only; --root retains the same analytical code"
+    "change": "default root argument only; exact original producer bytes archived separately"
   },
   {
-    "file": "scripts\\analyze_gse27385.R",
+    "file": "scripts/analyze_gse27385.R",
     "original_sha256": "93a3f7ab0c0792169514715adea9994bd6673c71138c0746544f4b8166e237c0",
+    "original_bytes_path": "source_snapshots/default_path_originals/analyze_gse27385.R",
     "portable_sha256": "c6b43ab3b5cecf31b6db9f463670d9887eebf3f353fadd7b975f480927b7bed4",
-    "change": "default root argument only; --root retains the same analytical code"
+    "change": "default root argument only; exact original producer bytes archived separately"
   },
   {
-    "file": "scripts\\analyze_gse98645.R",
+    "file": "scripts/analyze_gse98645.R",
     "original_sha256": "05e1d8fff1f5b26c5bba28fa05d9ac777c124a2e21c921610f3115a922fed396",
+    "original_bytes_path": "source_snapshots/default_path_originals/analyze_gse98645.R",
     "portable_sha256": "ac03538fde47885989477fc218f68f700380b0d6ad32e412f3b18d9e47e523b8",
-    "change": "default root argument only; --root retains the same analytical code"
+    "change": "default root argument only; exact original producer bytes archived separately"
   }
 ]

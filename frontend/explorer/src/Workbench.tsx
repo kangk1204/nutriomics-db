@@ -10,6 +10,7 @@ import GraphView from './GraphView';
 import NetworkDetails from './NetworkDetails';
 import { contrastConditions } from './evidenceConditions';
 import { mealPresentation } from './mealPresentation';
+import { calculationId } from './foodIdentity';
 import { summarizeScientificEvidence } from './evidenceSummary';
 import { EntityBadge, WorkspaceWelcome, LoadingRows, EvidenceSummary, MatchingBadge, KIND_ICONS } from './WorkbenchSurface';
 import type { Entity, EvidenceEdge, Filters, GraphData, Kind, Locus, Meta, NodeDetail, ScientificContrast, ScientificEvidence, ScientificMatchResult, WorkbenchEvidence } from './types';
@@ -88,11 +89,12 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[searchBusy,setSearchBusy]=useState(false),[meal,setMeal]=useState<Record<string,unknown>|null>(null);
   const [mealBusy,setMealBusy]=useState(false);
   const mealRequest=useRef(0);
+  const mealFoodId=calculationId(detail);
   useEffect(()=>{mealRequest.current++;setMeal(null);setMealBusy(false)},[seed?.id,intake]);
   const calculateMeal=async()=>{
-    if(!detail?.metadata?.core_food_id)return;
+    if(!mealFoodId)return;
     const requestId=++mealRequest.current;setMeal(null);setMealBusy(true);
-    try{const result=await analyzeFood(String(detail.metadata.core_food_id),intake);if(requestId===mealRequest.current)setMeal(result)}
+    try{const result=await analyzeFood(mealFoodId,intake);if(requestId===mealRequest.current)setMeal(result)}
     catch(error){if(requestId===mealRequest.current)setError((error as Error).message)}
     finally{if(requestId===mealRequest.current)setMealBusy(false)}
   };
@@ -214,7 +216,7 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
           {link(source?.url)&&<a className="wb-source-link" href={link(source?.url)} target="_blank" rel="noreferrer"><ExternalLink size={15}/>원본 자료</a>}<details><summary>출처 버전·한계·원본 필드</summary><dl>{Object.entries(source||{}).filter(([k])=>!k.includes('path')).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{f(v)}</dd></div>)}</dl><p>{f(selected.reg?.context?.limitations||selected.exposure?.limitations)}</p></details>
         </>:seed?<>
           <EntityBadge entity={seed}/><h2>{seed.label}</h2><p className="wb-identifier">{seed.id}</p><GeneIdentifiers detail={detail} onSelect={selectEntity} onError={setError}/><p className="ws-detail-hint">근거 행을 선택하면 연구 조건과 원문 출처가 여기에 표시됩니다.</p>
-          {seed.kind==='food'&&<section className="ws-meal-card"><h3>성분 섭취량</h3><p><strong>{intake} g</strong> · 원본 함량 기준이 일치하는 성분을 계산합니다.</p><button className="wb-primary" disabled={offline||mealBusy||!detail?.metadata?.core_food_id} onClick={()=>void calculateMeal()}>{mealBusy?<LoaderCircle className="wb-loading" size={16}/>:<SlidersHorizontal size={16}/>} {mealBusy?'성분량 계산 중':'성분 섭취량 계산'}</button>{offline?<small>독립 HTML에서 새 섭취량은 계산하지 않습니다.</small>:detail&&!detail.metadata?.core_food_id?<small>기준 음식 ID의 대응이 확인되지 않았습니다.</small>:null}{meal&&<MealSummary key={`${seed.id}:${intake}`} meal={meal}/>}</section>}
+          {seed.kind==='food'&&<section className="ws-meal-card"><h3>성분 섭취량</h3><p><strong>{intake} g</strong> · 원본 함량 기준이 일치하는 성분을 계산합니다.</p><button className="wb-primary" disabled={offline||mealBusy||!mealFoodId} onClick={()=>void calculateMeal()}>{mealBusy?<LoaderCircle className="wb-loading" size={16}/>:<SlidersHorizontal size={16}/>} {mealBusy?'성분량 계산 중':'성분 섭취량 계산'}</button>{offline?<small>독립 HTML에서 새 섭취량은 계산하지 않습니다.</small>:detail&&!detail.metadata?.core_food_id?<small>기준 음식 ID의 대응이 확인되지 않았습니다.</small>:null}{meal&&<MealSummary key={`${seed.id}:${intake}`} meal={meal}/>}</section>}
           <h3>선택 항목의 수록 범위</h3><dl><div><dt>직접 발현 결과</dt><dd>{detail?`${detail.effects?.length||0}개 표시`:'조회 중'}</dd></div><div><dt>외부·임상 관계</dt><dd>{detail?`${detail.total_regulatory_evidence||0}개`:'조회 중'}</dd></div></dl>{detail?.gaps?.map(g=><p className="wb-muted" key={g}>{g}</p>)}
         </>:<div className="ws-inspector-empty"><BookOpen size={28}/><h3>근거의 맥락을 확인하는 곳</h3><p>항목 또는 근거를 선택하면 원본 식별자·연구 조건·출처가 표시됩니다.</p><div><span>01</span>항목 선택</div><div><span>02</span>연구·관계 확인</div><div><span>03</span>원본 출처 확인</div></div>}
       </aside>

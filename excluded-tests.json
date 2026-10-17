@@ -23,5 +23,12 @@
     "modules": [
       "promote_memory_clone"
     ]
+  },
+  {
+    "path": "tests\\test_tailscale_recovery.py",
+    "reason": "depends on project-specific server tooling",
+    "modules": [
+      "recover_tailscale_snapshot"
+    ]
   }
 ]

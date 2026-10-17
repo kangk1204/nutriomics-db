@@ -43,6 +43,10 @@ Build candidates with `python -m scripts.build_publication_release`; prepare
 the service derivative with `python -m scripts.prepare_public_service_release`.
 Both create new directories. See [the runbook](docs/PUBLICATION_RUNBOOK_ko.md) for
 review, validation, restore, DOI deposit and monthly update procedures.
+For rebuilding on a new host from official public originals, see
+[the fresh-source rebuild procedure](docs/WORKBENCH_PUBLIC_REBUILD_ko.md).
+It includes versioned execution of the 14 analysis outcomes and separate
+computational, public-value preservation and browser/performance gates.
 
 ## Public service
 

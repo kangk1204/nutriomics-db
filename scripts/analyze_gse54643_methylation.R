@@ -128,7 +128,7 @@ if (!file.copy(script_path, script_snapshot, overwrite = TRUE)) stop("Could not 
 helper_snapshot <- file.path(output_root, "gse54643_methylation_helpers.R")
 if (!file.copy(file.path(dirname(script_path), "gse54643_methylation_helpers.R"), helper_snapshot, overwrite = TRUE)) stop("Could not preserve the helper script snapshot.")
 metadata <- list(
-  accession = "GSE54643", analysis_version = "gse54643-processed-signal-paired-limma-v1",
+  accession = "GSE54643", analysis_version = arg_value("--analysis-version", "gse54643-processed-signal-paired-limma-v1"),
   run_utc = format(Sys.time(), tz = "UTC", usetz = TRUE), script_path = script_path,
   script_sha256 = sha256_file(script_path), helper_sha256 = sha256_file(helper_snapshot),
   environment_lock_path = lock_path, environment_lock_sha256 = sha256_file(lock_path),

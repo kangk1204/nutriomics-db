@@ -68,6 +68,20 @@ def read_only(path: Path) -> sqlite3.Connection:
     return connection
 
 
+def verify_closed_sqlite(path: Path) -> None:
+    """Read committed pages through a fresh connection, outside the writer cache."""
+    connection = read_only(path)
+    try:
+        connection.execute("PRAGMA cache_size=-131072")
+        integrity = [row[0] for row in connection.execute("PRAGMA integrity_check")]
+        foreign_keys = connection.execute("PRAGMA foreign_key_check").fetchmany(20)
+        if integrity != ["ok"] or foreign_keys:
+            raise ValueError("Reopened SQLite integrity failed: " + canonical({
+                "integrity": integrity[:20], "foreign_keys": [list(row) for row in foreign_keys]}))
+    finally:
+        connection.close()
+
+
 def decode(value: str | None, default: Any = None) -> Any:
     return json.loads(value) if value else ({} if default is None else default)
 
@@ -104,6 +118,10 @@ class ReleaseWriter:
         meta.update(metadata or {})
         names = set(decode(old["aliases_json"], [])) if old else set()
         names.update(a for a in aliases if a)
+        if kind == "gene" and meta.get("gene_identity_verified") is True and meta.get("hgnc_symbol"):
+            if label != meta["hgnc_symbol"]:
+                names.add(label)
+            label = meta["hgnc_symbol"]
         self.domains[identifier].update(domains)
         self.db.execute("""INSERT INTO node VALUES (?,?,?,?,?,?,?,0)
           ON CONFLICT(id) DO UPDATE SET label=excluded.label,label_en=excluded.label_en,
@@ -153,7 +171,10 @@ def import_graph(writer: ReleaseWriter, graph_path: Path) -> None:
     db = writer.db
     db.execute("ATTACH DATABASE ? AS original_graph", (graph_path.resolve().as_uri() + "?mode=ro",))
     db.execute("INSERT INTO source SELECT * FROM original_graph.source")
-    db.execute("INSERT INTO node SELECT id,kind,name,name,'[]',metadata_json,'[]',0 FROM original_graph.node")
+    db.execute("""INSERT INTO node SELECT id,kind,name,name,
+        CASE WHEN json_type(metadata_json,'$.identifier_aliases')='array'
+             THEN json_extract(metadata_json,'$.identifier_aliases') ELSE '[]' END,
+        metadata_json,'[]',0 FROM original_graph.node""")
     db.execute("""INSERT INTO edge
       WITH sources AS (SELECT edge_id,json_group_array(source_id) ids FROM original_graph.edge_source GROUP BY edge_id),
       citations AS (SELECT edge_id,json_group_array(pmid) ids FROM original_graph.citation GROUP BY edge_id)
@@ -188,6 +209,12 @@ def import_core(writer: ReleaseWriter, core: Path, input_hash: str) -> dict:
         for row in list(writer.db.execute("SELECT * FROM node WHERE kind='food'")):
             metadata = decode(row["metadata_json"])
             matches = core_foods.get(row["id"], [])
+            if not matches and row["id"].startswith("USDA-FDC:"):
+                source_code = "FDC:" + row["id"].split(":", 1)[1]
+                candidates = core_foods.get(source_code, [])
+                matches = [food for food in candidates if food["source_id"] == "R03"
+                           and str(decode(food["metadata_json"]).get("fdc_id")) == row["id"].split(":", 1)[1]
+                           and metadata.get("original_source_code") == source_code]
             if len(matches) > 1:
                 counts["ambiguous_food_mapping"] += 1
                 continue
@@ -568,6 +595,9 @@ def build_release(graph_db: Path | str, core_db: Path | str, output_dir: Path | 
     staging.mkdir(parents=True)
     connection = sqlite3.connect((staging / "explorer.sqlite").resolve().as_uri() + "?mode=rwc", uri=True)
     connection.row_factory = sqlite3.Row
+    # Connection-local settings on the new derivative, never source databases.
+    connection.execute("PRAGMA cache_size=-1048576")
+    connection.execute("PRAGMA synchronous=NORMAL")
     connection.executescript(SCHEMA)
     writer = ReleaseWriter(connection)
     try:
@@ -584,7 +614,9 @@ def build_release(graph_db: Path | str, core_db: Path | str, output_dir: Path | 
         invalid_source_refs = connection.execute("""SELECT count(*) FROM edge,json_each(edge.source_ids_json) refs
                      LEFT JOIN source ON source.id=refs.value WHERE source.id IS NULL""").fetchone()[0]
         if integrity != "ok" or foreign_keys or missing_sources or invalid_source_refs:
-            raise ValueError("release integrity/provenance failed")
+            raise ValueError("release integrity/provenance failed: " + canonical({
+                "integrity": integrity, "foreign_keys": foreign_keys[:5],
+                "missing_sources": missing_sources, "invalid_source_refs": invalid_source_refs}))
         if any((path.stat().st_size, path.stat().st_mtime_ns) != input_stats[key]
                for key, path in input_paths.items()):
             raise ValueError("source inputs changed during release build; rebuild from stable sources")
@@ -621,6 +653,7 @@ def build_release(graph_db: Path | str, core_db: Path | str, output_dir: Path | 
         connection.execute("ANALYZE")
         connection.commit()
         connection.close()
+        verify_closed_sqlite(staging / "explorer.sqlite")
         manifest["database_sha256"] = sha256(staging / "explorer.sqlite")
         (staging / "builder_source.py").write_bytes(builder_source)
         (staging / "manifest.json").write_text(canonical(manifest) + "\n", encoding="utf-8")
@@ -630,14 +663,26 @@ def build_release(graph_db: Path | str, core_db: Path | str, output_dir: Path | 
                     "literature": lit_counts, "integrity_check": integrity, "foreign_key_errors": foreign_keys,
                     "gaps": gaps, "food_to_health_causal_paths": 0}
         (staging / "coverage.json").write_text(canonical(coverage) + "\n", encoding="utf-8")
+        (staging / "verification.json").write_text(canonical({
+            "release_id": release_id, "database_sha256": manifest["database_sha256"],
+            "verified_at": datetime.now(timezone.utc).isoformat(),
+            "integrity_check": integrity, "foreign_key_errors": foreign_keys,
+            "source_stats_after_build": {key: {"bytes": path.stat().st_size,
+                "mtime_ns": path.stat().st_mtime_ns} for key, path in input_paths.items()},
+            "scope": "Build integrity and unchanged immutable inputs; not scientific review or API validation"
+        }) + "\n", encoding="utf-8")
         # Atomic directory rename on the target filesystem; never changes current.
         os.replace(staging, output_dir)
         return manifest
-    except BaseException:
+    except BaseException as error:
         connection.close()
-        # Remove only this invocation's verified staging directory, never sources.
+        # Keep failed derivatives auditable. They never receive an active pointer.
         if staging.parent.resolve() == output_dir.parent.resolve() and staging.name == "." + output_dir.name + ".building":
-            shutil.rmtree(staging)
+            (staging / "FAILED.json").write_text(canonical({"error_type": type(error).__name__,
+                "error": str(error), "release_id": release_id}), encoding="utf-8")
+            failed = staging.with_name("." + output_dir.name + ".failed-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f"))
+            staging.rename(failed)
+            error.add_note("Unactivated diagnostic files: " + str(failed))
         raise
 
 

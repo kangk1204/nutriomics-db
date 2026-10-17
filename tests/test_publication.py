@@ -70,6 +70,11 @@ def test_publication_preserves_null_nonsignificant_values_rights_and_keys(explor
     assert len(quality["contrast_coverage"]["curated_without_public_values"]) == 0
     public_only = tmp_path / "public-only-service"
     prepare(output, None, public_only, "test-public-only")
+    from nutrigenomics.explorer_performance import has_index, indexed_source
+    with sqlite3.connect(public_only / "nutriomics.sqlite3") as indexed:
+        assert has_index(indexed, "perf_adj")
+        assert not has_index(indexed, "perf_effect_ref")
+        assert not indexed_source(indexed, public_only / "nutriomics.sqlite3")
     with TestClient(create_app(public_only, allow_candidate=True)) as public_client:
         assert public_client.get("/api/v1/explorer/entities").status_code == 200
         assert public_client.post("/api/v1/meals/analyze", json={

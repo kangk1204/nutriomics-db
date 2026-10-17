@@ -44,7 +44,14 @@ def freeze(folder: Path) -> dict:
             sources.append({"path": str(archived.relative_to(folder)), "sha256": expected})
     # jsonlite auto_unbox serializes a length-one R vector as a JSON string.
     # Both forms designate file names, never individual characters.
-    result_files = metadata["result_files"]
+    result_files = metadata.get("result_files")
+    if result_files is None:
+        # Older expression producers use the importer's two documented names.
+        # Both must exist; this is not permission to guess arbitrary outputs.
+        legacy = ("gene_effects.tsv.gz", "pathway_effects.tsv.gz")
+        if not all((folder / name).is_file() for name in legacy):
+            raise ValueError("Producer omitted result_files and its legacy outputs are incomplete")
+        result_files = list(legacy)
     if isinstance(result_files, str):
         result_files = [result_files]
     if not isinstance(result_files, list) or not all(isinstance(n, str) for n in result_files):

@@ -71,18 +71,30 @@ def parse_html_snapshot(html):
     return value
 
 
-def exports(base, measured, cases, manifest, output):
+def exports(base, measured, cases, manifest, output, graph_case='yogurt-max-graph'):
     output = Path(output); output.mkdir(parents=True, exist_ok=True)
-    graph = json.loads((Path(measured) / "yogurt-max-graph-response.json").read_text(encoding="utf-8"))
+    spec = json.loads(Path(cases).read_text(encoding='utf-8'))
+    selected_case = next(c for c in spec['cases'] if c['id'] == graph_case)
+    if (selected_case['params'].get('max_nodes'), selected_case['params'].get('max_edges')) != (250, 750):
+        raise ValueError('Export validation requires a frozen 250-node/750-edge request')
+    graph = json.loads((Path(measured) / (graph_case + "-response.json")).read_text(encoding="utf-8"))
+    seed_id = selected_case['params']['seed_id']
+    seed = next(n for n in graph['nodes'] if n['id'] == seed_id)
+    context = {'seed_id': seed_id}
+    if seed.get('kind') == 'food':
+        context['intake_g'] = 150
     report = {**common(cases, manifest, graph["release_id"]), "formats": {}, "validation_errors": [],
               "offline_browser_pass": False, "offline_browser_status": "pending_actual_browser",
               "maximum_selection_verified": len(graph["nodes"]) == 250 and len(graph["edges"]) == 750,
-              "selection": {"nodes": len(graph["nodes"]), "edges": len(graph["edges"])}}
+              "display_limit_valid": 0 < len(graph['nodes']) <= 250 and len(graph['edges']) <= 750,
+              "selection": {"nodes": len(graph["nodes"]), "edges": len(graph["edges"])},
+              "graph_case": graph_case, "seed_id": seed_id,
+              "requested_limits": {key: selected_case['params'].get(key) for key in ('max_nodes','max_edges')}}
     payload = {"release_id": graph["release_id"], "node_ids": [n["id"] for n in graph["nodes"]],
                "edge_ids": [e["id"] for e in graph["edges"]],
                "positions": {n["id"]: {"x": i * 12, "y": (i % 7) * 90} for i, n in enumerate(graph["nodes"])},
                "filters": {"domain": "all", "tier": "all", "include_extracted": False,
-                           "scientific_context": {"seed_id": "FDC:2259793", "intake_g": 150}}}
+                           "scientific_context": context}}
     snapshots = {}
     for fmt in ("json", "csv", "html"):
         metrics, body = request(base, "/api/v1/explorer/export", {**payload, "format": fmt})
@@ -142,12 +154,14 @@ if __name__ == "__main__":
         p.add_argument("--" + name, type=Path, required=True)
     p.add_argument("--measured", type=Path)
     p.add_argument("--release")
+    p.add_argument("--graph-case", default='yogurt-max-graph')
+    p.add_argument('--allow-unsaturated-selection', action='store_true', help='Report actual public scope when it cannot fill both limits; never lowers requested graph limits')
     a = p.parse_args()
     if a.mode == "exports":
         if a.measured is None:
             p.error("--measured required for the fixed maximum graph response")
-        result = exports(a.base, a.measured, a.cases, a.manifest, a.output)
-        passed = not result["validation_errors"] and result["maximum_selection_verified"] and all(v["status"] == 200 and v["seconds"] <= 10 for v in result["formats"].values())
+        result = exports(a.base, a.measured, a.cases, a.manifest, a.output, a.graph_case)
+        passed = not result["validation_errors"] and result['display_limit_valid'] and (result["maximum_selection_verified"] or a.allow_unsaturated_selection) and all(v["status"] == 200 and v["seconds"] <= 10 for v in result["formats"].values())
     else:
         if not a.release:
             p.error("--release required for compatibility report")

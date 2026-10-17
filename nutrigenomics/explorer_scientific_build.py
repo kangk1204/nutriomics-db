@@ -5,12 +5,11 @@ from __future__ import annotations
 import hashlib
 import os
 import re
-import shutil
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .explorer_build import canonical, decode, read_only, sha256
+from .explorer_build import canonical, decode, read_only, sha256, verify_closed_sqlite
 
 TABLES = {
     "ng_exposure": "exposure",
@@ -51,6 +50,7 @@ def upgrade_scientific_release(base_dir, core_db, output_dir, release_id, curati
     staging = output_dir.with_name("." + output_dir.name + ".building")
     staging.mkdir(parents=True, exist_ok=False)
     target = sqlite3.connect(staging / "explorer.sqlite")
+    target.execute("PRAGMA cache_size=-262144")
     body = Path(__file__).read_bytes()
     counts = {}
     try:
@@ -161,9 +161,11 @@ def upgrade_scientific_release(base_dir, core_db, output_dir, release_id, curati
         for key, value in manifest.items():
             target.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (key, canonical(value)))
         target.commit()
-        if target.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
-            raise ValueError("release integrity failure")
+        integrity = [row[0] for row in target.execute("PRAGMA integrity_check")]
+        if integrity != ["ok"]:
+            raise ValueError("release integrity failure: " + canonical(integrity[:20]))
         target.close()
+        verify_closed_sqlite(staging / "explorer.sqlite")
         manifest["database_sha256"] = sha256(staging / "explorer.sqlite")
         (staging / "manifest.json").write_text(canonical(manifest) + "\n", encoding="utf-8")
         (staging / "scientific_builder_source.py").write_bytes(body)
@@ -182,11 +184,15 @@ def upgrade_scientific_release(base_dir, core_db, output_dir, release_id, curati
         (staging / "verification.json").write_text(canonical(receipt) + "\n", encoding="utf-8")
         os.replace(staging, output_dir)
         return manifest
-    except BaseException:
+    except BaseException as error:
         target.close()
         if (
             staging.parent.resolve() == output_dir.parent.resolve()
             and staging.name == "." + output_dir.name + ".building"
         ):
-            shutil.rmtree(staging)
+            (staging / "FAILED.json").write_text(canonical({"error": str(error),
+                "release_id": release_id, "scope": "Unactivated failed derivative retained for diagnosis"}), encoding="utf-8")
+            failed = staging.with_name("." + output_dir.name + ".failed-" + datetime.now(UTC).strftime("%Y%m%dT%H%M%S%f"))
+            staging.rename(failed)
+            error.add_note("Unactivated diagnostic files: " + str(failed))
         raise

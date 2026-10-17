@@ -75,8 +75,15 @@ def download(data_dir: Path = DATA_DIR) -> dict:
                     if damaged:
                         raise ValueError(f"Corrupt entry in {item['name']}: {damaged}")
                 os.replace(temp, path)
-            except BaseException:
-                temp.unlink(missing_ok=True)
+            except BaseException as error:
+                if temp.exists():
+                    failed = temp.with_name(temp.name + ".failed-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f"))
+                    temp.rename(failed)
+                    failed.with_suffix(failed.suffix + ".json").write_text(json.dumps({
+                        "source_url": item["url"], "bytes": failed.stat().st_size,
+                        "sha256": sha256_file(failed), "status": "quarantined_not_importable",
+                        "error_type": type(error).__name__, "error": str(error),
+                    }, indent=2), encoding="utf-8")
                 raise
             finally:
                 response.close()

@@ -37,6 +37,7 @@ from .explorer_scientific import (
     annotate_effect_context,
     edge_scientific,
     feature_match_identity,
+    gene_feature_identifiers,
     path_scientific,
     scientific_matches,
 )
@@ -344,7 +345,7 @@ def _source(db, identifier):
             ),
         ),
         "version": original.get(
-            "version", original.get("report_created", original.get("recorded_at"))
+            "version", original.get("release", original.get("report_created", original.get("recorded_at")))
         ),
         "sha256": original.get("sha256"),
         "license": (policy or {}).get("license") or original.get("license", original.get("rights")),
@@ -395,9 +396,7 @@ def _effects(node, limit=50):
     core = configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db" / "nutrigenomics.sqlite3")
     if not core.is_file():
         raise QueryUnavailable("source_unavailable")
-    identifiers = [node["id"], node["id"].split(":", 1)[-1], node["label"]]
-    identifiers += node["metadata"].get("verified_feature_ids", [])
-    identifiers = list(dict.fromkeys(str(x) for x in identifiers if x))[:100]
+    identifiers = gene_feature_identifiers(node)
     try:
         with read_connection(core) as db:
             rows = db.execute(
@@ -776,8 +775,8 @@ def graph(
             # other foods, or walk a gene back into unrelated chemical assays.
             inbound = ""
             if level > 0:
-                inbound = " AND e.relation NOT IN ('contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')"
-            rows = reads.adjacent(current, level, max_edges + 1) if reads.indexed else db.execute(
+                inbound = " AND e.relation NOT IN ('contains','contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')"
+            rows = reads.adjacent(current, level, max_edges + 1, hydrate=False) if reads.indexed else db.execute(
                 # Rank the small identifier projection first. UNION on full
                 # provenance/context JSON made high-degree gene neighborhoods
                 # expensive even though only <=751 records could be returned.
@@ -808,7 +807,11 @@ def graph(
                     seen[neighbor] = _node(n)
                     q.append((neighbor, level + 1))
                 chosen[e["id"]] = e
-        nodes, edges = list(seen.values()), list(chosen.values())
+        # Traversal needs only endpoint IDs. Hydrate the selected records once;
+        # omitted neighbors retain their exact counts without reading large
+        # provenance JSON for thousands of records that will not be displayed.
+        nodes = list(seen.values())
+        edges = reads.load_edges(list(chosen)) if reads.indexed else list(chosen.values())
         paths = _paths(nodes, edges, seed_id)
         gaps = []
         if not edges:

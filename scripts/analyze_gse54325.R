@@ -181,7 +181,13 @@ valid_entrez <- !is.na(gene_entrez) & nzchar(gene_entrez) & is.finite(fit$t[, 1L
 ranks <- data.frame(entrez = as.character(gene_entrez[valid_entrez]), t = fit$t[valid_entrez, 1L])
 ranks <- ranks[order(-abs(ranks$t), ranks$entrez), ]
 ranks <- ranks[!duplicated(ranks$entrez), ]
-fgsea_result <- fgsea(pathways = pathway_sets, stats = sort(setNames(ranks$t, ranks$entrez), decreasing = TRUE), minSize = 10L, maxSize = 500L)
+write.table(data.frame(pathway_id=rep(names(pathway_sets),lengths(pathway_sets)),
+  entrez_id=unlist(pathway_sets,use.names=FALSE)),file.path(output_root,"reactome_membership.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
+write_json(list(database_metadata=AnnotationDbi::metadata(reactome.db),
+  release_status="Exact installed annotation snapshot; not relabeled as current Reactome release"),
+  file.path(output_root,"reactome_snapshot.json"),auto_unbox=TRUE,pretty=TRUE)
+set.seed(20261001L)
+fgsea_result <- fgsea(pathways = pathway_sets, stats = sort(setNames(ranks$t, ranks$entrez), decreasing = TRUE), minSize = 10L, maxSize = 500L, nproc = 1L)
 if (!nrow(fgsea_result)) stop("No Reactome pathway results were generated.")
 fgsea_result$pathway_name <- unname(pathway_names[fgsea_result$pathway])
 pathway_results <- data.frame(
@@ -256,7 +262,7 @@ input_manifest <- lapply(input_paths, function(path) {
 })
 metadata <- list(
   accession = "GSE54325",
-  analysis_version = "gse54325-agilent-limma-v1",
+  analysis_version = arg_value("--analysis-version", "gse54325-agilent-limma-v1"),
   run_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
   script_path = script_path,
   script_sha256 = sha256_file(script_path),

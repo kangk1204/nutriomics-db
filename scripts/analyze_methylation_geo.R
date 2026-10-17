@@ -250,7 +250,7 @@ if (!identical(normalizePath(script_path), normalizePath(script_snapshot, mustWo
   if (!file.copy(script_path, script_snapshot, overwrite = TRUE)) stop("Could not preserve the analysis script snapshot.")
 }
 metadata <- list(
-  accession = accession, analysis_version = paste0(tolower(accession), "-noob-limma-cpg-", if (arg_value("--bridge-contrasts","false")=="true") "between-arm-v3" else if (accession == "GSE219217") "v2" else "v1"), run_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
+  accession = accession, analysis_version = arg_value("--analysis-version", paste0(tolower(accession), "-noob-limma-cpg-", if (arg_value("--bridge-contrasts","false")=="true") "between-arm-v3" else if (accession == "GSE219217") "v2" else "v1")), run_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
   script_path = script_path, script_sha256 = sha256_file(script_path), environment_lock_path = lock_path, environment_lock_sha256 = sha256_file(lock_path),
   overlay_lock_path = overlay_lock_path, overlay_lock_sha256 = sha256_file(overlay_lock_path), input_manifest = input_manifest,
   sample_count = nrow(sample_info), independent_people = length(unique(sample_info$person_id)), timepoints = as.list(sort(unique(sample_info$timepoint))),

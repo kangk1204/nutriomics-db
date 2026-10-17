@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {transform} from 'esbuild';
+const compiled=await transform(await readFile('src/foodIdentity.ts','utf8'),{loader:'ts',format:'esm'});
+const {calculationId}=await import('data:text/javascript;base64,'+Buffer.from(compiled.code).toString('base64'));
+assert.equal(calculationId(undefined),undefined);
+assert.equal(calculationId({metadata:{core_food_id:7}}),'7');
+assert.equal(calculationId({metadata:{core_food_id:7,public_food_id:'USDA-FDC:42'}}),'USDA-FDC:42');
+assert.equal(calculationId({metadata:{calculation_food_id:'food:rice',public_food_id:'old'}}),'food:rice');
+assert.equal(calculationId({metadata:{public_food_id:' ',core_food_id:7}}),'7');
+assert.equal(calculationId({metadata:{core_food_id:0}}),undefined);
+assert.equal(calculationId({metadata:{core_food_id:NaN}}),undefined);
+assert.equal(calculationId({id:'food:unverified'}),undefined);
+console.log('8 calculation identifier checks passed; public source IDs do not depend on private row numbers');

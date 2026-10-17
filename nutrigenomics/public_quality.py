@@ -7,6 +7,7 @@ from .explorer_build import canonical
 
 
 def analysis_role(version):
+    version = version.split("-rebuild", 1)[0]
     if "blood-composition" in version:
         return "sensitivity"
     if "regions-fixed" in version:

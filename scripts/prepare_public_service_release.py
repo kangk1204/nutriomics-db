@@ -9,6 +9,7 @@ from pathlib import Path
 
 from nutrigenomics.explorer_build import canonical, read_only, sha256
 from nutrigenomics.public_quality import build_quality
+from nutrigenomics.explorer_performance_build import add_graph_read_indexes
 from nutrigenomics.publication import EFFECT_FIELDS, _csv, _write_review
 from nutrigenomics.source_updates import atomic_json
 
@@ -68,9 +69,14 @@ def prepare(candidate, parent, output, release_id):
                 info.update(core_food_id=core_id, public_food_id=row["id"])
                 db.execute("UPDATE node SET metadata_json=? WHERE id=?", (canonical(info), row["id"]))
                 db.execute("INSERT INTO food_alias VALUES(?,?)", (int(core_id), row["id"]))
+        db.execute("""UPDATE node SET metadata_json=json_set(metadata_json,
+            '$.public_food_id',id,'$.calculation_food_id',id) WHERE kind='food'""")
         columns = [k for k in EFFECT_FIELDS if k != "metadata_json"]
         db.execute("CREATE VIEW study_effect AS SELECT " + ",".join(columns) + ",json_set(metadata_json,'$.export_allowed',json('true'),'$.publication_rights_policy_id',rights_policy_id) AS metadata_json,NULL AS source_file FROM effect")
         metadata = json.loads((staging / "dataset-metadata.json").read_text())
+        print(json.dumps({"phase": "graph_search_match_indexes"}), flush=True)
+        graph_indexes = add_graph_read_indexes(db, release_id)
+        metadata["graph_performance"] = graph_indexes
         quality = build_quality(db)
         print(json.dumps({"phase": "quality_indexes_complete", "quality": quality}), flush=True)
         metadata["quality"] = quality

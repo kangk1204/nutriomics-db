@@ -56,7 +56,7 @@ def assess(*, status, amount, unit, basis, metadata=None, food_metadata=None, so
             method, accepted = declaration, True
         else:
             data_type = food.get("data_type", food.get("dataType"))
-            provenance = str(source_id or "").startswith("USDA-FDC:")
+            provenance = str(source_id or "").startswith("USDA-FDC:") or source_id == "R03"
             derivation = context.get("foodNutrientDerivation") or context.get("source_derivation") or {}
             code = str(derivation.get("code", "")).upper()
             description = str(derivation.get("description", "")).casefold()

@@ -3,12 +3,15 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - r-base=4.5
+  - python=3.12
+  - r-base=4.5.3
   - bioconductor-limma
   - bioconductor-edger
   - bioconductor-affy
   - bioconductor-preprocesscore=1.72.0
   - bioconductor-hgu219cdf
+  - bioconductor-hgu133plus2cdf
+  - bioconductor-makecdfenv
   - bioconductor-hgu219.db
   - bioconductor-minfi
   - bioconductor-illuminahumanmethylation450kmanifest

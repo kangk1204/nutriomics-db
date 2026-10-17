@@ -28,7 +28,7 @@ for(k in seq_along(folders)) {
   if(filename!="camera_sensitivity.tsv.gz")file.copy(file.path(folders[[k]],filename),file.path(outputs[[k]],filename),overwrite=TRUE)
  }
  file.copy(file.path(folders[[k]],"reanalysis_inputs.rds"),file.path(outputs[[k]],"reanalysis_inputs.rds"),overwrite=TRUE)
- original$analysis_version<-sub("-v1$","-studyfamily-v2",original$analysis_version)
+ original$analysis_version<-paste0(sub("-v1$","-studyfamily-v2",original$analysis_version),arg_value("--analysis-version-suffix",""))
  original$run_utc<-format(Sys.time(),tz="UTC",usetz=TRUE)
  original$script_path<-normalizePath(script);original$script_sha256<-file_sha(script)
  original$helper_path<-file.path(dirname(script),"bridge_omics_helpers.R");original$helper_sha256<-file_sha(original$helper_path)

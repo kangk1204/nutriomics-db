@@ -146,7 +146,8 @@ def _nutrient_fields(food_nutrient: dict[str, Any]) -> tuple[str, str, str | Non
         value = None
     extra = {
         key: food_nutrient.get(key)
-        for key in ("dataPoints", "standardError", "min", "max", "median", "derivationCode", "footnote")
+        for key in ("dataPoints", "standardError", "min", "max", "median", "derivationCode", "footnote",
+                    "foodNutrientDerivation", "foodNutrientSource", "type")
         if food_nutrient.get(key) is not None
     }
     return str(nutrient_id), str(name), str(unit) if unit else None, value, extra
@@ -318,7 +319,10 @@ def import_fdc(data_dir: Path = DATA_DIR, database_url: str = DATABASE_URL) -> d
                     else:
                         measurement.amount_per_100g = amount
                         measurement.unit = unit
-                        measurement.status = "measured_zero" if amount == 0 else "measured"
+                        derivation = extra.get("foodNutrientDerivation") or {}
+                        description = str(derivation.get("description") or "").casefold()
+                        analytical = item.get("dataType") != "Survey (FNDDS)" and description.startswith("analytical")
+                        measurement.status = ("measured_zero" if amount == 0 else "measured") if analytical else "derived"
                         measurement.n_observations = extra.get("dataPoints")
                         measurement.standard_error = extra.get("standardError")
                         measurement.minimum = extra.get("min")

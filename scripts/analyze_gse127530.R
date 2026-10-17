@@ -164,6 +164,12 @@ path_name_columns <- intersect(c("path_name", "PATHNAME", "name"), names(pathway
 if (!length(path_id_columns) || !length(path_name_columns)) stop("Unable to identify Reactome pathway identifier and name columns.")
 pathway_names_table <- pathway_names_table[grepl("^R-HSA-", pathway_names_table[[path_id_columns[[1L]]]]), , drop = FALSE]
 pathway_names <- setNames(as.character(pathway_names_table[[path_name_columns[[1L]]]]), as.character(pathway_names_table[[path_id_columns[[1L]]]]))
+write.table(data.frame(pathway_id=rep(names(pathway_sets),lengths(pathway_sets)),
+  entrez_id=unlist(pathway_sets,use.names=FALSE)),file.path(output_root,"reactome_membership.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
+write_json(list(database_metadata=AnnotationDbi::metadata(reactome.db),
+  release_status="Exact installed annotation snapshot; not relabeled as current Reactome release"),
+  file.path(output_root,"reactome_snapshot.json"),auto_unbox=TRUE,pretty=TRUE)
+set.seed(20261001L)
 
 pathway_tables <- lapply(seq_len(ncol(contrast_matrix)), function(index) {
   contrast_name <- colnames(contrast_matrix)[[index]]
@@ -175,7 +181,7 @@ pathway_tables <- lapply(seq_len(ncol(contrast_matrix)), function(index) {
   ranks <- ranks[!duplicated(ranks$entrez), ]
   stats <- setNames(ranks$t, ranks$entrez)
   stats <- sort(stats, decreasing = TRUE)
-  enrichment <- fgsea(pathways = pathway_sets, stats = stats, minSize = 10L, maxSize = 500L)
+  enrichment <- fgsea(pathways = pathway_sets, stats = stats, minSize = 10L, maxSize = 500L, nproc = 1L)
   if (!nrow(enrichment)) return(NULL)
   enrichment$pathway_name <- unname(pathway_names[enrichment$pathway])
   enrichment$leading_edge <- vapply(enrichment$leadingEdge, paste, collapse = ";", character(1))
@@ -219,8 +225,14 @@ sample_qc <- data.frame(
 write.table(sample_qc, file.path(output_root, "sample_qc.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
 
 metadata <- list(
+  script_path = normalizePath(sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1])),
+  script_sha256 = strsplit(system2("sha256sum",shQuote(sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1])),stdout=TRUE)," +")[[1]][1],
+  environment_lock_path = normalizePath(file.path(data_root,"..","toolchain","r-environment-linux-64.lock.txt")),
+  environment_lock_sha256 = strsplit(system2("sha256sum",shQuote(file.path(data_root,"..","toolchain","r-environment-linux-64.lock.txt")),stdout=TRUE)," +")[[1]][1],
+  result_files = list("gene_effects.tsv.gz","pathway_effects.tsv.gz"),
+  fgsea_random_seed = 20261001L, fgsea_workers = 1L,
   accession = "GSE127530",
-  analysis_version = "gse127530-limma-voom-v1",
+  analysis_version = arg_value("--analysis-version", "gse127530-limma-voom-v1"),
   run_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
   input_file = basename(count_file),
   input_file_sha256 = count_audit$files[[2L]]$compressed_sha256,

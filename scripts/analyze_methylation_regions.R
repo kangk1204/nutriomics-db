@@ -40,7 +40,7 @@ tables<-lapply(seq_len(ncol(paired$contrasts)),function(k) {
 })
 result<-do.call(rbind,tables);result$q_value_contrast<-result$q_value;result$q_value_study_family<-p.adjust(result$p_value,"BH");result$q_value<-result$q_value_study_family
 write_gzip_tsv(result,file.path(output,"dmr_effects.tsv.gz"))
-metadata$analysis_version<-paste0(metadata$analysis_version,"-regions-fixed1000bp-v1");metadata$run_utc<-format(Sys.time(),tz="UTC",usetz=TRUE)
+metadata$analysis_version<-arg_value("--analysis-version",paste0(metadata$analysis_version,"-regions-fixed1000bp-v1"));metadata$run_utc<-format(Sys.time(),tz="UTC",usetz=TRUE)
 metadata$script_path<-normalizePath(script);metadata$script_sha256<-file_sha(script);metadata$helper_path<-file.path(dirname(script),"bridge_omics_helpers.R");metadata$helper_sha256<-file_sha(metadata$helper_path)
 metadata$analysis_role<-"Secondary fixed-region screening endpoint; no claim that fixed tile boundaries reproduce segmented DMRs"
 metadata$dmr_analysis<-"All hg19 autosomal fixed 1000-bp regions containing at least 3 tested CpGs; person-level M/beta means preserve within-region correlation; regional M tests and beta-scale SE/CI"

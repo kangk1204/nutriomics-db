@@ -59,7 +59,7 @@ tables<-lapply(seq_len(ncol(contrasts)),function(k) {
 })
 result<-do.call(rbind,tables);result$q_value_contrast<-result$q_value;result$q_value_study_family<-p.adjust(result$p_value,"BH");result$q_value<-result$q_value_study_family
 write_gzip_tsv(result,file.path(output,"cpg_effects.tsv.gz"))
-metadata$analysis_version<-paste0(metadata$analysis_version,"-blood-composition-closed-v2");metadata$run_utc<-format(Sys.time(),tz="UTC",usetz=TRUE)
+metadata$analysis_version<-arg_value("--analysis-version",paste0(metadata$analysis_version,"-blood-composition-closed-v2"));metadata$run_utc<-format(Sys.time(),tz="UTC",usetz=TRUE)
 metadata$script_path<-normalizePath(script);metadata$script_sha256<-file_sha(script);metadata$helper_path<-file.path(dirname(script),"bridge_omics_helpers.R");metadata$helper_sha256<-file_sha(metadata$helper_path)
 metadata$cell_composition_adjusted<-TRUE;metadata$analysis_role<-"Sensitivity; estimated relative cell composition may mediate dietary response; no direct-effect causal claim"
 metadata$design_formula<-"Paired M/beta changes; original arm contrasts plus changes in five closed relative cell fractions; Gran reference omitted"

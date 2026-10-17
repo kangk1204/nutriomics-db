@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import shutil
 import sqlite3
@@ -11,7 +12,7 @@ from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .explorer_build import canonical, read_only, sha256
+from .explorer_build import canonical, read_only, sha256, verify_closed_sqlite
 from .explorer_performance import fingerprint, selector_key
 from .explorer_scientific import RULE_VERSION, decoded, exposure_match_identity, science_records
 
@@ -26,8 +27,13 @@ CREATE TABLE perf_exposure_match(node_id TEXT,exposure_id TEXT,identity_json TEX
 CREATE TABLE perf_adj(edge_id TEXT PRIMARY KEY,subject TEXT,object TEXT,relation TEXT,tier TEXT,rank_default INTEGER,rank_health INTEGER,rank_gene INTEGER,measurement_id TEXT,usable INTEGER);
 CREATE INDEX perf_adj_subject ON perf_adj(subject,rank_default,edge_id);
 CREATE INDEX perf_adj_object ON perf_adj(object,rank_default,edge_id);
+CREATE INDEX perf_adj_subject_cover ON perf_adj(subject,rank_default,edge_id,relation,tier);
+CREATE INDEX perf_adj_object_cover ON perf_adj(object,rank_default,edge_id,relation,tier);
+CREATE INDEX perf_adj_object_traversal_cover ON perf_adj(object,rank_default,edge_id,relation,tier) WHERE relation NOT IN ('contains','contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence');
 CREATE INDEX perf_adj_health ON perf_adj(subject,rank_health,edge_id);
 CREATE INDEX perf_adj_gene ON perf_adj(subject,rank_gene,edge_id);
+CREATE INDEX perf_adj_tier ON perf_adj(tier,subject,object);
+CREATE INDEX perf_edge_tier ON edge(tier,subject,object);
 CREATE INDEX perf_node_label ON node(kind,label,id);
 CREATE INDEX perf_node_degree ON node(kind,degree,id);
 CREATE TABLE perf_search_content(rowid INTEGER PRIMARY KEY,node_id TEXT UNIQUE,label TEXT,label_en TEXT,aliases TEXT,identifier TEXT);
@@ -35,7 +41,63 @@ CREATE VIRTUAL TABLE perf_search USING fts5(label,label_en,aliases,identifier,co
 """
 
 
+def add_graph_read_indexes(db, release_id):
+    """Index a new self-contained projection without a circular core fingerprint.
+
+    Quantitative effects use the public effect_selector and native effect index.
+    No effect values or effect IDs are copied into this graph-only index.
+    """
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='perf_adj'").fetchone():
+        raise ValueError("Graph indexes already exist; build a fresh derivative")
+    db.executescript(SCHEMA[SCHEMA.index("CREATE TABLE perf_exposure_match"):])
+    db.execute("""INSERT INTO perf_search_content(node_id,label,label_en,aliases,identifier)
+        SELECT id,label,coalesce(label_en,''),aliases_json,id FROM node ORDER BY id""")
+    db.execute("INSERT INTO perf_search(perf_search) VALUES('rebuild')")
+    refs = {k: science_records(db, k) for k in ("exposure", "curation")}
+    curated = {r["core_exposure_id"]: r for r in (refs["curation"][0] if refs["curation"] else {}).get("exposures", [])}
+    components = {}
+    for row in db.execute("SELECT DISTINCT food,component FROM measurement WHERE amount>0 AND status NOT IN ('missing','unverified','below_detection')"):
+        components.setdefault(row[0], []).append(row[1])
+    for row in db.execute("SELECT id,kind,label,label_en,aliases_json,metadata_json FROM node"):
+        seed = dict(row)
+        seed["metadata"] = decoded(seed.pop("metadata_json"))
+        seed["aliases"] = decoded(seed.pop("aliases_json"), [])
+        seed["label_en"] = seed.get("label_en") or ""
+        if seed["kind"] == "food":
+            seed["metadata"]["available_component_ids"] = components.get(seed["id"], [])
+        for original in refs["exposure"]:
+            exposure = {**original, **curated.get(original["id"], {})}
+            identity = exposure_match_identity(seed, exposure, decoded(original.get("component_keys"), []))
+            if identity["status"] != "unknown":
+                db.execute("INSERT INTO perf_exposure_match VALUES(?,?,?)", (seed["id"], original["id"], canonical(identity)))
+    measurements = {r["id"]: dict(r) for r in db.execute("SELECT id,amount FROM measurement")}
+    correspondence = {"candidate_name_correspondence", "source_identifier_cross_reference"}
+    batch = []
+    for row in db.execute("SELECT id,subject,object,relation,tier,context_json FROM edge"):
+        relation = row["relation"]
+        disease = "disease" in relation.lower()
+        rank = 0 if disease else 1 if relation in correspondence else 3 if row["tier"] == "observed_composition" else 2
+        health = 0 if disease or relation == "randomized_difference" else 1 if relation in correspondence else 4 if relation == "annotated_to_pathway" else 2
+        gene = 0 if relation == "chemical_gene_influence" else 1 if disease else 2 if relation in correspondence else 3
+        context = decoded(row["context_json"])
+        measurement_id = context.get("measurement_id")
+        measurement = measurements.get(measurement_id, context.get("measurement"))
+        usable = row["tier"] != "restricted" and (not measurement or measurement.get("amount") is not None and measurement["amount"] > 0)
+        batch.append((row["id"], row["subject"], row["object"], relation, row["tier"], rank, health, gene, measurement_id, int(usable)))
+        if len(batch) >= 5000:
+            db.executemany("INSERT INTO perf_adj VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
+            batch.clear()
+    db.executemany("INSERT INTO perf_adj VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
+    db.execute("ANALYZE")
+    info = {"indexed_for_release": release_id, "matching_rule_version": RULE_VERSION,
+            "adjacency_rows": db.execute("SELECT count(*) FROM perf_adj").fetchone()[0],
+            "effect_values_copied": 0, "scope": "Self-contained graph/search/exposure indexes; public quantitative selectors remain native"}
+    db.execute("INSERT OR REPLACE INTO meta VALUES(?,?)", ("graph_performance", canonical(info)))
+    return info
+
+
 def build_performance_release(parent_dir, core_path, output_dir, release_id, ram_workspace=False, memory_budget_gib=32):
+    builder_source = Path(__file__).read_bytes()
     parent_dir, core_path, output_dir = map(Path, (parent_dir, core_path, output_dir))
     if output_dir.exists():
         raise ValueError("Output exists; immutable releases cannot be overwritten")
@@ -156,16 +218,18 @@ def build_performance_release(parent_dir, core_path, output_dir, release_id, ram
             parent_meta = {r[0]: decoded(r[1]) for r in db.execute("SELECT * FROM meta")}
             info = {"schema_version": 1, "indexed_for_release":release_id, "core_fingerprint": json.loads(canonical(initial)), "matching_rule_version": RULE_VERSION,
                     "source_release": parent_meta.get("release_id"), "selector_count": len(selectors), "effect_reference_rows": sum(counts.values()),
-                    "effect_values_copied": 0, "builder_sha256": sha256(Path(__file__))}
+                    "effect_values_copied": 0, "builder_sha256": hashlib.sha256(builder_source).hexdigest()}
             created_at = datetime.now(UTC).isoformat()
             db.executemany("INSERT OR REPLACE INTO meta VALUES(?,?)", [("release_id", canonical(release_id)), ("performance", canonical(info)), ("created_at", canonical(created_at))])
             db.commit()
             if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                 raise RuntimeError("Index integrity failed")
+        verify_closed_sqlite(destination)
         for name in ("manifest.json", "scope.json"):
             if (parent_dir / name).exists():
                 shutil.copy2(parent_dir / name, output_dir / name)
         manifest = {**parent_meta, "release_id": release_id, "created_at":created_at, "performance": info, "database_sha256": sha256(destination)}
+        (output_dir / "performance_builder_source.py").write_bytes(builder_source)
         (output_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
         return manifest
     except BaseException:

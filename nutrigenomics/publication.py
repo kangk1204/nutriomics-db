@@ -197,6 +197,14 @@ def build_candidate(release, core, policy_path, output, release_id, *, batch_siz
                 dest.execute("INSERT INTO " + table + " VALUES(" + ",".join("?" for _ in row) + ")", _copy_row(row))
             exclusions.append({"table": table, "records": skipped, "reason": "redistribution_unconfirmed_or_explicitly_denied"})
         for row in src.execute("SELECT * FROM node"):
+            info = decode(row["metadata_json"])
+            # Approved identifier-only nodes may be isolated in the dietary
+            # graph while still indexing real quantitative expression results.
+            identifier_sources = info.get("source_ids", [])
+            if (row["kind"] == "gene" and info.get("gene_identity_verified") is True
+                    and info.get("feature_identifier_mappings") and identifier_sources
+                    and all(value in allowed for value in identifier_sources)):
+                nodes.add(row["id"])
             if row["id"] in nodes:
                 dest.execute("INSERT INTO node VALUES(" + ",".join("?" for _ in row) + ")", _copy_row(row))
         records = [dict(r) for r in src.execute("SELECT * FROM science_record ORDER BY kind,id")]

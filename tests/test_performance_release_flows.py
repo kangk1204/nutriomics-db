@@ -30,3 +30,28 @@ def test_html_requires_embedded_runtime_and_network_block():
         parse_html_snapshot(html.replace("connect-src 'none'","connect-src *"))
     with pytest.raises(ValueError):
         parse_html_snapshot(html+'<script src="https://unavailable.invalid/runtime.js"></script>')
+
+
+def test_export_context_uses_frozen_case_identity(tmp_path, monkeypatch):
+    import scripts.verify_explorer_release_flows as flows
+    from scripts.benchmark_explorer_performance import digest
+    seed = 'synthetic:current-food'
+    cases = [{'id': 'maximum-graph', 'params': {'seed_id': seed, 'max_nodes': 250, 'max_edges': 750}}]
+    spec = tmp_path / 'cases.json'
+    spec.write_text(json.dumps({'cases': cases, 'case_sha256': digest(cases)}))
+    manifest = tmp_path / 'manifest.json'
+    manifest.write_text('{}')
+    graph = {'release_id': 'synthetic-release', 'nodes': [{'id': seed, 'kind': 'food'}], 'edges': []}
+    (tmp_path / 'maximum-graph-response.json').write_text(json.dumps(graph))
+    payloads = []
+
+    def capture(base, path, payload):
+        payloads.append(payload)
+        return {'status': 503}, b''
+
+    monkeypatch.setattr(flows, 'request', capture)
+    report = flows.exports('http://unused.invalid', tmp_path, spec, manifest, tmp_path / 'output', 'maximum-graph')
+    assert len(payloads) == 3
+    assert all(p['filters']['scientific_context'] == {'seed_id': seed, 'intake_g': 150} for p in payloads)
+    assert report['maximum_selection_verified'] is False
+    assert report['display_limit_valid'] is True

@@ -9,6 +9,8 @@ class GraphReads:
         self.db, self.decode_node, self.decode_edge = db, decode_node, decode_edge
         self.domain, self.tiers, self.include_extracted = domain, tiers, include_extracted
         self.indexed = has_index(db, "perf_adj")
+        self.covering = self.indexed and bool(db.execute("SELECT 1 FROM sqlite_master WHERE name='perf_adj_object_cover'").fetchone())
+        self.traversal_covering = self.indexed and bool(db.execute("SELECT 1 FROM sqlite_master WHERE name='perf_adj_object_traversal_cover'").fetchone())
         self.nodes, self.edges = {}, {}
 
     def load_nodes(self, identifiers):
@@ -55,8 +57,28 @@ class GraphReads:
         ids = [r[0] for r in self.db.execute("SELECT a.edge_id FROM perf_adj a WHERE a.subject=?" + clause + " ORDER BY a." + rank + ",a.edge_id LIMIT ?", [current, *args, limit])]
         return self.load_edges(ids)
 
-    def adjacent(self, current, level, limit):
+    def adjacent(self, current, level, limit, *, hydrate=True):
         clause, args = self.clause()
-        inbound = " AND a.relation NOT IN ('contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')" if level > 0 else ""
-        ids = [r[0] for r in self.db.execute("WITH adjacent AS (SELECT a.edge_id,a.rank_default FROM perf_adj a WHERE a.subject=?" + clause + " UNION SELECT a.edge_id,a.rank_default FROM perf_adj a WHERE a.object=?" + clause + inbound + ") SELECT edge_id FROM adjacent ORDER BY rank_default,edge_id LIMIT ?", [current, *args, current, *args, limit])]
+        inbound = " AND a.relation NOT IN ('contains','contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')" if level > 0 else ""
+        subject_index = ' INDEXED BY perf_adj_subject_cover' if self.covering else ''
+        object_index = ' INDEXED BY perf_adj_object_cover' if self.covering else ''
+        if level > 0 and self.traversal_covering:
+            object_index = ' INDEXED BY perf_adj_object_traversal_cover'
+        # Each member of the global top K must occur in its branch's top K.
+        # This retains the exact union ordering, including self-loop duplicates,
+        # while avoiding a sort of every adjacent edge of a high-degree node.
+        sql = ("WITH outgoing AS (SELECT a.edge_id,a.rank_default FROM perf_adj a" + subject_index +
+               " WHERE a.subject=?" + clause + " ORDER BY a.rank_default,a.edge_id LIMIT ?), "
+               "incoming AS (SELECT a.edge_id,a.rank_default FROM perf_adj a" + object_index +
+               " WHERE a.object=?" + clause + inbound + " ORDER BY a.rank_default,a.edge_id LIMIT ?), "
+               "adjacent AS (SELECT * FROM outgoing UNION SELECT * FROM incoming) "
+               "SELECT edge_id FROM adjacent ORDER BY rank_default,edge_id LIMIT ?")
+        ids = [r[0] for r in self.db.execute(sql, [current, *args, limit, current, *args, limit, limit])]
+        if not hydrate:
+            if not ids:
+                return []
+            rows = {r['edge_id']: dict(r) for r in self.db.execute(
+                'SELECT edge_id id,edge_id,subject,object FROM perf_adj WHERE edge_id IN (' +
+                ','.join('?' for _ in ids) + ')', ids)}
+            return [rows[i] for i in ids]
         return self.load_edges(ids)

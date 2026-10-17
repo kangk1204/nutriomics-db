@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, type ColumnDef } from '@tanstack/react-table';
 import { Activity, ArrowDownUp, ArrowRight, ArrowUpRight, BookOpen, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Download, ExternalLink, FileJson, FileSpreadsheet, FileCode2, FlaskConical, GitBranch, Info, Leaf, LoaderCircle, Microscope, Network, RefreshCw, Search, ShieldCheck, SlidersHorizontal, X, Dna, HeartPulse, ListFilter } from 'lucide-react';
 import GraphView, { relationLabel } from './GraphView';
+import { calculationId } from './foodIdentity';
 import { measurementsForReading, nutrientReadingPriority, weakestLinkLabel } from './graphFocus';
 import ScientificEvidencePanel, { ScientificEdgeContext, ScientificPathContext } from './ScientificEvidence';
 import { analyzeFood, exportGraph, getEdge, getEntities, getGraph, getMeta, getNode, normalizeKind, offline, saveBlob, scientificSnapshotSeed } from './api';
@@ -131,7 +132,7 @@ export default function App() {
       saveBlob(blob, filename); setToast(`${format.toUpperCase()} 내보내기가 완료되었습니다. 선택한 연결망과 출처를 포함합니다.`);
     } catch (error) { setToast((error as Error).message); } finally { setExportBusy(false); }
   };
-  const coreFoodId = nodeDetail?.metadata?.core_food_id || nodeDetail?.metadata?.food_id;
+  const coreFoodId = calculationId(nodeDetail);
   const foodMetadata = nodeDetail?.metadata;
   const hasEdibleBasis = Boolean(foodMetadata?.edible_state);
   const coreMetadata = foodMetadata?.core_metadata as Record<string, unknown> | undefined;

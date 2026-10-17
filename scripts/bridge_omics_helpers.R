@@ -39,6 +39,7 @@ freeze_reactome <- function(output) {
 }
 export_expression <- function(expression, sample_info, design, contrasts, accession, version, output,
                               entrez_ids, labels, context, input_files, qc_limit, voom_object=NULL) {
+  version <- arg_value("--analysis-version", version)
   if(qr(design)$rank!=ncol(design)) stop("Design is not full rank")
   fitted <- lmFit(if(is.null(voom_object)) expression else voom_object,design)
   fit <- eBayes(contrasts.fit(fitted,contrasts),robust=TRUE)
@@ -66,7 +67,7 @@ export_expression <- function(expression, sample_info, design, contrasts, access
   set.seed(20261001)
   for(i in seq_len(ncol(contrasts))) {
     statistics <- fit$t[selected,i]; names(statistics)<-entrez_ids[selected]
-    fg <- as.data.frame(fgsea(pathways=annotation$sets,stats=sort(statistics,decreasing=TRUE),minSize=10L,maxSize=500L))
+    fg <- as.data.frame(fgsea(pathways=annotation$sets,stats=sort(statistics,decreasing=TRUE),minSize=10L,maxSize=500L,nproc=1L))
     fg$leading_edge <- vapply(fg$leadingEdge,paste,collapse=";",character(1))
     fgsea_tables[[i]] <- data.frame(feature_type="pathway",feature_id=fg$pathway,feature_label=unname(annotation$names[fg$pathway]),
       contrast=colnames(contrasts)[i],tissue=context$tissue,timepoint=context$timepoint[[i]],intervention=context$intervention,
