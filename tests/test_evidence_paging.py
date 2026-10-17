@@ -13,14 +13,14 @@ def indexed(tmp_path, monkeypatch):
     source = tmp_path / 'source.sqlite'
     index = tmp_path / 'pages.sqlite'
     with sqlite3.connect(source) as db:
-        db.executescript('CREATE TABLE meta(key TEXT,value_json TEXT); CREATE TABLE workbench_evidence(id TEXT PRIMARY KEY,layer TEXT,study_id TEXT,tissue TEXT,metadata_json TEXT);')
+        db.executescript('CREATE TABLE meta(key TEXT,value_json TEXT); CREATE TABLE workbench_evidence(id TEXT PRIMARY KEY,layer TEXT,study_id TEXT,tissue TEXT,metadata_json TEXT,subject_id TEXT,object_id TEXT);')
         db.execute('INSERT INTO meta VALUES(?,?)', ('release_id', json.dumps('release-a')))
-        db.executemany('INSERT INTO workbench_evidence VALUES(?,?,?,?,?)', [
-            ('b', 'predicted', None, 'K562', '{"value":null}'),
-            ('a', 'predicted', None, 'GM12878', '{"value":0}'),
-            ('d', 'predicted', 's1', None, '{"value":-2}'),
-            ('c', 'literature', None, None, '{"candidate":true}'),
-            ('e', 'predicted', 's1', None, '{"value":3}')])
+        db.executemany('INSERT INTO workbench_evidence VALUES(?,?,?,?,?,?,?)', [
+            ('b', 'predicted', None, 'K562', '{"value":null}', 'A','B'),
+            ('a', 'predicted', None, 'GM12878', '{"value":0}', 'A','A'),
+            ('d', 'predicted', 's1', None, '{"value":-2}', 'C','A'),
+            ('c', 'literature', None, None, '{"candidate":true}', 'C','D'),
+            ('e', 'predicted', 's1', None, '{"value":3}', 'X','Y')])
     receipt = build(source, index, hashlib.sha256(source.read_bytes()).hexdigest())
     index.with_suffix('.json').write_text(json.dumps(receipt))
     monkeypatch.setenv('NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX', str(index))
@@ -41,6 +41,20 @@ def test_all_pages_preserve_native_count_order_and_values(indexed, layer):
         assert total == len(native)
         actual.extend(dict(row) for row in rows)
     assert actual == native
+
+
+@pytest.mark.parametrize('seed,layer', [('A','all'),('A','predicted'),('C','all'),('missing','all'),('C','absent')])
+def test_entity_pages_preserve_order_values_and_self_loop_deduplication(indexed, seed, layer):
+    source, _, db, _ = indexed
+    where = '(subject_id=? OR object_id=?)' + (' AND layer=?' if layer!='all' else '')
+    args=[seed,seed,*([layer] if layer!='all' else [])]
+    expected=[dict(r) for r in db.execute('SELECT * FROM workbench_evidence WHERE '+where+' ORDER BY layer,study_id,tissue,id',args)]
+    actual=[]
+    for page in range(1,5):
+        total,rows=page_rows(db,source,'release-a',layer,page,2,seed)
+        assert total==len(expected)
+        actual.extend(dict(r) for r in rows)
+    assert actual==expected
 
 
 def test_changed_source_and_wrong_release_are_not_zero(indexed):

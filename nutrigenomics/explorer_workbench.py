@@ -148,9 +148,9 @@ def _query(
             " INDEXED BY sqlite_autoindex_workbench_evidence_1" if seed_id else ""
         )
         indexed_page = None
-        if not any((seed_id, tissue, study_id, review_status, q, regulatory_only)):
+        if not any((tissue, study_id, review_status, q, regulatory_only)):
             from .evidence_paging import page_rows
-            indexed_page = page_rows(db, configured_path('NUTRIGENOMICS_EXPLORER_DATABASE', DATA_DIR / 'explorer/current/explorer.sqlite'), release, layer, page, page_size)
+            indexed_page = page_rows(db, configured_path('NUTRIGENOMICS_EXPLORER_DATABASE', DATA_DIR / 'explorer/current/explorer.sqlite'), release, layer, page, page_size, seed_id)
         if indexed_page is not None:
             total, rows = indexed_page
         else:

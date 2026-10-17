@@ -62,6 +62,34 @@ def test_cached_candidate_eligibility_keeps_filters_and_invalidates_on_source_ch
     assert client.get("/api/v1/explorer/entities", params=query).json()["total"] == 1
 
 
+def test_endpoint_index_keeps_node_details_and_export_values(explorer, monkeypatch, tmp_path):
+    from nutrigenomics.evidence_paging import build
+    with sqlite3.connect(explorer['db']) as db:
+        db.executescript('''CREATE TABLE workbench_evidence(
+          id TEXT PRIMARY KEY,subject_id TEXT,object_id TEXT,relation TEXT,layer TEXT,
+          study_id TEXT,source_id TEXT,tissue TEXT,organism TEXT,review_status TEXT,
+          export_allowed INTEGER,metadata_json TEXT);''')
+        db.executemany('INSERT INTO workbench_evidence VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', [
+            (f'p-{n:03}', 'NCBIGene:41', f'region:{n}', 'predicted_ccre_gene_link',
+             'regulatory_predicted', None, 'open', 'K562', 'human', 'candidate', 1,
+             json.dumps({'context':{'native_source_field':str(n)}})) for n in range(120)])
+        db.execute('INSERT INTO workbench_evidence VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                   ('identity-1','NCBIGene:41','Ensembl:fixture','verified_gene_identifier_cross_reference',
+                    'molecular_identity',None,'open',None,'human','source_verified',1,'{}'))
+    client=explorer['client']
+    before=client.get('/api/v1/explorer/nodes/NCBIGene:41').json()
+    payload={'release_id':RELEASE,'format':'json','node_ids':['NCBIGene:41'],'edge_ids':[]}
+    exported_before=client.post('/api/v1/explorer/export',json=payload).json()['node_details']
+    index=tmp_path/'endpoints.sqlite'
+    receipt=build(explorer['db'],index,hashlib.sha256(explorer['db'].read_bytes()).hexdigest())
+    index.with_suffix('.json').write_text(json.dumps(receipt))
+    monkeypatch.setenv('NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX',str(index))
+    assert client.get('/api/v1/explorer/nodes/NCBIGene:41').json()==before
+    assert client.post('/api/v1/explorer/export',json=payload).json()['node_details']==exported_before
+    assert before['total_regulatory_evidence']==121
+    assert len(before['regulatory_evidence'])==100
+
+
 @pytest.fixture
 def explorer(tmp_path: Path, monkeypatch):
     projection = tmp_path / "explorer.sqlite"

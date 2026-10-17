@@ -557,21 +557,27 @@ def _node_detail(db, identifier):
 
     # Use the request's pinned connection, including during a release swap.
     if _present(db, "workbench_evidence"):
-        rows = db.execute(
+        from .evidence_paging import page_rows
+        source_path = configured_path('NUTRIGENOMICS_EXPLORER_DATABASE', DATA_DIR / 'explorer/current/explorer.sqlite')
+        release_id = _meta(db).get('release_id')
+        reference_page = page_rows(db, source_path, release_id, 'all', 1, 100, identifier)
+        identity_page = page_rows(db, source_path, release_id, 'molecular_identity', 1, 1000, identifier)
+        rows = reference_page[1] if reference_page is not None else db.execute(
             "SELECT * FROM workbench_evidence WHERE subject_id=? OR object_id=? ORDER BY layer,study_id,tissue,id LIMIT 100",
             (identifier, identifier),
         ).fetchall()
         item["regulatory_evidence"] = [record(r, db) for r in rows]
-        item["total_regulatory_evidence"] = db.execute(
+        item["total_regulatory_evidence"] = reference_page[0] if reference_page is not None else db.execute(
             "SELECT count(*) FROM workbench_evidence WHERE subject_id=? OR object_id=?",
             (identifier, identifier),
         ).fetchone()[0]
         item["verified_identifier_links"] = [
             record(r, db)
-            for r in db.execute(
+            for r in (identity_page[1] if identity_page is not None and identity_page[0] <= 1000 else db.execute(
                 "SELECT * FROM workbench_evidence WHERE (subject_id=? OR object_id=?) AND relation='verified_gene_identifier_cross_reference'",
                 (identifier, identifier),
-            )
+            ))
+            if r['relation'] == 'verified_gene_identifier_cross_reference'
         ]
     else:
         item["regulatory_evidence"] = []
