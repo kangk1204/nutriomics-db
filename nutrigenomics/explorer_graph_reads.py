@@ -1,6 +1,8 @@
 """Lazy batched graph hydration; preserve the original bounded traversal exactly."""
 from __future__ import annotations
 
+import hashlib
+
 from .explorer_performance import has_index
 
 
@@ -14,6 +16,15 @@ class GraphReads:
         self.nodes, self.edges = {}, {}
         self.kinds = None
         self.pending = {}
+        self.domain_function = None
+        if self.indexed and domain != 'all':
+            # Read the small covering domain projection once. A correlated
+            # EXISTS for every candidate caused scattered HDD reads during
+            # health-path lookahead, despite bounded result/display sizes.
+            members = frozenset(row[0] for row in db.execute(
+                'SELECT edge_id FROM edge_domain WHERE domain=?', (domain,)).fetchall())
+            self.domain_function = 'ng_graph_domain_' + hashlib.sha256(domain.encode()).hexdigest()[:12]
+            db.create_function(self.domain_function, 1, lambda identifier: int(identifier is not None and identifier in members), deterministic=True)
 
     def prefetch_adjacent(self, identifiers, level, limit):
         """Batch queued lookups without changing traversal or per-node top K."""
@@ -80,8 +91,11 @@ class GraphReads:
     def clause(self):
         clauses, args = [], []
         if self.domain != "all":
-            clauses.append("EXISTS(SELECT 1 FROM edge_domain ed WHERE ed.edge_id=a.edge_id AND ed.domain=?)")
-            args.append(self.domain)
+            if self.domain_function:
+                clauses.append(self.domain_function + '(a.edge_id)')
+            else:
+                clauses.append("EXISTS(SELECT 1 FROM edge_domain ed WHERE ed.edge_id=a.edge_id AND ed.domain=?)")
+                args.append(self.domain)
         if self.tiers is not None:
             clauses.append("a.tier IN (" + ",".join("?" for _ in self.tiers) + ")")
             args.extend(self.tiers)

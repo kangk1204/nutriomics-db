@@ -70,6 +70,10 @@ export NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX=<new-index.sqlite3>
 
 색인 schema 2는 모든 근거의 양끝 ID도 원본과 대조한다. 항목 상세·HTML/CSV/JSON에서는 작은 ID 색인에서 실제 표시할 근거를 정한 뒤 해당 원본 행만 읽는다. 고연결 유전자에서 100개 미리보기를 정렬하려고 수천 개의 원문 payload를 읽는 일을 줄인다. 자기 자신을 연결한 관계는 한 번만 집계하며 원래의 정렬과 총수를 유지한다. 효과량·통계값·원문은 이 색인에 복제하지 않는다.
 
+혈압·지질·비만 그래프는 현재 연결의 domain 소속 ID를 읽기 전용 연결에서 한 번 읽고 요청 내 집합으로 확인한다. 후보 간선을 확인할 때마다 HDD의 domain 테이블을 흩어 읽는 비용을 줄이며, 원래 `EXISTS` 조건과의 전체 응답 대조로 선택·순서·생략 수를 검사한다. domain별 집합은 연결 수명에 한정되며 서로 다른 범위의 판정을 섞지 않는다.
+
+부모 manifest의 legacy `literature_import`는 과거 기본 적재 이력이다. 이번 후보 계층의 현재 범위는 `candidate_layers.literature`와 문서 register에 기록한다. 다운로드 당시의 보수적인 `export_allowed=false` 영수증도 덮어쓰지 않는다. 이후 ENCODE 정책 확인에 따른 GraphRegLR의 release별 공개 판단은 `candidate_layers.graphreg_rights`에 별도로 보존한다. PubMed의 제한은 그 판단으로 바뀌지 않는다.
+
 `source-accuracy.json`은 수록된 모든 GraphRegLR 행의 ID·원본 필드·세포주·문자열 점수·계층과 문헌 후보의 문자 위치·PMID·방향·검수 상태를 대조한다. 이것은 원본 보존 검사이며 전문가 의미 정확도 평가는 아니다.
 
 SQLite authorizer로 기존 조성·연구·정량 결과·효과 참조 테이블의 쓰기를 금지한다. 기존 core DB도 변경하지 않는다. 그래프·검색·노출 색인만 재구축하고 기존 효과 참조의 release 바인딩을 새 버전으로 갱신한다. 닫힌 SQLite 파일의 integrity/FK 검사와 manifest SHA-256을 확인한다.
