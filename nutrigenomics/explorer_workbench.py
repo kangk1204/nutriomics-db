@@ -147,14 +147,21 @@ def _query(
         table = "workbench_evidence" + (
             " INDEXED BY sqlite_autoindex_workbench_evidence_1" if seed_id else ""
         )
-        total = db.execute("SELECT count(*) FROM " + table + where, args).fetchone()[0]
-        rows = db.execute(
+        indexed_page = None
+        if not any((seed_id, tissue, study_id, review_status, q, regulatory_only)):
+            from .evidence_paging import page_rows
+            indexed_page = page_rows(db, configured_path('NUTRIGENOMICS_EXPLORER_DATABASE', DATA_DIR / 'explorer/current/explorer.sqlite'), release, layer, page, page_size)
+        if indexed_page is not None:
+            total, rows = indexed_page
+        else:
+            total = db.execute("SELECT count(*) FROM " + table + where, args).fetchone()[0]
+            rows = db.execute(
             "SELECT * FROM "
             + table
             + where
             + " ORDER BY layer,study_id,tissue,id LIMIT ? OFFSET ?",
             [*args, page_size, (page - 1) * page_size],
-        ).fetchall()
+            ).fetchall()
         withheld = 0
         if layer == 'literature_candidate' and total == 0 and _present(db, 'candidate_document'):
             withheld = db.execute("SELECT coalesce(sum(candidate_count),0) FROM candidate_document WHERE json_extract(metadata_json,'$.assertion_visibility')='withheld'").fetchone()[0]

@@ -156,6 +156,12 @@ def benchmark(base, spec_path, output, runs=100, baseline=False, concurrent_mode
     if digest(spec["cases"]) != spec["case_sha256"]:
         raise ValueError("Frozen cases changed; do not silently replace the evaluation set")
     results=[]
+    partial = out / 'samples.partial.jsonl'
+    partial.write_text('', encoding='utf-8')
+    def checkpoint(entries):
+        with partial.open('a', encoding='utf-8') as stream:
+            for entry in entries:
+                stream.write(json.dumps(entry, ensure_ascii=False) + '\n')
     expected = {}
     for c in spec["cases"]:
         first,data=request(base,c)
@@ -175,6 +181,7 @@ def benchmark(base, spec_path, output, runs=100, baseline=False, concurrent_mode
             samples=[measured(c) for _ in range(runs)]
         row={"id":c["id"],"target_s":c["target_s"],"first":first,"metrics":metrics(samples),"samples":samples}
         results.append(row)
+        checkpoint([{'mode':'first','case':c['id'],'sample':first}, *({'mode':'warm','case':c['id'],'sample':sample} for sample in samples)])
         (out/"progress.json").write_text(json.dumps({"completed":len(results),"total":len(spec["cases"]),"latest":row["id"],"metrics":row["metrics"]},indent=2),encoding="utf-8")
     concurrent_results={}
     if concurrent_mode:
@@ -182,8 +189,14 @@ def benchmark(base, spec_path, output, runs=100, baseline=False, concurrent_mode
         def run(c):
             return c["id"],measured(c)
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-            for name,sample in pool.map(run,jobs):
+            pending = []
+            for completed, (name,sample) in enumerate(pool.map(run,jobs), 1):
                 concurrent_results.setdefault(name,[]).append(sample)
+                pending.append({'mode':'concurrent4','case':name,'sample':sample})
+                if completed % 100 == 0:
+                    checkpoint(pending);pending=[]
+                    (out/'concurrent-progress.json').write_text(json.dumps({'completed':completed,'total':len(jobs),'errors':sum(s.get('status') != 200 or bool(s.get('validation_errors')) or bool(s.get('error')) for rows in concurrent_results.values() for s in rows)}),encoding='utf-8')
+            checkpoint(pending)
     report={"verified_at":datetime.now(UTC).isoformat(),"base":base,"case_sha256":spec["case_sha256"],"runs_per_case":3 if baseline else runs,"warmup":"First request excluded; OS caches not dropped", "results":results,
             "all_warm_pass":all(r["metrics"]["errors"]==0 and r["metrics"]["n"]==runs and r["metrics"]["p95_s"]<=r["target_s"] for r in results) if not baseline else None,
             "concurrent":{name:{"metrics":metrics(samples),"samples":samples} for name,samples in concurrent_results.items()}}

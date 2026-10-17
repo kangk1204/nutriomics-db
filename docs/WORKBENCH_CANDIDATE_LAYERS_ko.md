@@ -57,6 +57,17 @@ PubMed 초록·파생 주장에 대한 문서별 재배포 조건은 미확정�
 
 ## 검증
 
+대형 근거 표의 깊은 페이지는 정량 결과를 복제하지 않는 별도 순번 색인으로 제공할 수 있다. 기존 release 파일은 수정하지 않는다. 원본 전체 SHA-256과 파일 변경 상태를 묶고, 원래 `layer,study_id,tissue,id` 순서의 모든 ID를 대조한다. 요청은 해당 순번의 ID만 읽고 원본 기록을 조회한다. 색인이 다른 release를 가리키거나 원본이 변경되면 오류로 반환하며 0건으로 바꾸지 않는다. 색인 파일도 응답 캐시의 변경 감지 대상이다.
+
+```bash
+python -m scripts.build_evidence_query_index \
+  --source <release>/<explorer.sqlite-or-nutriomics.sqlite3> \
+  --manifest <release>/manifest.json --output <new-index.sqlite3>
+export NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX=<new-index.sqlite3>
+```
+
+필터가 없는 전체/계층별 페이지에 이 순번 색인을 사용한다. 유전자·조직·연구·검수·문자열 조건은 기존 조건 검사를 유지한다. 반복 성능 평가 중 실제 HDD 대기로 발생한 시간 초과는 실패 기록으로 보존하고, 수정 뒤 같은 질의 집합을 다시 평가한다. 서버의 다른 작업이나 전역 디스크·메모리 설정은 변경하지 않는다.
+
 `source-accuracy.json`은 수록된 모든 GraphRegLR 행의 ID·원본 필드·세포주·문자열 점수·계층과 문헌 후보의 문자 위치·PMID·방향·검수 상태를 대조한다. 이것은 원본 보존 검사이며 전문가 의미 정확도 평가는 아니다.
 
 SQLite authorizer로 기존 조성·연구·정량 결과·효과 참조 테이블의 쓰기를 금지한다. 기존 core DB도 변경하지 않는다. 그래프·검색·노출 색인만 재구축하고 기존 효과 참조의 release 바인딩을 새 버전으로 갱신한다. 닫힌 SQLite 파일의 integrity/FK 검사와 manifest SHA-256을 확인한다.

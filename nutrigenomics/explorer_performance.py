@@ -216,11 +216,14 @@ def has_index(db, table):
 
 
 def source_paths():
-    return [
+    paths = [
         configured_path("NUTRIGENOMICS_EXPLORER_DATABASE", DATA_DIR / "explorer/current/explorer.sqlite"),
         configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db/nutrigenomics.sqlite3"),
         configured_path("NUTRIGENOMICS_EXPLORER_RIGHTS", PROJECT_ROOT / "config/explorer_export_rights.json"),
     ]
+    if os.environ.get('NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX'):
+        paths.append(Path(os.environ['NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX']))
+    return paths
 
 
 def healthy(value):
