@@ -334,6 +334,16 @@ def export(client, format="json", **overrides):
     payload.update(overrides)
     return client.post("/api/v1/explorer/export", json=payload)
 
+def test_restricted_effect_previews_are_not_reported_as_original_absence(explorer):
+    with sqlite3.connect(explorer['core']) as db:
+        db.execute("UPDATE study_effect SET metadata_json=json_set(metadata_json,'$.export_allowed',json('false')) WHERE feature_type='gene_expression'")
+    original=explorer['client'].get('/api/v1/explorer/nodes/NCBIGene:41').json()
+    assert len(original['effects'])==2
+    result=export(explorer['client'],node_ids=['NCBIGene:41'],edge_ids=[]).json()
+    detail=result['node_details']['NCBIGene:41']
+    assert detail['effects']==[] and detail['withheld_effect_previews']==2
+    assert any('결과 부재를 뜻하지 않습니다' in text for text in detail['gaps'])
+
 
 @pytest.mark.parametrize(
     "kind,expected",

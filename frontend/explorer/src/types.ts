@@ -20,6 +20,7 @@ export interface EvidenceEdge {
 export interface NodeDetail extends Entity {
   measurements?: Measurement[]; studies?: Record<string, unknown>[];
   effects?: Record<string, unknown>[]; gaps?: string[]; provenance?: unknown[];
+    withheld_effect_previews?: number;
   methylation_annotations?: Record<string, unknown>[]; total_methylation_annotations?: number;
   scientific_matches?: ScientificMatchResult;
   regulatory_evidence?: WorkbenchEvidence[]; total_regulatory_evidence?: number;

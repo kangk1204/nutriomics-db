@@ -1061,6 +1061,7 @@ def export_selection(payload: ExportInput):
             detail = _clean_node(full)
             detail["measurements"] = measurements
             detail["effects"] = [e for e in full["effects"] if e["export_allowed"]]
+            detail["withheld_effect_previews"] = len(full["effects"]) - len(detail["effects"])
             detail["methylation_annotations"] = [
                 e for e in full["methylation_annotations"] if e["export_allowed"]
             ]
@@ -1083,6 +1084,10 @@ def export_selection(payload: ExportInput):
                     else []
                 ),
             ]
+            if detail["withheld_effect_previews"]:
+                detail["gaps"].append(
+                    f"발현 결과 미리보기 {detail['withheld_effect_previews']}건은 내보내기 권한이 확인되지 않아 제외했습니다. 원본 서비스의 결과 부재를 뜻하지 않습니다."
+                )
             if len(regulatory) > len(detail["regulatory_evidence"]):
                 detail["gaps"].append(
                     "재배포 이용조건이 확인되지 않은 조절 근거의 상세 값은 제외했습니다. 원본 서비스에서 확인하십시오."
