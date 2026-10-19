@@ -193,6 +193,21 @@ def test_report_rejects_stale_contract_and_undated_receipt(tmp_path):
     with pytest.raises(ValueError): build_report(**{**kwargs, "science_source": stale})
 
 
+@pytest.mark.parametrize("history", [{"not_final_runtime_proof": True}, {"historical_runtime_source": "source-v9"}])
+def test_same_data_release_does_not_promote_old_runtime_evidence(tmp_path, history):
+    receipt = {"source_file": "old-runtime.json", "source_sha256": "b" * 64,
+               "reference_date": "2026-10-19", "status": "passed_old_runtime",
+               "release_ids": ["actual-public"], **history}
+    result = build_report(internal_contract=contract("internal"), public_contract=contract(),
+        science_source=source(), output=tmp_path / "report", workspace=tmp_path,
+        validation_receipts=[receipt])
+    stored = result["validation_receipts"][0]
+    assert stored["applies_to_current_release"] is True
+    assert stored["runtime_applicability"] == "historical_runtime_not_current_pass"
+    text = (tmp_path / "report/NutriOmics_성과및최종보완보고서.html").read_text(encoding="utf-8")
+    assert "이전 실행 코드의 결과: 현재 서비스 통과로 승계하지 않음" in text
+
+
 def test_report_rejects_tampered_validation_receipt_file(tmp_path):
     (tmp_path / "actual-test.json").write_text("changed", encoding="utf-8")
     with pytest.raises(ValueError, match="receipt content"):

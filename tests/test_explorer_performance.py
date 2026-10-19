@@ -110,6 +110,35 @@ def test_wal_commit_invalidates_cache_and_index(explorer, monkeypatch):
         writer.close()
 
 
+def test_ordered_public_index_and_receipt_replacement_invalidates_http_cache(explorer, monkeypatch, tmp_path):
+    """A valid cached response cannot hide replacement/removal of its sidecar."""
+    from nutrigenomics.explorer_performance import source_paths
+
+    index = tmp_path / "ordered.sqlite3"
+    receipt = index.with_suffix(".json")
+    index.write_bytes(b"source-bound-reference-index")
+    receipt.write_text('{"index_sha256":"first"}', encoding="utf-8")
+    monkeypatch.setenv("NUTRIGENOMICS_PUBLIC_OMICS_INDEX", str(index))
+    assert index in source_paths() and receipt in source_paths()
+    client = explorer["client"]
+    url = "/api/v1/explorer/entities?kind=food&q=rice"
+    first = client.get(url)
+    assert first.status_code == 200 and first.headers["x-explorer-cache"] == "miss"
+    assert client.get(url).headers["x-explorer-cache"] == "hit"
+    replacement = tmp_path / "replacement.sqlite3"
+    replacement.write_bytes(index.read_bytes())
+    replacement.replace(index)
+    second = client.get(url)
+    assert second.status_code == 200 and second.headers["x-explorer-cache"] == "miss"
+    assert second.json() == first.json()
+    assert client.get(url).headers["x-explorer-cache"] == "hit"
+    receipt.write_text('{"index_sha256":"second"}', encoding="utf-8")
+    assert client.get(url).headers["x-explorer-cache"] == "miss"
+    assert client.get(url).headers["x-explorer-cache"] == "hit"
+    index.unlink()
+    assert client.get(url).headers["x-explorer-cache"] == "miss"
+
+
 def test_byte_lru_and_singleflight():
     cache = ByteCache(10)
     cache.put("one", b"123456")

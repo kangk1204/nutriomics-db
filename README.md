@@ -71,4 +71,4 @@ corpus from PubMed. Computational predictions, automatic text candidates and
 observed human intervention results use distinct layers and review states.
 Source-span preservation is not expert semantic validation. Article-specific
 redistribution restrictions remain enforced in the public dataset and exports.
-See [candidate layer acquisition, interpretation and verification](WORKBENCH_CANDIDATE_LAYERS_ko.md).
+See [candidate layer acquisition, interpretation and verification](docs/WORKBENCH_CANDIDATE_LAYERS_ko.md).

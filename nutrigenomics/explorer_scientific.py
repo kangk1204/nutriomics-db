@@ -13,6 +13,7 @@ from copy import deepcopy
 from pathlib import Path
 from urllib.parse import urlencode
 
+from .effect_batch import read_rows_by_ids, verify_reference
 from .explorer_performance import (
     CACHE,
     CURRENT,
@@ -21,6 +22,7 @@ from .explorer_performance import (
     fingerprint,
     has_index,
     indexed_source,
+    logical_connection_path,
     read_connection,
     selector_key,
 )
@@ -382,7 +384,7 @@ def path_scientific(nodes, edges, node_ids, edge_ids) -> dict:
 
 def science_records(db, kind):
     budget = CURRENT.get()
-    memo_key = ("science_records", db.execute("PRAGMA database_list").fetchone()[2], kind)
+    memo_key = ("science_records", logical_connection_path(db), kind)
     if budget and memo_key in budget.memo:
         return deepcopy(budget.memo[memo_key])
     try:
@@ -454,14 +456,22 @@ def _run_context(runs, contrast):
     }
 
 
-def _contrast_effects(core_path, contrast, gene=None, limit=6, projection=None):
+def _preview_key(identity, projection_identity, contrast, gene, limit):
+    return ("effects", identity, projection_identity,
+            canonical({k: contrast.get(k) for k in ("series_accession", "contrast", "analysis_version")}),
+            canonical(gene) if gene else None, limit)
+
+
+def _contrast_effects(core_path, contrast, gene=None, limit=6, projection=None, batch_results=None):
     if not Path(core_path).is_file():
         return [], None, "source_unavailable"
-    projection_path = projection.execute("PRAGMA database_list").fetchone()[2] if projection else None
+    projection_path = logical_connection_path(projection) if projection else None
     identity = fingerprint(core_path)
-    key = ("effects", identity, fingerprint(projection_path) if projection_path else None,
-           canonical({k: contrast.get(k) for k in ("series_accession", "contrast", "analysis_version")}),
-           canonical(gene) if gene else None, limit)
+    key = _preview_key(identity, fingerprint(projection_path) if projection_path else None, contrast, gene, limit)
+    if batch_results is not None and batch_results.get("_batch_sources") != (identity, key[2]):
+        return [], None, "source_changed"
+    if batch_results is not None and key in batch_results:
+        return deepcopy(batch_results[key])
     cached = CACHE.get(key)
     if cached is not None:
         return json.loads(cached)
@@ -469,6 +479,114 @@ def _contrast_effects(core_path, contrast, gene=None, limit=6, projection=None):
     if result[2] == "available" and fingerprint(core_path) == identity:
         CACHE.put(key, canonical(result).encode())
     return result
+
+
+def _format_effect(row, gene):
+    effect = dict(row)
+    effect["metadata"] = decoded(effect.pop("metadata_json", None))
+    effect["export_allowed"] = effect["metadata"].get("export_allowed") is True
+    effect["feature_mapping"] = (feature_match_identity(gene, effect) if gene
+                                 else {"status": "source_feature", "label": "연구의 원본 feature"})
+    effect["key"] = {key: effect[key] for key in
+                     ("series_accession", "feature_type", "feature_id", "contrast", "analysis_version")}
+    return effect
+
+
+def _batch_contrast_effects(core_path, contrasts, gene, projection, limit=6, *, store_cache=True):
+    """Prime only matched selectors; one source snapshot and sorted PK fetches.
+
+    Legacy/unindexed releases retain the scalar route. No preview matrix or
+    persistent value copy is introduced; successful source-bound cache entries
+    and all API payloads keep their original format.
+    """
+    if not contrasts or not Path(core_path).is_file():
+        return None
+    identity = fingerprint(core_path)
+    if not indexed_source(projection, core_path):
+        return None
+    projection_path = logical_connection_path(projection)
+    projection_identity = fingerprint(projection_path) if projection_path else None
+    modes = [None, gene] if gene else [None]
+    selected = {selector_key(contrast): contrast for contrast in contrasts}
+    results, missing = {"_batch_sources": (identity, projection_identity)}, []
+    for selector, contrast in selected.items():
+        for mode in modes:
+            key = _preview_key(identity, projection_identity, contrast, mode, limit)
+            cached = CACHE.get(key)
+            if cached is not None:
+                results[key] = json.loads(cached)
+            else:
+                missing.append((selector, contrast, mode, key))
+    if not missing:
+        return results
+    try:
+        selectors = list(dict.fromkeys(item[0] for item in missing))
+        placeholders = ",".join("?" for _ in selectors)
+        summaries = {row["selector"]: row["total"] for row in projection.execute(
+            "SELECT selector,total FROM perf_effect_selector WHERE selector IN (" + placeholders + ")", selectors)}
+        # A partially indexed source is supported without changing its legacy
+        # missing-selector semantics; it shares the one source connection.
+        prepared, refs = {}, []
+        for mode in modes:
+            entries = [item for item in missing if item[2] is mode and item[0] in summaries]
+            if not entries:
+                continue
+            ids = gene_feature_identifiers(mode) if mode else []
+            feature_clause = (" AND feature_type IN ('gene_expression','expression','gene','transcript') AND feature_id IN (" +
+                              ",".join("?" for _ in ids) + ")") if mode else ""
+            mode_selectors = [item[0] for item in entries]
+            totals = summaries
+            if mode:
+                totals = {row["selector"]: row["n"] for row in projection.execute(
+                    "SELECT selector,count(*) n FROM perf_effect_ref WHERE selector IN (" +
+                    ",".join("?" for _ in mode_selectors) + ")" + feature_clause + " GROUP BY selector", [*mode_selectors, *ids])}
+            branch = ("SELECT ? origin,effect_id,feature_type,feature_id FROM (SELECT effect_id,feature_type,feature_id "
+                      "FROM perf_effect_ref WHERE selector=?" + feature_clause + " ORDER BY ordinal_all LIMIT ?)")
+            parameters = [value for selector in mode_selectors for value in (selector, selector, *ids, limit)]
+            by_selector = {selector: [] for selector in mode_selectors}
+            for row in projection.execute(" UNION ALL ".join(branch for _ in mode_selectors), parameters):
+                by_selector[row["origin"]].append(dict(row))
+                refs.append(row["effect_id"])
+            for selector, contrast, _, key in entries:
+                prepared[key] = (contrast, mode, by_selector[selector], totals.get(selector, 0))
+        with read_connection(core_path) as core:
+            core.execute("BEGIN")
+            # Public releases use native selectors and a view; preserve their
+            # scalar policy path rather than treating a missing public assay as 0.
+            if core.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='effect_selector'").fetchone():
+                return None
+            by_id = read_rows_by_ids(core, refs)
+            for key, (contrast, mode, references, total) in prepared.items():
+                try:
+                    rows = [verify_reference(by_id.get(ref["effect_id"]), contrast, ref) for ref in references]
+                    results[key] = ([_format_effect(row, mode) for row in rows], total, "available")
+                except QueryUnavailable as error:
+                    results[key] = ([], None, error.status)
+            for selector, contrast, mode, key in missing:
+                if key in prepared:
+                    continue
+                conditions = "series_accession=? AND contrast=? AND analysis_version=?"
+                args = [contrast[k] for k in ("series_accession", "contrast", "analysis_version")]
+                if mode:
+                    identifiers = gene_feature_identifiers(mode)
+                    conditions += " AND feature_type IN ('gene_expression','expression','gene','transcript') AND feature_id IN (" + ",".join("?" for _ in identifiers) + ")"
+                    args.extend(identifiers)
+                total = core.execute("SELECT count(*) FROM study_effect WHERE " + conditions, args).fetchone()[0]
+                rows = core.execute("SELECT * FROM study_effect WHERE " + conditions + " ORDER BY feature_type,feature_id LIMIT ?", [*args, limit]).fetchall()
+                results[key] = ([_format_effect(row, mode) for row in rows], total, "available")
+        if fingerprint(core_path) != identity or (fingerprint(projection_path) if projection_path else None) != projection_identity:
+            return {**{key: ([], None, "source_changed") for key in results if key != "_batch_sources"},
+                    **{key: ([], None, "source_changed") for _, _, _, key in missing},
+                    "_batch_sources": (identity, projection_identity)}
+        for _, _, _, key in missing:
+            if store_cache and results[key][2] == "available":
+                CACHE.put(key, canonical(results[key]).encode())
+        return results
+    except (QueryUnavailable, sqlite3.Error) as error:
+        status = error.status if isinstance(error, QueryUnavailable) else (
+            "query_timeout" if CURRENT.get() and CURRENT.get().expired() else "source_unavailable")
+        results.update({key: ([], None, status) for _, _, _, key in missing})
+        return results
 
 
 def annotate_effect_context(db, effects):
@@ -538,25 +656,7 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
                 rows = core.execute("SELECT * FROM study_effect WHERE " + conditions + " ORDER BY feature_type,feature_id LIMIT ?", [*args, limit]).fetchall()
             effects = []
             for row in rows:
-                effect = dict(row)
-                effect["metadata"] = decoded(effect.pop("metadata_json", None))
-                effect["export_allowed"] = effect["metadata"].get("export_allowed") is True
-                effect["feature_mapping"] = (
-                    feature_match_identity(gene, effect)
-                    if gene
-                    else {"status": "source_feature", "label": "연구의 원본 feature"}
-                )
-                effect["key"] = {
-                    k: effect[k]
-                    for k in (
-                        "series_accession",
-                        "feature_type",
-                        "feature_id",
-                        "contrast",
-                        "analysis_version",
-                    )
-                }
-                effects.append(effect)
+                effects.append(_format_effect(row, gene))
             return effects, total, "available"
     except QueryUnavailable as exc:
         return [], None, exc.status
@@ -663,6 +763,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
     evidence, gaps = [], []
     has_match_index = has_index(db, "perf_exposure_match")
     match_index = {r[0]: decoded(r[1]) for r in db.execute("SELECT exposure_id,identity_json FROM perf_exposure_match WHERE node_id=?", (seed["id"],))} if has_match_index else {}
+    matched_exposures = []
     for original in records["exposure"]:
         curation = curated_exp.get(original["id"], {})
         exposure = {**original, **curation}
@@ -670,6 +771,12 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
         identity = match_index.get(original["id"], {"status": "unknown"}) if has_match_index else exposure_match_identity(seed, exposure, keys)
         if identity["status"] == "unknown":
             continue
+        matched_exposures.append((original, curation, exposure, identity))
+    matched_ids = {original["id"] for original, _, _, _ in matched_exposures}
+    batch_results = _batch_contrast_effects(core_path,
+        [contrast for contrast in records["contrast"] if matched_ids.intersection(contrast.get("exposure_ids", []))],
+        gene, db)
+    for original, curation, exposure, identity in matched_exposures:
         study = study_by_id.get(original["study_id"], {})
         study_cur = curated_study.get(original["study_id"], {})
         verified = study_cur.get("verified_fields", {})
@@ -695,8 +802,8 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
             )
             contrast = {**contrast, "comparison_kind": selector.get("comparison_kind")}
             design = contrast_classification(contrast)
-            effects, total, effects_status = _contrast_effects(core_path, contrast, gene, projection=db)
-            source_effects = _contrast_effects(core_path, contrast, projection=db) if gene else (effects, total, effects_status)
+            effects, total, effects_status = _contrast_effects(core_path, contrast, gene, projection=db, batch_results=batch_results)
+            source_effects = _contrast_effects(core_path, contrast, projection=db, batch_results=batch_results) if gene else (effects, total, effects_status)
             source_total = source_effects[1]
             context = _run_context(records["analysis_run"], contrast)
             if selector.get("sample_scope"):

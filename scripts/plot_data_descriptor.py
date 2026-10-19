@@ -18,7 +18,7 @@ def render(metadata, review_manifest, performance, output):
     metadata, review_manifest, output = Path(metadata), Path(review_manifest), Path(output)
     data = json.loads(metadata.read_text(encoding="utf-8"))
     reviews = json.loads(review_manifest.read_text(encoding="utf-8"))
-    metrics = json.loads(Path(performance).read_text()) if performance else None
+    metrics = json.loads(Path(performance).read_text(encoding="utf-8")) if performance else None
     counts = data["counts"]
     reviews.setdefault("fact_candidates", reviews.get("primary_paper_fact_candidates", 0))
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "svg.fonttype": "none", "pdf.fonttype": 42, "axes.spines.top": False, "axes.spines.right": False})
@@ -45,7 +45,7 @@ def render(metadata, review_manifest, performance, output):
               (3.35, 3.0, "Human intervention", "curation", "Exposure, arm, contrast\nTissue, time, sample n"),
               (6.6, 3.0, "Omics results", "omics", "Five-part result key\nEffect, SE, P, FDR"),
               (0.1, 0.3, "Source and review", "neutral", "Hashes, source rights\nHuman review: pending"),
-              (3.35, 0.3, "Clinical summaries", "curation", "Reported summaries, tests\nUnit, table, sample scope"),
+              (3.35, 0.3, "Clinical summaries", "curation", "Reported summaries\nUnits, times, group n"),
               (6.6, 0.3, "Versioned release", "neutral", "SQLite · Parquet · CSV\nmanifest, policy, review")]
     for x, y, title, color, text in blocks:
         ax.add_patch(FancyBboxPatch((x, y), 3, 1.2, boxstyle="round,pad=0.04,rounding_size=.05", facecolor="#f5f7f8", edgecolor=COLORS[color], linewidth=1))
@@ -72,7 +72,7 @@ def render(metadata, review_manifest, performance, output):
         ax.set_xlim(0, span * 1.4)
         for i, value in enumerate(values):
             ax.text(value + span * .025, i, f"{value:,}", va="center", fontsize=7)
-        def label(value):
+        def label(value, panel=panel):
             if panel == "C" and value == "dmr":
                 return "region tests\n(native dmr)"
             if panel == "A" and value == "gene":
@@ -82,7 +82,7 @@ def render(metadata, review_manifest, performance, output):
         ax.invert_yaxis(); ax.set_title(panel + "  " + title, loc="left", fontsize=10)
         ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 4)); ax.set_xlabel("Records", fontsize=8)
         plotted.extend((panel, k, v) for k, v in entries)
-    save(fig, 2, ["panel", "type", "records"], plotted, "Figure 2. Actual public-candidate counts by data grain. Entity namespaces are not unique biological genes; quantitative records are feature × contrast × analysis-version results, not participants. Native feature type dmr is retained in source data; fixed-window regional tests are not discovered or validated DMRs. Rights-restricted source values are excluded; predictions remain separately labelled.")
+    save(fig, 2, ["panel", "type", "records"], plotted, "Figure 2. Actual public-candidate counts by data grain. The administrative singleton curation record is omitted from panel B. Entity namespaces are not unique biological genes; quantitative records are feature × contrast × analysis-version results, not participants. Native feature type dmr is retained in source data; fixed-window regional tests are not discovered or validated DMRs. Rights-restricted source values are excluded; predictions remain separately labelled.")
     # Figure 3: explicitly stated use cases, supported by the requested case design.
     fig, ax = plt.subplots(figsize=(7.2, 3.5)); ax.axis("off")
     examples = [("Yogurt", "Input: 150 g", "Acute study: 800 g", "Dose mismatch; product identity unverified"),
@@ -99,17 +99,23 @@ def render(metadata, review_manifest, performance, output):
     if metrics:
         for i, row in enumerate(metrics["results"]):
             value = row["metrics"]["p95_s"]
-            ax.scatter(i, value, color=COLORS["neutral"], s=22)
-            rows.append((row["id"], row["metrics"]["n"], value, row["target_s"]))
-        ax.axhline(1, color="#9da8ae", linestyle="--", linewidth=1)
+            complete = row["metrics"]["n"] == metrics["runs_per_case"] and row["metrics"]["errors"] == 0
+            ax.scatter(i, value, color=COLORS["neutral"] if complete else "#a54e40", marker="o" if complete else "x", s=22)
+            rows.append((row["id"], row["metrics"]["n"], value, row["target_s"], row["metrics"]["errors"], complete))
+        for target in sorted({row["target_s"] for row in metrics["results"]}):
+            ax.axhline(target, color="#9da8ae", linestyle="--", linewidth=.7)
+            ax.text(1.01, target, f"{target:g} s target", transform=ax.get_yaxis_transform(), fontsize=7, va="center")
+        if all(row[2] > 0 for row in rows):
+            ax.set_yscale("log")
         ax.set(xlabel="Frozen query case (ordered as benchmark manifest)", ylabel="Warm p95 (s)")
-        ax.set_xticks(range(len(rows)), [str(i + 1) for i in range(len(rows))], fontsize=7)
+        ticks = sorted({0, len(rows)-1, *range(0, len(rows), max(1, len(rows)//8))})
+        ax.set_xticks(ticks, [str(i + 1) for i in ticks], fontsize=7)
         ax.set_title("Technical latency; scientific validation is evaluated separately", loc="left", fontsize=10)
     else:
         ax.axis("off"); ax.text(.05, .65, "Fresh benchmark: pending", transform=ax.transAxes, fontsize=12)
-        rows.append(("fresh_benchmark", 0, "pending", "not_measured"))
+        rows.append(("fresh_benchmark", 0, "pending", "not_measured", "not_measured", False))
     ax.text(.05, -.3 if metrics else .35, f"Human-approved core review records: {reviews['expert_verified']} / {reviews.get('records', reviews.get('expected_records', 'not reported'))} (pending)\nSource-fact candidates: {reviews['fact_candidates']} (not gold labels); sealed-query accuracy: not evaluated", transform=ax.transAxes, fontsize=8, color=COLORS["neutral"])
-    save(fig, 4, ["case", "warm_requests", "p95_seconds", "target_seconds"], rows, "Figure 4. Technical and scientific validation states. When present, latency uses 100 warm requests per case with first requests excluded. Engineering repeats are not independent biological samples. Expert review and sealed-query accuracy are not inferred from automated tests.")
+    save(fig, 4, ["case", "measured_requests", "p95_seconds", "target_seconds", "errors", "complete_error_free_series"], rows, "Figure 4. Technical and scientific validation states. The source table retains the actual number of measured requests and errors for each frozen case. Completed warm series exclude first requests; an aborted preparation is marked as an incomplete series, not a warm measurement. Crosses mark incomplete or error-containing series and do not establish a passing benchmark. HTTP cache hits, startup and operating-system cache preparation must be interpreted with the raw receipt. Engineering repeats are not independent biological samples. Expert review and sealed-query accuracy are not inferred from automated tests.")
     # Figure 5: graph layers are counted separately from molecular result rows.
     entries = list(counts.get("by_tier", {}).items())
     labels = {"observed_composition": "Food composition", "observed_intervention": "Study/component context", "observed": "Published clinical summaries", "predicted": "Cell-line regulatory predictions", "regulatory_identity": "Identifier cross-references", "candidate": "Candidate correspondences", "curated": "Source-curated associations", "extracted": "Automatic text candidates"}
@@ -123,7 +129,7 @@ def render(metadata, review_manifest, performance, output):
     ax.set_xlim(.8, max(values, default=1) * 4)
     for i, value in enumerate(values):
         ax.text(value * 1.08, i, f"{value:,}", va="center", fontsize=8)
-    ax.set_title("Graph relationships are not validated dietary effects", loc="left", fontsize=10)
+    ax.set_title("Public graph inventory by evidence layer", loc="left", fontsize=10)
     save(fig, 5, ["layer", "display_label", "relationship_records"], [(key, labels.get(key, key), value) for key, value in entries], "Figure 5. Public graph relationship inventory by source layer. Composition, clinical summaries, study context, identifier correspondences and cell-line predictions have different meanings. Counts do not establish causality, clinical benefit or independent biological replication. Human review remains pending.")
     return packages
 

@@ -13,8 +13,9 @@ class GraphReads:
         self.indexed = has_index(db, "perf_adj")
         self.covering = self.indexed and bool(db.execute("SELECT 1 FROM sqlite_master WHERE name='perf_adj_object_cover'").fetchone())
         self.traversal_covering = self.indexed and bool(db.execute("SELECT 1 FROM sqlite_master WHERE name='perf_adj_object_traversal_cover'").fetchone())
+        self.kind_projection = bool(db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='node_kind'").fetchone())
         self.nodes, self.edges = {}, {}
-        self.kinds = None
+        self.kinds = {}
         self.pending = {}
         self.domain_function = None
         if self.indexed and domain != 'all':
@@ -45,7 +46,8 @@ class GraphReads:
             # position<=K filter. Selecting the opposite endpoint also forces
             # random table reads beyond the covering adjacency index. Keep each
             # node/direction top K bounded inside its indexed subquery, then
-            # hydrate only the final union's endpoints in one batched lookup.
+            # retain only the final union's IDs. Its endpoints are read when
+            # that queued node is actually visited, not for unused lookahead.
             branch = ('SELECT ? AS origin,edge_id,rank_default FROM (SELECT a.edge_id,a.rank_default '
                       'FROM perf_adj a' + index + ' WHERE a.' + direction + '=?' + clause + inbound +
                       ' ORDER BY a.rank_default,a.edge_id LIMIT ?)')
@@ -55,25 +57,35 @@ class GraphReads:
                 selected[row['origin']][row['edge_id']] = dict(row)
         ordered = {identifier: sorted(items.values(), key=lambda r: (r['rank_default'], r['edge_id']))[:limit]
                    for identifier, items in selected.items()}
-        ids = list(dict.fromkeys(row['edge_id'] for rows in ordered.values() for row in rows))
-        endpoints = {}
-        for start in range(0, len(ids), 500):
-            batch = ids[start:start + 500]
-            for row in self.db.execute('SELECT edge_id,subject,object FROM perf_adj WHERE edge_id IN (' +
-                                       ','.join('?' for _ in batch) + ')', batch):
-                endpoints[row['edge_id']] = row
         for identifier, rows in ordered.items():
-            self.pending[(identifier, level, limit)] = [
-                {'id': r['edge_id'], 'edge_id': r['edge_id'],
-                 'subject': endpoints[r['edge_id']]['subject'], 'object': endpoints[r['edge_id']]['object']}
-                for r in rows]
+            self.pending[(identifier, level, limit)] = [r['edge_id'] for r in rows]
 
     def node_kind(self, identifier):
-        if self.kinds is None:
-            # Existing kind/label and kind/degree indexes cover this small
-            # projection. Anchor lookahead needs no source payload hydration.
-            self.kinds = dict(self.db.execute("SELECT id,kind FROM node"))
-        return self.kinds.get(identifier)
+        if identifier in self.nodes:
+            return self.nodes[identifier]['kind']
+        if identifier not in self.kinds:
+            # Health-path lookahead visits at most 240 nodes. A primary-key
+            # lookup keeps cold work bounded too, instead of scanning every
+            # regulatory-region node on each request or cache initialization.
+            # Canonical releases include an exact id/kind mirror, avoiding
+            # pages containing large node metadata for this two-field lookup.
+            row = self.db.execute("SELECT kind FROM node_kind WHERE id=?", (identifier,)).fetchone() if self.kind_projection else None
+            if row is None:
+                row = self.db.execute("SELECT kind FROM node WHERE id=?", (identifier,)).fetchone()
+            self.kinds[identifier] = row[0] if row is not None else None
+        return self.kinds[identifier]
+
+    def endpoints(self, identifiers):
+        """Hydrate only a popped node's exact top K, preserving its order."""
+        rows = {}
+        for start in range(0, len(identifiers), 500):
+            batch = identifiers[start:start + 500]
+            for row in self.db.execute(
+                'SELECT edge_id id,edge_id,subject,object FROM perf_adj WHERE edge_id IN (' +
+                ','.join('?' for _ in batch) + ')', batch
+            ):
+                rows[row['edge_id']] = dict(row)
+        return [rows[identifier] for identifier in identifiers]
 
     def load_nodes(self, identifiers):
         missing = list(set(identifiers) - self.nodes.keys())
@@ -129,7 +141,7 @@ class GraphReads:
     def adjacent(self, current, level, limit, *, hydrate=True):
         ready = self.pending.pop((current, level, limit), None)
         if ready is not None:
-            return self.load_edges([r['id'] for r in ready]) if hydrate else ready
+            return self.load_edges(ready) if hydrate else self.endpoints(ready)
         clause, args = self.clause()
         inbound = " AND a.relation NOT IN ('contains','contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')" if level > 0 else ""
         subject_index = ' INDEXED BY perf_adj_subject_cover' if self.covering else ''
@@ -147,10 +159,5 @@ class GraphReads:
                "SELECT edge_id FROM adjacent ORDER BY rank_default,edge_id LIMIT ?")
         ids = [r[0] for r in self.db.execute(sql, [current, *args, limit, current, *args, limit, limit])]
         if not hydrate:
-            if not ids:
-                return []
-            rows = {r['edge_id']: dict(r) for r in self.db.execute(
-                'SELECT edge_id id,edge_id,subject,object FROM perf_adj WHERE edge_id IN (' +
-                ','.join('?' for _ in ids) + ')', ids)}
-            return [rows[i] for i in ids]
+            return self.endpoints(ids)
         return self.load_edges(ids)

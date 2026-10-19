@@ -30,6 +30,7 @@ from .explorer_performance import (
     ExplorerReadMiddleware,
     QueryUnavailable,
     has_index,
+    logical_connection_path,
     read_connection,
 )
 from .explorer_performance import fingerprint as source_fingerprint
@@ -41,8 +42,8 @@ from .explorer_scientific import (
     path_scientific,
     scientific_matches,
 )
-from .settings import DATA_DIR, PROJECT_ROOT
 from .release_contract import metadata_with_contract
+from .settings import DATA_DIR, PROJECT_ROOT
 
 router = APIRouter(prefix="/api/v1/explorer", tags=["Explorer"])
 DOMAINS = [
@@ -291,7 +292,7 @@ def entities(
             conditions.append("n.id IN (SELECT c.node_id FROM perf_search f JOIN perf_search_content c ON c.rowid=f.rowid WHERE perf_search MATCH ?)")
             args.append(phrase)
         if not include_extracted and tier != "extracted":
-            source = Path(db.execute("PRAGMA database_list").fetchone()[2]).resolve()
+            source = Path(logical_connection_path(db)).resolve()
             fingerprint = source.stat()
             excluded = _extracted_only_ids(
                 str(source), fingerprint.st_size, fingerprint.st_mtime_ns, allowed, source_fingerprint(source)
@@ -393,6 +394,28 @@ def _study_url(accession):
     return None
 
 
+_EFFECT_PREVIEW_COLUMNS = (
+    "series_accession", "feature_type", "feature_id", "feature_label", "contrast", "tissue",
+    "timepoint", "intervention", "dose", "duration", "effect_estimate", "standard_error",
+    "p_value", "q_value", "effect_unit", "status", "n_people", "n_samples",
+    "analysis_version", "metadata_json",
+)
+_GENE_EFFECT_TYPES = {"gene_expression", "expression", "gene", "transcript"}
+
+
+def _effect_preview_value(node, row):
+    """Keep scalar and export-batch serialization byte-for-byte equivalent."""
+    value = {key: row[key] for key in _EFFECT_PREVIEW_COLUMNS}
+    value["metadata"] = _public(_json(value.pop("metadata_json")))
+    value["feature_mapping"] = feature_match_identity(node, value)
+    if value["metadata"].get("contrast_assay_count") is not None:
+        value["contrast_assay_count"] = value["metadata"]["contrast_assay_count"]
+    value["export_allowed"] = value["metadata"].get("export_allowed") is True
+    value["original_url"] = _study_url(value["series_accession"])
+    value["interpretation"] = "연구의 관찰 결과; 식품의 독립 효과나 개인 건강 효과가 아님"
+    return value
+
+
 def _effects(node, limit=50):
     """Indexed source-feature lookup only. Do not scan/guess CpG-gene links."""
     if node["kind"] != "gene":
@@ -418,22 +441,78 @@ def _effects(node, limit=50):
                 + ") ORDER BY series_accession,analysis_version,contrast LIMIT ?",
                 [*identifiers, limit],
             ).fetchall()
-            values = []
-            for row in rows:
-                value = dict(row)
-                value["metadata"] = _public(_json(value.pop("metadata_json")))
-                value["feature_mapping"] = feature_match_identity(node, value)
-                if value["metadata"].get("contrast_assay_count") is not None:
-                    value["contrast_assay_count"] = value["metadata"]["contrast_assay_count"]
-                value["export_allowed"] = value["metadata"].get("export_allowed") is True
-                value["original_url"] = _study_url(value["series_accession"])
-                value["interpretation"] = (
-                    "연구의 관찰 결과; 식품의 독립 효과나 개인 건강 효과가 아님"
-                )
-                values.append(value)
-            return values
+            return [_effect_preview_value(node, row) for row in rows]
     except sqlite3.OperationalError as exc:
         raise QueryUnavailable("source_unavailable") from exc
+
+
+def _batch_export_effects(nodes, limit=50):
+    """Export-only native-table reads; ordinary node details keep scalar reads.
+
+    First gather covering feature-ID/native-ID references. Hydrate their union
+    in native-ID order with one caller-owned source connection, then retain the
+    original per-node type filter/order/limit and source metadata/rights. No
+    scalar or failed response is cached. Unsupported views/indexes use the
+    unchanged scalar route; missing/changed sources and failed reads do not.
+    """
+    genes = {node["id"]: node for node in nodes if node["kind"] == "gene"}
+    if not genes:
+        return {}
+    core = configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db" / "nutrigenomics.sqlite3")
+    if not core.is_file():
+        raise QueryUnavailable("source_unavailable")
+    before = source_fingerprint(core)
+    aliases = {identifier: set(gene_feature_identifiers(node)) for identifier, node in genes.items()}
+    names = sorted({name for values in aliases.values() for name in values})
+    with read_connection(core) as source:
+        native = source.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='study_effect'").fetchone()
+        feature_index = source.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='index' AND name='ix_study_effect_feature_id' AND tbl_name='study_effect'"
+        ).fetchone()
+        columns = source.execute("PRAGMA index_info(ix_study_effect_feature_id)").fetchall() if feature_index else []
+        primary = source.execute("PRAGMA table_info(study_effect)").fetchall() if native else []
+        integer_id = any(row["name"] == "id" and row["type"].upper() == "INTEGER" and row["pk"] == 1 for row in primary)
+        supported = bool(native and integer_id and columns and columns[0]["name"] == "feature_id")
+        if not supported:
+            if source_fingerprint(core) != before:
+                raise QueryUnavailable("source_changed")
+            return None
+        references = {}
+        for offset in range(0, len(names), 400):
+            batch = names[offset:offset + 400]
+            for row in source.execute(
+                "SELECT id,feature_id FROM study_effect INDEXED BY ix_study_effect_feature_id WHERE feature_id IN ("
+                + ",".join("?" for _ in batch) + ") ORDER BY feature_id,id", batch
+            ):
+                if row["id"] in references and references[row["id"]] != row["feature_id"]:
+                    raise QueryUnavailable("analysis_key_mismatch")
+                references[row["id"]] = row["feature_id"]
+        from .effect_batch import read_rows_by_ids
+
+        rows = read_rows_by_ids(source, references)
+        if set(rows) != set(references):
+            raise QueryUnavailable("analysis_key_mismatch")
+        candidates = []
+        for identifier, row in rows.items():
+            if row["id"] != identifier or row["feature_id"] != references[identifier]:
+                raise QueryUnavailable("analysis_key_mismatch")
+            if row["feature_type"] not in _GENE_EFFECT_TYPES:
+                continue
+            if any(not isinstance(row[key], str) or not row[key] for key in
+                   ("series_accession", "feature_type", "feature_id", "contrast", "analysis_version")):
+                raise QueryUnavailable("analysis_key_mismatch")
+            candidates.append(row)
+        # The pinned scalar feature-ID B-tree visits feature_id then native rowid
+        # before its stable ORDER BY sorter. Retain that tie order as well as the
+        # three explicitly ordered keys; no parallel aliases are collapsed.
+        candidates.sort(key=lambda row: (row["series_accession"], row["analysis_version"], row["contrast"], row["feature_id"], row["id"]))
+        result = {}
+        for identifier, node in genes.items():
+            selected = [row for row in candidates if row["feature_id"] in aliases[identifier]][:limit]
+            result[identifier] = [_effect_preview_value(node, row) for row in selected]
+    if source_fingerprint(core) != before:
+        raise QueryUnavailable("source_changed")
+    return result
 
 
 def _methylation_annotations(projection, node, limit=30):
@@ -503,7 +582,7 @@ def _methylation_annotations(projection, node, limit=30):
         raise QueryUnavailable("source_unavailable") from exc
 
 
-def _node_detail(db, identifier):
+def _node_detail(db, identifier, *, preloaded_effects=None):
     row = db.execute("SELECT * FROM node WHERE id=?", (identifier,)).fetchone()
     if row is None:
         raise HTTPException(404, "항목을 찾을 수 없습니다.")
@@ -527,7 +606,7 @@ def _node_detail(db, identifier):
     srcs += item["metadata"].get("source_ids", [])
     if item["metadata"].get("active_source"):
         srcs.append(item["metadata"]["active_source"])
-    effects = _effects(item)
+    effects = preloaded_effects[identifier] if preloaded_effects is not None and identifier in preloaded_effects else _effects(item)
     methylation, methylation_count = _methylation_annotations(db, item)
     annotate_effect_context(db, effects)
     annotate_effect_context(db, methylation)
@@ -1070,8 +1149,16 @@ def export_selection(payload: ExportInput):
             raise HTTPException(409, "release가 변경되었습니다. 화면을 새로고침한 뒤 내보내세요.")
         nodes, details, edges, edetails = [], {}, [], {}
         ids = set(payload.node_ids)
+        selected = list(dict.fromkeys(payload.node_ids))
+        selected_rows = {row["id"]: row for row in db.execute(
+            "SELECT * FROM node WHERE id IN (" + ",".join("?" for _ in selected) + ")", selected
+        )} if selected else {}
+        for identifier in selected:
+            if identifier not in selected_rows:
+                raise HTTPException(404, "항목을 찾을 수 없습니다.")
+        preloaded_effects = _batch_export_effects([_node(selected_rows[identifier]) for identifier in selected])
         for identifier in dict.fromkeys(payload.node_ids):
-            full = _node_detail(db, identifier)
+            full = _node_detail(db, identifier, preloaded_effects=preloaded_effects)
             measurements = [
                 m for m in full["measurements"] if _source(db, m["source_id"])["export_allowed"]
             ]
@@ -1348,6 +1435,8 @@ def _dist():
 
 def attach_explorer(app: FastAPI, *, public=False):
     app.add_middleware(ExplorerReadMiddleware, include_public=public)
+    from .source_replicas import ReplicaGuardMiddleware
+    app.add_middleware(ReplicaGuardMiddleware)
     app.include_router(router)
     from .explorer_workbench import router as workbench_router
 

@@ -84,6 +84,7 @@ def package(output):
     files += list(ROOT.glob('source_snapshots/default_path_originals/*.R'))
     files += list(ROOT.glob('source_snapshots/candidate_layers/*.py'))
     files += list(ROOT.glob('source_snapshots/clinical_layers/*.py'))
+    files += list(ROOT.glob('source_snapshots/performance_layers/*.py'))
     files += [ROOT/'portable-path-changes.json']
     files += [ROOT/'scripts/setup_rebuild_runtime.sh']
     files += list(ROOT.glob('config/rebuild-runtime-*.lock.txt'))
@@ -128,6 +129,7 @@ def package(output):
     files += [ROOT/'docs/PUBLIC_DATA_DICTIONARY.md']
     files += [ROOT/'docs/FINAL_UPGRADE_REPORTING_ko.md']
     files += [ROOT/'docs/ANALYSIS_INPUT_AUDIT_20261019.md']
+    files += [ROOT/'docs/EXPLORER_PERFORMANCE_ko.md']
     files += list(ROOT.glob('docs/CLINICAL_ENDPOINTS*'))
     files += list(ROOT.glob('docs/CLINICAL_ENDPOINT_SOURCE*'))
     files += [ROOT/'docs/PUBLIC_README.md']
@@ -178,7 +180,7 @@ def package(output):
         text=re.sub(r'/home/[^/]+/projects/nutrigenomics-db', '/home/research/test-project', text)
         p.write_text(text,encoding='utf-8')
     if (code/'docs/PUBLIC_README.md').is_file():
-        text=(code/'docs/PUBLIC_README.md').read_text(encoding='utf-8').replace('(PUBLICATION_RUNBOOK_ko.md)','(docs/PUBLICATION_RUNBOOK_ko.md)').replace('(WORKBENCH_PUBLIC_REBUILD_ko.md)','(docs/WORKBENCH_PUBLIC_REBUILD_ko.md)').replace('(../LICENSE)','(LICENSE)').replace('(../LICENSE-DATA.md)','(LICENSE-DATA.md)')
+        text=(code/'docs/PUBLIC_README.md').read_text(encoding='utf-8').replace('(PUBLICATION_RUNBOOK_ko.md)','(docs/PUBLICATION_RUNBOOK_ko.md)').replace('(WORKBENCH_PUBLIC_REBUILD_ko.md)','(docs/WORKBENCH_PUBLIC_REBUILD_ko.md)').replace('(WORKBENCH_CANDIDATE_LAYERS_ko.md)','(docs/WORKBENCH_CANDIDATE_LAYERS_ko.md)').replace('(../LICENSE)','(LICENSE)').replace('(../LICENSE-DATA.md)','(LICENSE-DATA.md)')
         (code/'README.md').write_text(text,encoding='utf-8')
     (code / "LICENSE-NOTICE.md").write_text(
         "# License and scope\n\nProject-authored software: MIT (see LICENSE). Project-authored curation/analysis outputs: CC BY 4.0 only where affirmative per-source/output policy permits them (see LICENSE-DATA.md). Third-party dependencies retain their own licenses. No dependency binaries, source data, credentials or private server environment files are bundled. This candidate code archive does not imply scientific review, dataset DOI registration or final submission readiness. Build the frontend from its lock before creating the public container. Server-specific tests requiring excluded transport/deployment helpers are listed in excluded-tests.json; portable tests are retained.\n",

@@ -11,8 +11,8 @@ from nutrigenomics.source_updates import atomic_json, fetch_source
 
 
 def check(registry, output, previous=None, session=None, snapshot_root=None):
-    entries = json.loads(Path(registry).read_text())["sources"]
-    old = {r["id"]: r for r in json.loads(Path(previous).read_text()).get("sources", [])} if previous else {}
+    entries = json.loads(Path(registry).read_text(encoding="utf-8"))["sources"]
+    old = {r["id"]: r for r in json.loads(Path(previous).read_text(encoding="utf-8")).get("sources", [])} if previous else {}
     client = session or requests.Session()
     results = []
     try:

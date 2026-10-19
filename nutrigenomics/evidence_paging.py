@@ -10,6 +10,7 @@ from contextlib import closing
 from pathlib import Path
 
 from .explorer_performance import QueryUnavailable, canonical, fingerprint, read_connection
+from .source_replicas import physical_read_path
 
 _VERIFIED_INDEXES = {}
 _IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -96,9 +97,10 @@ def verify_index(index_path, source_path, release_id, source_sha256):
     path = Path(index_path).resolve()
     before = fingerprint(path)
     receipt = json.loads(path.with_suffix('.json').read_text())
-    with path.open('rb') as stream:
+    physical = physical_read_path(path).resolve()
+    with physical.open('rb') as stream:
         actual = hashlib.file_digest(stream, 'sha256').hexdigest()
-    with closing(sqlite3.connect(path.as_uri() + '?mode=ro', uri=True)) as db:
+    with closing(sqlite3.connect(physical.as_uri() + '?mode=ro&immutable=1', uri=True)) as db:
         binding = json.loads(db.execute("SELECT value FROM header WHERE key='binding'").fetchone()[0])
     if (before != fingerprint(path) or actual != receipt.get('index_sha256')
             or binding.get('release_id') != release_id or binding.get('source_sha256') != source_sha256

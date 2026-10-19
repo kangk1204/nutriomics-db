@@ -439,8 +439,15 @@ def omics_results(
                         raise QueryUnavailable("analysis_key_mismatch")
                     rows.append(row)
         else:
-            total = type_counts[native_type] if type_counts is not None and not feature_id else db.execute("SELECT count(*) FROM study_effect WHERE " + condition, args).fetchone()[0]
-            rows = [dict(r) for r in db.execute("SELECT * FROM study_effect WHERE " + condition + " ORDER BY feature_id,id LIMIT ? OFFSET ?", [*args, page_size, offset])]
+            from .public_omics_index import page_rows
+            public_page = page_rows(db, core, release, (series, native_type, contrast, analysis_version), offset, page_size, feature_id) if type_counts is not None else None
+            if public_page is not None:
+                total, rows = public_page
+                if not feature_id and total != type_counts[native_type]:
+                    raise QueryUnavailable("analysis_key_mismatch")
+            else:
+                total = type_counts[native_type] if type_counts is not None and not feature_id else db.execute("SELECT count(*) FROM study_effect WHERE " + condition, args).fetchone()[0]
+                rows = [dict(r) for r in db.execute("SELECT * FROM study_effect WHERE " + condition + " ORDER BY feature_id,id LIMIT ? OFFSET ?", [*args, page_size, offset])]
         for row in rows:
             row["metadata"] = _public(_json(row.pop("metadata_json", None)))
             row["analysis_key"] = [

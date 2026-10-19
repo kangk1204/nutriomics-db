@@ -657,6 +657,11 @@ def build_report(*, internal_contract: dict, public_contract: dict, science_sour
             internal_contract["release_id"], public_contract["release_id"]})
         receipt["release_applicability"] = ("current_release" if receipt["applies_to_current_release"]
                                             else "historical_or_unbound_not_current_pass")
+        # A data release can stay fixed while the serving code changes.  Its ID
+        # alone must not make an older runtime benchmark a current pass.
+        historical_runtime = bool(receipt.get("not_final_runtime_proof") or receipt.get("historical_runtime_source"))
+        receipt["runtime_applicability"] = ("historical_runtime_not_current_pass" if historical_runtime
+            else "runtime_version_declared" if receipt.get("runtime_source") else "runtime_not_declared")
         receipt["evidence_class"] = receipt.get("evidence_class", "unclassified_receipt_no_scientific_validation_inferred")
         receipt["scientific_validation_inferred"] = False
     actual_clinical = clinical_record_summary(records_to_snapshot(records))
@@ -735,7 +740,11 @@ def _report_html(report: dict) -> str:
                     for tier in sorted(set(ic.get("by_tier", {})) | set(pc.get("by_tier", {}))))
     audit_rows = "".join(f"<tr><td>{esc(f['analysis_version'])}</td><td>{esc(f['code'])}</td><td>{esc(f['message'])}</td></tr>"
                          for f in report["analysis_audit"]["findings"])
-    receipts = "".join(f"<tr><td>{esc(r['reference_date'])}</td><td>{esc(r.get('label',r['source_file']))}<br><span class=muted>{esc(r['evidence_class'])}</span></td><td>{esc(r.get('status','recorded'))}<br>{'현재 release 참조' if r['applies_to_current_release'] else '과거 또는 release 미결속: 현재 통과로 승계하지 않음'}</td><td class=hash>{esc(r['source_sha256'])}</td></tr>"
+    def receipt_scope(r):
+        if r.get("runtime_applicability") == "historical_runtime_not_current_pass":
+            return "이전 실행 코드의 결과: 현재 서비스 통과로 승계하지 않음"
+        return "현재 자료 release 참조; 실행 코드·검증 범위는 해당 증빙을 따름" if r["applies_to_current_release"] else "과거 또는 release 미결속: 현재 통과로 승계하지 않음"
+    receipts = "".join(f"<tr><td>{esc(r['reference_date'])}</td><td>{esc(r.get('label',r['source_file']))}<br><span class=muted>{esc(r['evidence_class'])}</span></td><td>{esc(r.get('status','recorded'))}<br>{esc(receipt_scope(r))}</td><td class=hash>{esc(r['source_sha256'])}</td></tr>"
                        for r in report["validation_receipts"])
     if not receipts: receipts = "<tr><td colspan=4>이번 release에 연결된 검증 영수증 미입력. 과거 결과를 현재 통과로 대체하지 않음.</td></tr>"
     legacy = "".join(f"<tr><th>{esc(r['claim_id'])}</th><td>{esc(r['reported_value'])}</td><td>{esc(r['reference_date'] or '미확인')}</td><td>{esc(r['status'])}</td></tr>" for r in report["legacy_claims"])

@@ -8,11 +8,9 @@ from __future__ import annotations
 
 import copy
 import json
-import sqlite3
 from functools import lru_cache
-from pathlib import Path
 
-from .explorer_performance import fingerprint
+from .explorer_performance import fingerprint, logical_connection_path, read_connection
 
 SCHEMA_VERSION = "nutriomics-release-contract-v1"
 CORE_KINDS = {"study", "exposure", "arm", "contrast", "assertion", "analysis_run"}
@@ -196,8 +194,7 @@ def install_release_contract(db, contract):
 
 @lru_cache(maxsize=16)
 def _legacy_contract(path, identity, release_id=None):
-    with sqlite3.connect(Path(path).as_uri() + "?mode=ro", uri=True) as db:
-        db.execute("PRAGMA query_only=ON")
+    with read_connection(path) as db:
         return build_release_contract(db, release_id=release_id, verify_effect_counts=False)
 
 
@@ -209,7 +206,7 @@ def metadata_with_contract(db, metadata=None):
     result = {**(metadata or {}), **stored}
     contract = stored.get("release_contract")
     if not isinstance(contract, dict) or contract.get("schema_version") != SCHEMA_VERSION:
-        path = next((row[2] for row in db.execute("PRAGMA database_list") if row[1] == "main"), "")
+        path = logical_connection_path(db)
         release_id = stored.get("release_id") or result.get("release_id")
         contract = (_legacy_contract(path, fingerprint(path), release_id) if path else
                     build_release_contract(db, release_id=release_id, verify_effect_counts=False))

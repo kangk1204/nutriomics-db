@@ -12,10 +12,13 @@ from collections import OrderedDict
 from concurrent.futures import Future
 from contextlib import contextmanager
 from contextvars import ContextVar
+from dataclasses import dataclass
 from pathlib import Path
 
 from .explorer_context import configured_path
 from .settings import DATA_DIR, PROJECT_ROOT
+from .source_replicas import ReplicaUnavailable, physical_read_path
+from .source_replicas import guard as replica_guard
 
 
 def fingerprint(path):
@@ -103,6 +106,14 @@ class ProfileConnection(sqlite3.Connection):
         return self.cursor(factory=ProfileCursor).execute(sql, parameters)
 
 
+def logical_connection_path(db):
+    """Scientific/cache identity stays permanent; PRAGMA still reports reality."""
+    declared = getattr(db, 'logical_source_path', None)
+    if declared is not None:
+        return declared
+    return next((row[2] for row in db.execute('PRAGMA database_list') if row[1] == 'main'), '')
+
+
 @contextmanager
 def read_connection(path):
     budget = CURRENT.get()
@@ -113,7 +124,10 @@ def read_connection(path):
     started = time.monotonic()
     db = None
     try:
-        db = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=2, factory=ProfileConnection)
+        physical = physical_read_path(path).resolve()
+        immutable = '&immutable=1' if physical != path else ''
+        db = sqlite3.connect(physical.as_uri() + "?mode=ro" + immutable, uri=True, timeout=2, factory=ProfileConnection)
+        db.logical_source_path = str(path)
         db.row_factory = sqlite3.Row
         db.execute("PRAGMA query_only=ON")
         db.execute("PRAGMA cache_size=-65536")
@@ -123,6 +137,8 @@ def read_connection(path):
                 budget.connections.add(db)
                 budget.sql_connections += 1
         yield db
+    except ReplicaUnavailable as exc:
+        raise QueryUnavailable(exc.status) from exc
     except sqlite3.OperationalError as exc:
         raise QueryUnavailable("query_timeout" if budget and budget.expired() else "source_unavailable") from exc
     finally:
@@ -132,6 +148,12 @@ def read_connection(path):
                     budget.connections.discard(db)
                     budget.sql_seconds += time.monotonic() - started
             db.close()
+
+
+@dataclass(frozen=True)
+class FlightFailure:
+    """An in-flight failure delivered to waiters, never inserted in the cache."""
+    status: str
 
 
 class ByteCache:
@@ -174,11 +196,11 @@ class ByteCache:
             self.flights[key] = future
             return future, True
 
-    def finish(self, key, value=None):
+    def finish(self, key, value=None, *, failure=None):
         with self.lock:
             future = self.flights.pop(key, None)
             if future and not future.done():
-                future.set_result(value)
+                future.set_result(FlightFailure(failure) if failure is not None else value)
 
 
 CACHE = ByteCache()
@@ -223,6 +245,9 @@ def source_paths():
     ]
     if os.environ.get('NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX'):
         paths.append(Path(os.environ['NUTRIGENOMICS_EXPLORER_EVIDENCE_INDEX']))
+    if os.environ.get('NUTRIGENOMICS_PUBLIC_OMICS_INDEX'):
+        ordered = Path(os.environ['NUTRIGENOMICS_PUBLIC_OMICS_INDEX'])
+        paths.extend((ordered, ordered.with_suffix('.json')))
     return paths
 
 
@@ -261,6 +286,12 @@ class ExplorerReadMiddleware:
             "/api/v1/" if self.include_public else "/api/v1/explorer/"
         ):
             return await self.app(scope, receive, send)
+        # Manifest-authorized binary files must stream through FileResponse.
+        # JSON collection would buffer an entire SQLite/Parquet download and
+        # attempt UTF-8 decoding.  The outer replica guard and file route retain
+        # their source identity and permission checks; the JSON index is cached.
+        if self.include_public and path.startswith("/api/v1/public/files/"):
+            return await self.app(scope, receive, send)
         export = path.endswith("/export")
         budget = Budget(45 if export else 10)
         token = CURRENT.set(budget)
@@ -271,8 +302,11 @@ class ExplorerReadMiddleware:
         leader = False
         key = None
         watcher = None
+        flight_failure = "query_failed"
         started = time.monotonic()
         try:
+            # This precedes response-cache lookup, including an existing hit.
+            replica_guard()
             body = bytearray()
             while True:
                 event = await asyncio.wait_for(receive(), max(0.001, budget.deadline - time.monotonic()))
@@ -293,12 +327,17 @@ class ExplorerReadMiddleware:
             if cacheable:
                 cached = CACHE.get(key)
                 if cached is not None:
+                    replica_guard()
                     return await self.respond(send, cached, "hit", started, budget)
                 future, leader = CACHE.claim(key)
                 if not leader:
                     result = await asyncio.wait_for(asyncio.shield(asyncio.wrap_future(future)), max(0.001, budget.deadline - time.monotonic()))
-                    if result is not None:
-                        return await self.respond(send, result, "shared", started, budget)
+                    if isinstance(result, FlightFailure):
+                        raise QueryUnavailable(result.status)
+                    if result is None:
+                        raise QueryUnavailable("query_failed")
+                    replica_guard()
+                    return await self.respond(send, result, "shared", started, budget)
             while not budget.expired():
                 acquired = self.slots.acquire(blocking=False)
                 if acquired:
@@ -325,11 +364,13 @@ class ExplorerReadMiddleware:
 
             await self.app(scope, queue.get, capture)
             if budget.disconnected:
+                flight_failure = "query_cancelled"
                 return
             if budget.expired():
                 raise QueryUnavailable("query_timeout")
             head = next(m for m in messages if m["type"] == "http.response.start")
             content = b"".join(m.get("body", b"") for m in messages if m["type"] == "http.response.body")
+            replica_guard()
             if identity != tuple(fingerprint(p) for p in paths):
                 raise QueryUnavailable("source_changed")
             result = canonical({"status": head["status"], "headers": [[k.decode("latin1"), v.decode("latin1")] for k, v in head.get("headers", [])], "body": content.decode("utf-8")}).encode()
@@ -345,10 +386,11 @@ class ExplorerReadMiddleware:
                 CACHE.finish(key, result)
                 leader = False
             await self.respond(send, result, "miss", started, budget)
-        except (TimeoutError, QueryUnavailable) as exc:
+        except (TimeoutError, QueryUnavailable, ReplicaUnavailable) as exc:
+            flight_failure = getattr(exc, "status", "query_timeout")
             budget.cancel()
             if not budget.disconnected:
-                await self.error(send, 503, getattr(exc, "status", "query_timeout"))
+                await self.error(send, 503, flight_failure)
         finally:
             if watcher:
                 watcher.cancel()
@@ -357,7 +399,7 @@ class ExplorerReadMiddleware:
             if acquired:
                 self.slots.release()
             if leader:
-                CACHE.finish(key)
+                CACHE.finish(key, failure=flight_failure)
             profile = os.environ.get("NUTRIGENOMICS_EXPLORER_PROFILE")
             if profile:
                 # Server-local diagnostics, never parameters or scientific payloads.

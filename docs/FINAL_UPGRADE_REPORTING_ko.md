@@ -25,6 +25,8 @@ Python에서 `build_review_package(db, output)`를 호출하면 SQL 연결 또�
 
 `submission-report.json`은 내부와 공개 규모, 현재 검수 현황, 날짜별 검증, 남은 제출 조건을 분리한다. `claim-ledger.csv/json`은 기재 수치의 release와 단위를 보존한다. `legacy-claims.json`은 55,379 / 510,620 / 200마커 / 약 2,700명 / AUC 0.88 / cg04983977의 과거 문구를 별도 증빙으로 관리한다. 과거 준비 보고서 문구는 원 DB 집계 또는 모델 평가 증명으로 승격하지 않는다.
 
+`unique_pmids`는 관계 테이블 `edge.pmids_json` 필드의 고유 PMID 수다. 등록 문헌 후보 606개, 연구 등록 9개, 임상 원문 출처 및 독립 연구 수와 다른 집계이며, 이 숫자를 전체 원문 확보·검수 건수로 쓰지 않는다. `source_producer_verified=14`도 14개 실행의 생산 코드 참조 수다. 코드 해시가 같은 여러 실행을 고유 프로그램 14개나 독립 재현으로 세지 않는다.
+
 봉인 질의의 정답을 읽지 않으며 금표준 정답, precision 95%, 독립 평가 결과를 생성하지 않는다. 데이터·코드 DOI와 저자·연구비·기관 윤리 판단은 사람이 최종 확인한다. `journal_submission_ready`는 이 자동 파이프라인에서 항상 false다.
 
 ## 고정 임상 원본 재확보·지속 갱신
@@ -38,3 +40,5 @@ python -m scripts.reacquire_clinical_sources --check-latest --output <new-monthl
 고정된 5개 원본의 해시가 모두 같아야 현재 수치표를 재생성한다. 새 내용은 별도 내용 해시로 보존하고, 이용조건·표 구조·수치 재검토 후 새 큐레이션 버전을 만든다. 원본 변경으로 기존 사람 검수가 자동 승계되지 않는다. 정확한 최초 생산 코드도 `source_snapshots/clinical_layers`에 보존한다.
 
 공개 앱의 `/api/v1/public/files`는 현재 release manifest의 파일명·크기·SHA256만 반환한다. `/api/v1/public/files/<path>`는 그 목록에 있는 파일만 제공하고 Range 다운로드를 지원한다. DB·CSV·Parquet 다운로드는 전문가 검수 완료나 DOI 등록을 의미하지 않는다. 내부 release나 임의 서버 경로로 대체하지 않는다.
+
+파일 목록 JSON과 실제 파일 다운로드는 다른 응답이다. 파일 다운로드는 JSON 응답 캐시·전량 수집·일반 조회의 10초 예산을 거치지 않고 스트리밍한다. 원본/복제본의 freshness guard와 manifest 경로·파일 식별 검사는 유지한다. 배포 검증에는 실제 SQLite의 부분 Range 응답과 원본 바이트 대조를 포함하고, 전체 파일 수신자는 manifest SHA256을 확인한다. 부분 수신 성공을 전체 17GB 파일의 전송·재현 검증 완료로 보고하지 않는다.
