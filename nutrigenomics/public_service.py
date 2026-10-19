@@ -16,6 +16,8 @@ from .explorer import MatchInput, ReferenceContext, _match, _source, attach_expl
 from .explorer_build import canonical, sha256
 from .explorer_context import ExplorerContextMiddleware
 from .explorer_performance import read_connection
+from .release_contract import metadata_with_contract
+from .clinical_endpoints import study_clinical_summary
 
 
 class PublicMealItem(BaseModel):
@@ -58,7 +60,16 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
             if (not bound.is_relative_to(release) or not bound.is_file()
                     or sha256(bound) != binding.get("sha256")):
                 raise ValueError("public release review/validation evidence hash mismatch")
+    # One immutable inventory supplies file/API aliases. New releases install
+    # it at build time; legacy releases compute a read-only startup fallback.
+    with read_connection(database) as inventory_db:
+        metadata = metadata_with_contract(inventory_db, metadata)
+    if not allow_candidate and metadata.get("submission_ready") is not True:
+        raise ValueError("public deployment requires a reviewed, validated, hash-bound release gate")
     app = FastAPI(title="NutriOmics public data", version=metadata["release_id"])
+    from .public_files import attach_public_files
+    attach_public_files(app, release, manifest, metadata["release_id"],
+        preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
 
     @app.middleware("http")
     async def release_headers(request, call_next):
@@ -116,7 +127,8 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
             root = next((r for k, r in records if k == "study" and (r["id"] == identifier or identifier in r.get("metadata", {}).get("series", []))), None)
             if root is None:
                 raise HTTPException(404, "study not in this public release")
-            return {"study": root, "records": [{"kind": k, "record": r} for k, r in records if r.get("study_id") == root["id"]], "release_id": metadata["release_id"]}
+            return {"study": root, "records": [{"kind": k, "record": r} for k, r in records if r.get("study_id") == root["id"]],
+                    **study_clinical_summary(db, root["id"]), "release_id": metadata["release_id"]}
 
     @app.get("/api/v1/evidence")
     def evidence(accession: str, contrast: str, analysis_version: str,

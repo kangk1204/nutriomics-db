@@ -13,7 +13,7 @@ export function laneOf(node: Entity): number {
 }
 export const LANE_LABELS = ['음식 · 실험 노출','성분 · 화합물','CpG · 조절 영역','유전자 · 경로','건강지표 · 질환'];
 export const tierClass = (tier: string): 'recorded'|'indirect'|'extracted' => tier === 'extracted' ? 'extracted' : ['candidate','inferred','predicted','regulatory_identity','restricted'].includes(tier) ? 'indirect' : 'recorded';
-export const tierLabel = (tier: string) => ({observed_composition:'조성 측정 기록',observed:'실험 관찰',curated:'DB 수록 관계',candidate:'후보 대응',inferred:'추론 관계',predicted:'계산 예측',regulatory_identity:'조절 주석·식별자',restricted:'상세 이용 제한',extracted:'자동 추출 후보'}[tier] || tier);
+export const tierLabel = (tier: string) => ({observed_composition:'식품 조성 기록',observed:'관찰·보고 기록',curated:'DB 수록 관계',candidate:'후보 대응',inferred:'추론 관계',predicted:'계산 예측',regulatory_identity:'조절 주석·식별자',restricted:'상세 이용 제한',extracted:'자동 추출 후보'}[tier] || tier);
 function stable(value: unknown): string {
   if (Array.isArray(value)) return '['+value.map(stable).join(',')+']';
   if (value && typeof value === 'object') return '{'+Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>JSON.stringify(k)+':'+stable(v)).join(',')+'}';
@@ -85,7 +85,8 @@ export function edgeContext(edge:EvidenceEdge):{label:string;value:string}[]{
   const durationKey=['duration','duration_days','response_time_h','timepoint'].find(k=>c[k]!==null&&c[k]!==undefined&&c[k]!=='');
   const duration=durationKey?c[durationKey]:undefined;
   const m=(c.measurement&&typeof c.measurement==='object'?c.measurement:null) as Record<string,unknown>|null;
-  const measurementText=m?`${m.amount==null?'함량 미측정':text(m.amount)} ${m.unit||'단위 미확인'} · ${m.basis||'기준 미확인'} · ${m.status||'상태 미확인'}`:'미확인';
+  const missingAmount = m?.status==='not_measured'?'함량 미측정':m?.status==='below_detection'?'검출한계 미만':'함량 미확인';
+  const measurementText=m?`${m.amount==null?missingAmount:text(m.amount)} ${m.unit||'단위 미확인'} · ${m.basis||'기준 미확인'} · ${m.status||'상태 미확인'}`:'미확인';
   const doseText=typeof dose==='number'?`${dose} ${doseUnit||(doseKey==='dose_g'?'g':'단위 미확인')}${doseKey==='amount_per_100g'?' / 원본 100g 기준':''}`:dose==null?measurementText:text(dose);
   const durationText=typeof duration==='number'?`${duration} ${durationKey==='duration_days'?'일':durationKey==='response_time_h'?'h':'단위 미확인'}`:text(duration);
   return [{label:'종',value:text(edge.taxon||edge.scientific?.study_evidence?.species||value(['organism','species','taxon']))},

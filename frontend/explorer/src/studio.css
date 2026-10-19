@@ -74,3 +74,10 @@
 .wb-studio .wb-evidence-table td:nth-child(n+4){white-space:nowrap;word-break:normal;overflow-wrap:normal;min-width:76px}
 .wb-studio .wb-evidence-table td:nth-child(4){min-width:100px}
 .wb-studio .wb-evidence-table td:nth-child(8){min-width:115px}
+
+/* Clinical source facts retain source scales and review status. */
+.clinical-panel{border-top:1px solid #dce3e8;margin-top:24px;padding-top:18px}.clinical-boundary{font-size:12px;color:#475569;line-height:1.6;display:flex;gap:6px}.clinical-boundary svg{flex-shrink:0;margin-top:3px}.clinical-fact{padding:14px 0;border-bottom:1px solid #e5e9ee}.clinical-fact h4{font-size:14px;margin:0 0 8px}.clinical-pending{display:inline-block;font-size:11px;color:#725317;background:#fbf4e6;padding:3px 7px;margin-bottom:8px}.clinical-panel pre{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px}.clinical-table-wrap{overflow-x:auto}.clinical-fact details{margin-top:10px}.clinical-fact dl dd{overflow-wrap:anywhere}
+
+.wb-release-inventory{background:#f9fafb;border-bottom:1px solid #dce3e8;padding:9px 24px;color:#334155;font-size:12px}.wb-release-inventory summary{cursor:pointer;font-weight:600}.wb-release-inventory summary span{font-weight:400;margin-left:16px;color:#64748b}.release-grains{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px;padding:18px 0 9px}.release-grains div{display:grid;gap:5px;border-left:2px solid #d8e1e7;padding-left:12px}.release-grains strong{font-size:20px;font-variant-numeric:tabular-nums;color:#19364a}.release-grains b{font-weight:600}.release-grains small{font-size:11px;line-height:1.5;color:#64748b}.wb-release-inventory>p{margin:8px 0;color:#64748b}@media(max-width:1100px){.release-grains{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:680px){.release-grains{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-release-inventory{padding:9px 14px}.wb-release-inventory summary span{display:block;margin:5px 0}}
+
+.release-downloads{display:flex;flex-wrap:wrap;gap:10px 20px}.release-downloads a{color:#21556f;text-decoration:underline;text-underline-offset:3px}

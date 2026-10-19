@@ -457,6 +457,27 @@ def test_meta_distinguishes_graph_records_from_prediction(explorer):
     assert "개인의 건강" in meta["note"]
 
 
+def test_observed_filter_includes_source_checked_clinical_context(explorer):
+    client = explorer["client"]
+    all_before = client.get("/api/v1/explorer/graph", params={"seed_id": "food:rice", "tier": "all"}).json()
+    with sqlite3.connect(explorer["db"]) as db:
+        db.execute("INSERT INTO edge VALUES(?,?,?,?,?,?,?,?,?,?,?)", (
+            "clinical-context", "food:rice", "outcome:LDL", "same_study_reports_endpoint",
+            "observed", "source_checked_expert_pending", "9606",
+            json.dumps({"clinical_context_only": True, "mediation_established": False}),
+            '["open"]', '["123456"]', '["lipids"]'))
+        db.execute("INSERT INTO edge_domain VALUES('clinical-context','lipids')")
+    observed = client.get("/api/v1/explorer/graph", params={
+        "seed_id": "food:rice", "tier": "observed", "domain": "lipids"}).json()
+    assert {edge["id"] for edge in observed["edges"]} == {"clinical-context"}
+    assert observed["edges"][0]["context"]["mediation_established"] is False
+    health = client.get("/api/v1/explorer/entities", params={
+        "kind": "health", "tier": "observed", "domain": "lipids"}).json()
+    assert [node["id"] for node in health["items"]] == ["outcome:LDL"]
+    all_after = client.get("/api/v1/explorer/graph", params={"seed_id": "food:rice", "tier": "all"}).json()
+    assert {edge["id"] for edge in all_after["edges"]} == {edge["id"] for edge in all_before["edges"]} | {"clinical-context"}
+
+
 def test_unavailable_release_returns_503_without_disabling_legacy(explorer, monkeypatch, tmp_path):
     monkeypatch.setenv("NUTRIGENOMICS_EXPLORER_DATABASE", str(tmp_path / "not-created.sqlite"))
     client = explorer["client"]

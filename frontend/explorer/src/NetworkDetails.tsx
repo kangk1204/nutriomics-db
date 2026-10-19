@@ -2,6 +2,7 @@ import { ArrowUpRight, X } from 'lucide-react';
 import type { Entity, EvidenceEdge, NodeDetail } from './types';
 import { entityType, tierLabel, edgeContext } from './networkModel';
 import { relationLabel } from './GraphView';
+import { ClinicalFacts } from './ClinicalEndpoints';
 const text=(v:unknown)=>v==null?'미확인':typeof v==='object'?JSON.stringify(v):String(v);
 const safeUrl=(v:unknown)=>typeof v==='string'&&/^https?:\/\//.test(v)?v:undefined;
 export default function NetworkDetails({node,edge,detail,records,names,loading,onRecord,onCenter,onClose}:{node?:Entity;edge?:EvidenceEdge|null;detail?:NodeDetail|null;records:EvidenceEdge[];names:Map<string,string>;loading:boolean;onRecord:(e:EvidenceEdge)=>void;onCenter:(e:Entity)=>void;onClose:()=>void}){
@@ -18,6 +19,7 @@ export default function NetworkDetails({node,edge,detail,records,names,loading,o
       {edge.pmids?.length? <><h3>원문 문헌 · 고유 PMID {new Set(edge.pmids).size}개</h3>{[...new Set(edge.pmids)].filter(id=>/^\d+$/.test(id)).map(id=><a className="wb-source-link" key={id} href={`https://pubmed.ncbi.nlm.nih.gov/${id}/`} target="_blank" rel="noreferrer">PMID {id}<ArrowUpRight size={13}/></a>)}</>:<p className="wb-muted">개별 PMID 미수록</p>}
       {records.length>1&&<><h3>동일 맥락의 기록 {records.length}개</h3><div className="wb-network-records">{records.map(e=><button key={e.id} aria-pressed={edge.id===e.id} onClick={()=>onRecord(e)}>{e.id}</button>)}</div></>}
     </>:<><button onClick={()=>onCenter(node!)}>이 항목을 중심으로 탐색 <ArrowUpRight size={13}/></button><p>연결망에서 선택한 항목의 원본 기록입니다.</p>{detail?.measurements?.length? <><h3>성분 함량 · 원본 기준</h3><table className="wb-small-table"><thead><tr><th>성분</th><th>함량 · 기준</th></tr></thead><tbody>{detail.measurements.slice(0,10).map(m=><tr key={m.id}><td>{m.component_label||m.component}</td><td>{text(m.amount)} {m.unit}<small className="wb-row-sub">{m.basis} · {m.status}</small></td></tr>)}</tbody></table></>:null}{detail?.gaps?.map(g=><p className="wb-muted" key={g}>{g}</p>)}</>}
+    {Array.isArray(detail?.metadata?.clinical_endpoints)&&<section className="clinical-panel"><h3>같은 연구의 임상 보고값</h3><p className="clinical-boundary">보고된 건강지표입니다. 유전자 변화의 매개·인과 효과는 입증하지 않습니다.</p><ClinicalFacts records={detail.metadata.clinical_endpoints as Record<string,unknown>[]}/></section>}
     <h3>자료 출처 · 버전</h3>{sources.length?sources.map((s,i)=><div key={i}><dl>{['id','name','source','version','release','license','export_allowed'].filter(k=>s[k]!=null).map(k=><div key={k}><dt>{k}</dt><dd>{text(s[k])}</dd></div>)}</dl>{safeUrl(s.url)&&<a className="wb-source-link" href={safeUrl(s.url)} target="_blank" rel="noreferrer">원본 자료<ArrowUpRight size={13}/></a>}</div>):<p>{loading?'조회 중':'상세 출처 미수록'} · source ID {edge?.source_ids?.join(', ')||'미확인'}</p>}
     {edge?.scientific?.limitations?.map(v=><p className="wb-muted" key={v}>{v}</p>)}
     <details><summary>원본 관계 맥락</summary><pre>{JSON.stringify(edge?.context||detail?.metadata||{},null,2)}</pre></details>

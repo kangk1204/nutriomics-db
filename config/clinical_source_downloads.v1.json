@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "clinical-s03",
+      "enabled": true,
+      "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3998980/fullTextXML",
+      "allowed_hosts": [
+        "www.ebi.ac.uk"
+      ],
+      "format": "xml",
+      "max_bytes": 5000000,
+      "expected_sha256": "262dd8e3dc68d3e7e84cd39516d99878c0bf77ec968d545a75083a87b1af7599",
+      "filename": "S03-PMC3998980.xml",
+      "export_allowed": true,
+      "terms_url": "https://creativecommons.org/licenses/by/4.0/",
+      "scientific_review": "pending",
+      "scope": "Fixed licensed source snapshot only; changed content requires re-curation and human review"
+    },
+    {
+      "id": "clinical-s04",
+      "enabled": true,
+      "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5793243/fullTextXML",
+      "allowed_hosts": [
+        "www.ebi.ac.uk"
+      ],
+      "format": "xml",
+      "max_bytes": 5000000,
+      "expected_sha256": "345161b66bb8a9eb51906f78c2508b08dd802111153e5bde7d67df035bd10e0a",
+      "filename": "S04-PMC5793243.xml",
+      "export_allowed": true,
+      "terms_url": "https://creativecommons.org/licenses/by/4.0/",
+      "scientific_review": "pending",
+      "scope": "Fixed licensed source snapshot only; changed content requires re-curation and human review"
+    },
+    {
+      "id": "clinical-s05",
+      "enabled": true,
+      "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9710135/fullTextXML",
+      "allowed_hosts": [
+        "www.ebi.ac.uk"
+      ],
+      "format": "xml",
+      "max_bytes": 5000000,
+      "expected_sha256": "7d1878ae7dc49f8cf2f131165cb5f26f642febfea5b398485fea2afaff4815fc",
+      "filename": "S05-PMC9710135.xml",
+      "export_allowed": true,
+      "terms_url": "https://creativecommons.org/licenses/by/4.0/",
+      "scientific_review": "pending",
+      "scope": "Fixed licensed source snapshot only; changed content requires re-curation and human review"
+    },
+    {
+      "id": "clinical-n15",
+      "enabled": true,
+      "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5831037/fullTextXML",
+      "allowed_hosts": [
+        "www.ebi.ac.uk"
+      ],
+      "format": "xml",
+      "max_bytes": 5000000,
+      "expected_sha256": "dfecdd46b72d0140c00f63365eee06b282e7f9043efd0ccde9ca5c45080b08a2",
+      "filename": "N15-PMC5831037.xml",
+      "export_allowed": true,
+      "terms_url": "https://creativecommons.org/licenses/by/4.0/",
+      "scientific_review": "pending",
+      "scope": "Fixed licensed source snapshot only; changed content requires re-curation and human review"
+    },
+    {
+      "id": "clinical-n15-s3",
+      "enabled": true,
+      "url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0192947.s008&type=supplementary",
+      "allowed_hosts": [
+        "journals.plos.org",
+        "storage.googleapis.com"
+      ],
+      "format": "pdf",
+      "max_bytes": 5000000,
+      "expected_sha256": "77a8cc991201889ba7cc92eaed11cb5f8ab788f1a0f208ee83e8be2792093eba",
+      "filename": "N15-S3Table.pdf",
+      "export_allowed": true,
+      "terms_url": "https://creativecommons.org/licenses/by/4.0/",
+      "scientific_review": "pending",
+      "scope": "Supplementary source table; time-integration unit is unreported"
+    }
+  ],
+  "automatic_expert_approval": false
+}

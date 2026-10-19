@@ -66,3 +66,40 @@ def test_domain_projections_are_isolated_without_database_writes(monkeypatch):
     assert db.execute('PRAGMA query_only').fetchone()[0]==1
     with pytest.raises(sqlite3.OperationalError):db.execute("INSERT INTO edge_domain VALUES('c','lipids')")
     db.close()
+
+
+def test_prefetch_limits_covering_branches_before_endpoint_hydration(monkeypatch):
+    """K bounds execution work as well as output on a high-degree frontier."""
+    db = sqlite3.connect(':memory:')
+    db.row_factory = sqlite3.Row
+    db.executescript('CREATE TABLE perf_adj(edge_id TEXT PRIMARY KEY,subject TEXT,object TEXT,rank_default INTEGER,relation TEXT,tier TEXT);'
+                     'CREATE TABLE edge_domain(edge_id TEXT,domain TEXT);')
+    db.executemany('INSERT INTO perf_adj VALUES(?,?,?,?,?,?)', (
+        (f'e{i:06}', 'seed', f'n{i}', i % 5, 'association', 'curated') for i in range(30000)))
+    db.execute("INSERT INTO perf_adj VALUES('small-edge','small','seed',2,'association','curated')")
+    for direction in ('subject', 'object'):
+        db.execute(f'CREATE INDEX perf_adj_{direction}_cover ON perf_adj({direction},rank_default,edge_id,relation,tier)')
+    monkeypatch.setattr(graph_reads, 'has_index', lambda *_: True)
+    reader = graph_reads.GraphReads(db, None, None, 'all', None, False)
+    counts = [0]
+    def step():
+        counts[0] += 1
+        return 0
+    db.set_progress_handler(step, 1)
+    old_sql = ("WITH ranked AS (SELECT a.subject AS origin,a.edge_id,a.subject,a.object,a.rank_default,"
+               "row_number() OVER (PARTITION BY a.subject ORDER BY a.rank_default,a.edge_id) AS position "
+               "FROM perf_adj a INDEXED BY perf_adj_subject_cover WHERE a.subject IN (?,?) AND a.tier!='extracted') "
+               "SELECT origin,edge_id,subject,object,rank_default FROM ranked WHERE position<=?")
+    list(db.execute(old_sql, ['seed', 'small', 11]))
+    old_steps = counts[0]
+    counts[0] = 0
+    reader.prefetch_adjacent(['seed', 'small'], 0, 11)
+    new_steps = counts[0]
+    db.set_progress_handler(None, 0)
+    assert new_steps < old_steps / 10, (old_steps, new_steps)
+    for identifier in ('seed', 'small'):
+        expected = [dict(row) for row in db.execute(
+            "SELECT edge_id AS id,edge_id,subject,object FROM perf_adj WHERE subject=? OR object=? "
+            "ORDER BY rank_default,edge_id LIMIT 11", (identifier, identifier))]
+        assert reader.adjacent(identifier, 0, 11, hydrate=False) == expected
+    db.close()

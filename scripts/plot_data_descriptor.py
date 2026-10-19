@@ -20,6 +20,7 @@ def render(metadata, review_manifest, performance, output):
     reviews = json.loads(review_manifest.read_text(encoding="utf-8"))
     metrics = json.loads(Path(performance).read_text()) if performance else None
     counts = data["counts"]
+    reviews.setdefault("fact_candidates", reviews.get("primary_paper_fact_candidates", 0))
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "svg.fonttype": "none", "pdf.fonttype": 42, "axes.spines.top": False, "axes.spines.right": False})
     packages = []
     def save(fig, number, header, rows, legend):
@@ -39,23 +40,28 @@ def render(metadata, review_manifest, performance, output):
         packages.append(str(path))
         plt.close(fig)
     # Figure 1: schema and processing chain; no biological mechanism is asserted.
-    fig, ax = plt.subplots(figsize=(7.2, 3.5)); ax.set(xlim=(0, 10), ylim=(0, 4)); ax.axis("off")
-    blocks = [(0.1, 2.3, "Food composition", "food", "Source food ID, state\nquantity, unit, basis"),
-              (3.35, 2.3, "Human intervention", "curation", "Exposure, arm, contrast\ntissue, time, participants"),
-              (6.6, 2.3, "Omics results", "omics", "Five-part result key\nEffect, SE, P, FDR"),
-              (3.35, 0.25, "Versioned release", "neutral", "SQLite · Parquet · CSV\nmanifest, policy, review")]
+    fig, ax = plt.subplots(figsize=(7.2, 4.1)); ax.set(xlim=(0, 10), ylim=(0, 4.5)); ax.axis("off")
+    blocks = [(0.1, 3.0, "Food composition", "food", "Source food ID, state\nquantity, unit, basis"),
+              (3.35, 3.0, "Human intervention", "curation", "Exposure, arm, contrast\nTissue, time, sample n"),
+              (6.6, 3.0, "Omics results", "omics", "Five-part result key\nEffect, SE, P, FDR"),
+              (0.1, 0.3, "Source and review", "neutral", "Hashes, source rights\nHuman review: pending"),
+              (3.35, 0.3, "Clinical summaries", "curation", "Reported summaries, tests\nUnit, table, sample scope"),
+              (6.6, 0.3, "Versioned release", "neutral", "SQLite · Parquet · CSV\nmanifest, policy, review")]
     for x, y, title, color, text in blocks:
         ax.add_patch(FancyBboxPatch((x, y), 3, 1.2, boxstyle="round,pad=0.04,rounding_size=.05", facecolor="#f5f7f8", edgecolor=COLORS[color], linewidth=1))
         ax.text(x + .15, y + .94, title, fontweight="bold", color=COLORS[color]); ax.text(x + .15, y + .57, text, va="top", linespacing=1.5)
-    for x1, y1, x2, y2 in [(3.15, 2.9, 3.3, 2.9), (6.4, 2.9, 6.55, 2.9), (4.85, 2.2, 4.85, 1.55)]:
+    for x1, y1, x2, y2 in [(3.15, 3.6, 3.3, 3.6), (6.4, 3.6, 6.55, 3.6),
+                           (4.85, 2.9, 4.85, 1.6), (6.4, .9, 6.55, .9),
+                           (8.1, 2.9, 8.1, 1.6)]:
         ax.annotate("", (x2, y2), (x1, y1), arrowprops={"arrowstyle": "->", "color": COLORS["neutral"]})
-    ax.text(.1, 1.8, "Related food/component mapping;\ndose equivalence is checked separately", fontsize=8)
-    ax.text(6.65, 1.8, "Observed study results;\nno individual health prediction", fontsize=8)
-    ax.text(.1, .3, "Source rights\n+ content hashes", color=COLORS["neutral"])
-    ax.text(6.65, .3, "Human scientific review\n+ technical validation", color=COLORS["neutral"])
-    save(fig, 1, ["entity", "fields"], [(b[2], b[4].replace('\n', '; ')) for b in blocks], "Figure 1. Candidate data model and release workflow. Arrows represent database linkage and processing, not causal biological effects.")
+    ax.text(.1, 2.5, "Candidate food/component mapping;\ndose equivalence checked separately", fontsize=7.5)
+    ax.text(3.55, 2.1, "Shared study context\nnot mediation", fontsize=7.5,
+            bbox={"facecolor":"white", "edgecolor":"none", "pad":2})
+    ax.text(6.7, 2.1, "Packaged results\nnot personal prediction", fontsize=7.5,
+            bbox={"facecolor":"white", "edgecolor":"none", "pad":2})
+    save(fig, 1, ["entity", "fields"], [(b[2], b[4].replace('\n', '; ')) for b in blocks], "Figure 1. Candidate data model and release workflow. Clinical summaries and molecular results retain shared-study context; no mediation or causal biological pathway is inferred. Arrows represent data linkage and packaging.")
     # Figure 2: distinct grains; composition relations and omics records are not pooled.
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 3.2), gridspec_kw={"wspace": .7})
+    fig, axes = plt.subplots(1, 3, figsize=(9.6, max(4.8, .49 * len(counts["science_kinds"]) + .8)), gridspec_kw={"wspace": 1.1})
     sets = [list(counts["node_kinds"].items()), list(counts["science_kinds"].items()), list(counts["effect_types"].items())]
     plotted = []
     for panel, ax, entries, title, color in zip("ABC", axes, sets, ["Entities", "Curation records", "Quantitative results"], ["food", "curation", "omics"], strict=True):
@@ -66,11 +72,17 @@ def render(metadata, review_manifest, performance, output):
         ax.set_xlim(0, span * 1.4)
         for i, value in enumerate(values):
             ax.text(value + span * .025, i, f"{value:,}", va="center", fontsize=7)
-        ax.set_yticks(range(len(values)), [x.replace('_', '\n') for x in labels], fontsize=7)
+        def label(value):
+            if panel == "C" and value == "dmr":
+                return "region tests\n(native dmr)"
+            if panel == "A" and value == "gene":
+                return "gene\nidentifier"
+            return value.replace('_', '\n')
+        ax.set_yticks(range(len(values)), [label(x) for x in labels], fontsize=7)
         ax.invert_yaxis(); ax.set_title(panel + "  " + title, loc="left", fontsize=10)
         ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 4)); ax.set_xlabel("Records", fontsize=8)
         plotted.extend((panel, k, v) for k, v in entries)
-    save(fig, 2, ["panel", "type", "records"], plotted, "Figure 2. Actual public-candidate counts by data grain. Entity namespaces are not unique biological genes; quantitative records are feature × contrast × analysis-version results, not participants. External unassessed values are excluded.")
+    save(fig, 2, ["panel", "type", "records"], plotted, "Figure 2. Actual public-candidate counts by data grain. Entity namespaces are not unique biological genes; quantitative records are feature × contrast × analysis-version results, not participants. Native feature type dmr is retained in source data; fixed-window regional tests are not discovered or validated DMRs. Rights-restricted source values are excluded; predictions remain separately labelled.")
     # Figure 3: explicitly stated use cases, supported by the requested case design.
     fig, ax = plt.subplots(figsize=(7.2, 3.5)); ax.axis("off")
     examples = [("Yogurt", "Input: 150 g", "Acute study: 800 g", "Dose mismatch; product identity unverified"),
@@ -96,8 +108,23 @@ def render(metadata, review_manifest, performance, output):
     else:
         ax.axis("off"); ax.text(.05, .65, "Fresh benchmark: pending", transform=ax.transAxes, fontsize=12)
         rows.append(("fresh_benchmark", 0, "pending", "not_measured"))
-    ax.text(.05, -.3 if metrics else .35, f"Human-approved scientific facts: {reviews['expert_verified']} / {reviews['fact_candidates']} (pending)\nSealed-query scientific accuracy: not yet evaluated", transform=ax.transAxes, fontsize=8, color=COLORS["neutral"])
+    ax.text(.05, -.3 if metrics else .35, f"Human-approved core review records: {reviews['expert_verified']} / {reviews.get('records', reviews.get('expected_records', 'not reported'))} (pending)\nSource-fact candidates: {reviews['fact_candidates']} (not gold labels); sealed-query accuracy: not evaluated", transform=ax.transAxes, fontsize=8, color=COLORS["neutral"])
     save(fig, 4, ["case", "warm_requests", "p95_seconds", "target_seconds"], rows, "Figure 4. Technical and scientific validation states. When present, latency uses 100 warm requests per case with first requests excluded. Engineering repeats are not independent biological samples. Expert review and sealed-query accuracy are not inferred from automated tests.")
+    # Figure 5: graph layers are counted separately from molecular result rows.
+    entries = list(counts.get("by_tier", {}).items())
+    labels = {"observed_composition": "Food composition", "observed_intervention": "Study/component context", "observed": "Published clinical summaries", "predicted": "Cell-line regulatory predictions", "regulatory_identity": "Identifier cross-references", "candidate": "Candidate correspondences", "curated": "Source-curated associations", "extracted": "Automatic text candidates"}
+    fig, ax = plt.subplots(figsize=(7.2, max(3.4, len(entries) * .44 + 1.0)))
+    values = [value for _, value in entries]
+    ax.barh(range(len(entries)), values, color=COLORS["neutral"], height=.65)
+    ax.set_yticks(range(len(entries)), [labels.get(key, key) for key, _ in entries], fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xscale("log")
+    ax.set_xlabel("Source relationship records (log scale)")
+    ax.set_xlim(.8, max(values, default=1) * 4)
+    for i, value in enumerate(values):
+        ax.text(value * 1.08, i, f"{value:,}", va="center", fontsize=8)
+    ax.set_title("Graph relationships are not validated dietary effects", loc="left", fontsize=10)
+    save(fig, 5, ["layer", "display_label", "relationship_records"], [(key, labels.get(key, key), value) for key, value in entries], "Figure 5. Public graph relationship inventory by source layer. Composition, clinical summaries, study context, identifier correspondences and cell-line predictions have different meanings. Counts do not establish causality, clinical benefit or independent biological replication. Human review remains pending.")
     return packages
 
 

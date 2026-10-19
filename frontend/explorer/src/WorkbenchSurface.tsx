@@ -17,7 +17,7 @@ export function WorkspaceWelcome({meta,onSearch}:{meta:Meta|null;onSearch:(kind:
     <h2>하나의 항목에서 연구 근거까지</h2>
     <p>음식·성분·유전자·건강지표를 검색하고, 수록된 관계와 실제 실험 조건을 함께 확인하세요.</p>
     <div className="ws-start-grid">
-      {[{kind:'food' as Kind,q:'Yogurt',name:'요구르트',description:'식품 조성과 관련 중재',Icon:Leaf},{kind:'gene' as Kind,q:'APOE',name:'APOE',description:'발현·조절·질환 관련 근거',Icon:Dna},{kind:'health' as Kind,q:'Hypertension',name:'고혈압',description:'질환과 연결된 성분·유전자',Icon:HeartPulse}].map(({kind,q,name,description,Icon})=><button key={kind} onClick={()=>onSearch(kind,q)}><Icon size={22}/><strong>{name}</strong><span>{description}</span><small>수록 항목 검색</small></button>)}
+      {[{kind:'food' as Kind,q:'Yogurt',name:'요구르트',description:'식품 조성과 관련 중재',Icon:Leaf},{kind:'gene' as Kind,q:'APOE',name:'APOE',description:'발현·조절·질환 관련 근거',Icon:Dna},{kind:'health' as Kind,q:'blood pressure',name:'혈압',description:'원문에 보고된 건강지표',Icon:HeartPulse}].map(({kind,q,name,description,Icon})=><button key={kind} onClick={()=>onSearch(kind,q)}><Icon size={22}/><strong>{name}</strong><span>{description}</span><small>수록 항목 검색</small></button>)}
     </div>
     <div className="ws-workflows">
       <h3>선택한 항목을 네 가지 관점으로 확인합니다</h3>

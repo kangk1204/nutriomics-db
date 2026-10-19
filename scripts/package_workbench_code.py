@@ -83,6 +83,7 @@ def package(output):
     files += scripts
     files += list(ROOT.glob('source_snapshots/default_path_originals/*.R'))
     files += list(ROOT.glob('source_snapshots/candidate_layers/*.py'))
+    files += list(ROOT.glob('source_snapshots/clinical_layers/*.py'))
     files += [ROOT/'portable-path-changes.json']
     files += [ROOT/'scripts/setup_rebuild_runtime.sh']
     files += list(ROOT.glob('config/rebuild-runtime-*.lock.txt'))
@@ -117,12 +118,18 @@ def package(output):
             "foodb_food_crosswalk.template.json",
             "literature_reacquisition_pmids.json",
             "literature_candidate_entities.json",
+            "clinical_endpoints.v1.json",
+            "clinical_source_downloads.v1.json",
         )
     ]
     files += list(ROOT.glob("docs/WORKBENCH*"))
     files += [ROOT/'docs/MDPI_DATA_SUBMISSION_PREPARATION_ko.md']
     files += [ROOT/'docs/PUBLICATION_RUNBOOK_ko.md']
     files += [ROOT/'docs/PUBLIC_DATA_DICTIONARY.md']
+    files += [ROOT/'docs/FINAL_UPGRADE_REPORTING_ko.md']
+    files += [ROOT/'docs/ANALYSIS_INPUT_AUDIT_20261019.md']
+    files += list(ROOT.glob('docs/CLINICAL_ENDPOINTS*'))
+    files += list(ROOT.glob('docs/CLINICAL_ENDPOINT_SOURCE*'))
     files += [ROOT/'docs/PUBLIC_README.md']
     files += list(ROOT.glob('deploy/public/*'))
     files += list(ROOT.glob('.github/workflows/*.yml'))

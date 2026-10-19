@@ -42,6 +42,7 @@ from .explorer_scientific import (
     scientific_matches,
 )
 from .settings import DATA_DIR, PROJECT_ROOT
+from .release_contract import metadata_with_contract
 
 router = APIRouter(prefix="/api/v1/explorer", tags=["Explorer"])
 DOMAINS = [
@@ -60,6 +61,7 @@ KINDS = {
 }
 TIERS = {
     "observed": (
+        "observed",
         "observed_composition",
         "observed_intervention",
         "human_randomized",
@@ -212,7 +214,7 @@ def _edge_clause(domain, tier, include_extracted=True, prefix="e"):
 @router.get("/meta")
 def meta():
     with database() as db:
-        result = _meta(db)
+        result = metadata_with_contract(db)
         result.update(
             {
                 "domains": DOMAINS,
@@ -541,6 +543,10 @@ def _node_detail(db, identifier):
             "note": NOTE,
         }
     )
+    for key in ("clinical_endpoints", "clinical_endpoint_audit", "clinical_context_only",
+                "mediation_established", "expert_review_status", "study_id"):
+        if key in item["metadata"]:
+            item[key] = item["metadata"][key]
     if item.get("degree", 0) == 0:
         item["gaps"].append("이 단계의 연결 근거 없음")
     if item["kind"] == "gene" and not effects:
@@ -992,6 +998,12 @@ def _clean_node(node):
             "single_molecule_identity_verified",
             "food_basis",
             "original_id",
+            "clinical_endpoints",
+            "clinical_endpoint_audit",
+            "clinical_context_only",
+            "mediation_established",
+            "expert_review_status",
+            "study_id",
         )
         if k in metadata
     }
@@ -1340,6 +1352,9 @@ def attach_explorer(app: FastAPI, *, public=False):
     from .explorer_workbench import router as workbench_router
 
     app.include_router(workbench_router)
+    from .clinical_api import router as clinical_router
+
+    app.include_router(clinical_router)
 
     @app.get("/explorer", include_in_schema=False)
     def explorer_redirect():

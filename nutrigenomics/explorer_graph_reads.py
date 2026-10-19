@@ -34,7 +34,6 @@ class GraphReads:
         if len(identifiers) < 2:
             return
         clause, args = self.clause()
-        placeholders = ','.join('?' for _ in identifiers)
         selected = {identifier: {} for identifier in identifiers}
         for direction in ('subject', 'object'):
             inbound = " AND a.relation NOT IN ('contains','contains_nutrient','contains_analytical_flavonoid','chemical_gene_influence')" if direction == 'object' and level > 0 else ''
@@ -42,17 +41,32 @@ class GraphReads:
             if self.covering:
                 name = 'perf_adj_object_traversal_cover' if direction == 'object' and level > 0 and self.traversal_covering else 'perf_adj_' + direction + '_cover'
                 index = ' INDEXED BY ' + name
-            sql = ('WITH ranked AS (SELECT a.' + direction + ' AS origin,a.edge_id,a.subject,a.object,a.rank_default,'
-                   'row_number() OVER (PARTITION BY a.' + direction + ' ORDER BY a.rank_default,a.edge_id) AS position '
-                   'FROM perf_adj a' + index + ' WHERE a.' + direction + ' IN (' + placeholders + ')' + clause + inbound + ') '
-                   'SELECT origin,edge_id,subject,object,rank_default FROM ranked WHERE position<=?')
-            for row in self.db.execute(sql, [*identifiers, *args, limit]):
+            # A window over IN (...) ranks every neighbor before its outer
+            # position<=K filter. Selecting the opposite endpoint also forces
+            # random table reads beyond the covering adjacency index. Keep each
+            # node/direction top K bounded inside its indexed subquery, then
+            # hydrate only the final union's endpoints in one batched lookup.
+            branch = ('SELECT ? AS origin,edge_id,rank_default FROM (SELECT a.edge_id,a.rank_default '
+                      'FROM perf_adj a' + index + ' WHERE a.' + direction + '=?' + clause + inbound +
+                      ' ORDER BY a.rank_default,a.edge_id LIMIT ?)')
+            sql = ' UNION ALL '.join(branch for _ in identifiers)
+            parameters = [value for identifier in identifiers for value in (identifier, identifier, *args, limit)]
+            for row in self.db.execute(sql, parameters):
                 selected[row['origin']][row['edge_id']] = dict(row)
-        for identifier, items in selected.items():
-            ordered = sorted(items.values(), key=lambda r: (r['rank_default'], r['edge_id']))[:limit]
+        ordered = {identifier: sorted(items.values(), key=lambda r: (r['rank_default'], r['edge_id']))[:limit]
+                   for identifier, items in selected.items()}
+        ids = list(dict.fromkeys(row['edge_id'] for rows in ordered.values() for row in rows))
+        endpoints = {}
+        for start in range(0, len(ids), 500):
+            batch = ids[start:start + 500]
+            for row in self.db.execute('SELECT edge_id,subject,object FROM perf_adj WHERE edge_id IN (' +
+                                       ','.join('?' for _ in batch) + ')', batch):
+                endpoints[row['edge_id']] = row
+        for identifier, rows in ordered.items():
             self.pending[(identifier, level, limit)] = [
-                {'id': r['edge_id'], 'edge_id': r['edge_id'], 'subject': r['subject'], 'object': r['object']}
-                for r in ordered]
+                {'id': r['edge_id'], 'edge_id': r['edge_id'],
+                 'subject': endpoints[r['edge_id']]['subject'], 'object': endpoints[r['edge_id']]['object']}
+                for r in rows]
 
     def node_kind(self, identifier):
         if self.kinds is None:

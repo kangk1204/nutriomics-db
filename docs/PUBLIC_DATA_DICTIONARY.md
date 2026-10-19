@@ -4,6 +4,26 @@ The definitive structural definition is the release's `schema.sql`. This file
 defines the scientific meaning and limits. Use `dataset-metadata.json` for
 actual public counts; internal counts are not substituted.
 
+## Clinical source-summary extension, 2026-10-19
+
+`GET /api/v1/explorer/dictionary` returns the actual release ID, SQLite column
+types and clinical JSON field definitions with record-presence counts. The
+release-bound reporting package also exports `clinical-data-dictionary.json`
+and CSV. This supplements `schema.sql`; field presence is not expert approval.
+
+`clinical_endpoint_result` retains baseline, repeated-group and crossover-iAUC
+summaries. `observations[].value` is a published group summary; its SD, range or
+IQR is not an effect SE or confidence interval. `endpoint.unit` preserves the
+reported unit, while `canonical_unit` can remain null when its interpretation is
+uncertain. Statistical tests retain comparison scope and multiplicity separately
+from each observation. An omnibus P and an adjusted pairwise P are different
+results. Cohort n does not replace unreported observed n in imputed cells.
+
+`clinical_study_audit` records availability and unresolved source scope for all
+registered studies. Unassessed does not mean not measured. Shared study pointers
+do not establish participant-level RNA/DNAm/clinical linkage or genomic mediation.
+Source checks and automatic candidates remain pending human scientific review.
+
 ## Public service candidate changes, 2026-10-17
 
 `composition_assessment` is a derived index keyed by the unchanged measurement ID.
