@@ -27,7 +27,7 @@ from .explorer_performance import (
     selector_key,
 )
 
-RULE_VERSION = "scientific-matching-2026-10-03-v1"
+RULE_VERSION = "scientific-matching-2026-10-20-v2"
 DIMENSIONS = ("tissue", "response_time_h", "regimen_duration_days", "frequency", "population")
 TISSUES = {
     "pbmc": "pbmc",
@@ -1021,18 +1021,27 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
         )
     if not evidence:
         gaps.append("선택 항목에 대응하는 기존 사람 중재 기록 없음; 그래프 가설과 구분됩니다.")
+    connected_studies = sorted({r["study_id"] for r in evidence if r.get("clinical_results")})
+    unconnected_studies = sorted({r["study_id"] for r in evidence if not r.get("clinical_results")})
     if evidence:
-        gaps.extend(
-            [
-                "관련 성분이 같아도 음식·제품·배정량·기간이 같다는 뜻은 아닙니다.",
-                "현재 이 오믹스 중재 조회에는 수치형 임상 결과가 연결되어 있지 않습니다. 그래프의 별도 임상 근거와 구분되며 오믹스 변화의 건강상 이득·손해는 미확인입니다.",
-            ]
-        )
+        gaps.append("관련 성분이 같아도 음식·제품·배정량·기간이 같다는 뜻은 아닙니다.")
+        if connected_studies:
+            if unconnected_studies:
+                gaps.append("반환된 중재 기록 중 일부 연구에만 임상 근거가 연결되어 있습니다. 연구별 clinical_results와 원문을 확인해야 합니다.")
+            gaps.append("같은 연구의 임상 근거 연결은 오믹스 변화가 임상 변화를 매개했다는 증거가 아닙니다. 보고값의 비교 조건·시점·단위·검수 상태를 따로 확인해야 하며 개인의 건강상 이득·손해는 미확인입니다.")
+        else:
+            gaps.append("현재 반환된 중재 기록에는 임상 근거가 연결되어 있지 않습니다. 미연결은 임상 지표 미측정이나 효과 0을 뜻하지 않으며, 오믹스 변화의 건강상 이득·손해는 미확인입니다.")
     return {
         "rule_version": RULE_VERSION,
         "seed_id": seed["id"],
         "reference_context": reference,
         "observed_evidence": evidence,
         "evidence_gaps": gaps,
+        "clinical_context_summary": {
+            "studies_with_connected_clinical_evidence": connected_studies,
+            "studies_without_connected_clinical_evidence": unconnected_studies,
+            "scope": "Returned study context only; not mediation, matched individual data or clinical efficacy",
+            "mediation_established": False,
+        },
         "note": "실험 조건을 보존한 근거 조회이며 개인 반응·질병 위험 예측이 아닙니다.",
     }

@@ -8,6 +8,9 @@ It does not predict individual disease risk or health benefits.
 The current release is a **Data Descriptor candidate**. Scientific review,
 sealed-query evaluation, DOI registration and public hosting remain explicit
 release gates. A source-checked record is not an expert-approved result.
+The [source precheck and human-review workflow](WORKBENCH_SUBMISSION_REVIEW_ko.md)
+provides hash-bound decision proposals, source-only query review and a portable
+submission supplement while preserving these gates.
 
 ## Install
 

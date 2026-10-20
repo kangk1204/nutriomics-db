@@ -119,7 +119,7 @@ def manifest():
                "모든 군에 신체활동 안내; 식단 성분별 인과 분리는 불가능.",
                "RNA-seq166명·개인별 임상자료 접근 미확인. 동일인 다중오믹스 연결은 보류."],256,512),
         study("N06","fish oil/fenofibrate 교차시험 PBMC",["GSE27385"],"21429719",
-              "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27385","randomized_double_blind_crossover","PBMC","randomized",
+              "https://pubmed.ncbi.nlm.nih.gov/21429719/","randomized_double_blind_crossover","PBMC","randomized",
               [exposure("fish_oil","fish oil 3.7g/day n-3","component_group","fish-oil supplement EPA1.7g+DHA1.2g within3.7g n-3",
                         "assigned 3.7g/day total n-3,6weeks",[EPA,DHA],amount=3.7,unit="g",days=42,
                         quantified_components={EPA:{"amount":1.7,"unit":"g/day"},DHA:{"amount":1.2,"unit":"g/day"}},
@@ -172,7 +172,10 @@ def manifest():
                               ("lipids","triglycerides and cholesterol fractions",None),
                               ("tnfa","TNF-alpha incremental AUC",0.10)]]
     ]
-    return {"version":V,"created_at":"2026-10-01","expert_review_status":"pending",
+    return {"version":V,"created_at":"2026-10-01",
+            "curation_revision":"2026-10-20-primary-reference-v2",
+            "revision_note":"Stable bridge identifiers are retained; the N06 primary-publication link is corrected. Frozen earlier manifests are separate inputs.",
+            "expert_review_status":"pending",
             "scope":"source-backed noncommercial human intervention evidence retrieval","studies":studies}
 
 
