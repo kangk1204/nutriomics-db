@@ -1,5 +1,6 @@
-import type { Entity, EvidenceEdge, EvidencePage, ExportRequest, Filters, GraphData, Kind, Locus, Meta, NodeDetail, ScientificContext, ScientificMatchResult, Snapshot, WorkbenchEvidence } from './types';
+import type { Entity, EvidenceEdge, EvidencePage, ExportRequest, Filters, GraphData, InterventionRecord, Kind, Locus, Meta, NodeDetail, ScientificContext, ScientificMatchResult, Snapshot, WorkbenchEvidence } from './types';
 import { recordGraphReceipt } from './renderMetrics';
+import { exposureRecord, interventionEntity, interventionMatches, mergeCatalogPreview, type SearchKind } from './catalogSearch';
 
 export const offline = Boolean(window.__NUTRIOMICS_SNAPSHOT__);
 const snapshot = window.__NUTRIOMICS_SNAPSHOT__;
@@ -132,14 +133,14 @@ function eligibleEdge(edge: EvidenceEdge, filters: Filters) {
     (filters.tier === 'all' || edge.tier === 'restricted' || tiers[filters.tier]?.includes(edge.tier)) &&
     (filters.include_extracted || filters.tier === 'extracted' || edge.tier !== 'extracted');
 }
-export async function getEntities(kind: Kind, q: string, filters: Filters, page: number, pageSize: number, sort: string, order: string, signal?: AbortSignal) {
+export async function getEntities(kind: Kind | 'food_record' | 'exposure', q: string, filters: Filters, page: number, pageSize: number, sort: string, order: string, signal?: AbortSignal) {
   if (snapshot) {
     const query = q.trim().toLocaleLowerCase();
     const allowedEdges = snapshot.edges.filter(edge => eligibleEdge(edge, filters));
     const allowedIds = new Set(allowedEdges.flatMap(edge => [edge.subject, edge.object]));
     const extractedIds = new Set(snapshot.edges.filter(edge => edge.tier === 'extracted').flatMap(edge => [edge.subject, edge.object]));
     const nonExtractedIds = new Set(snapshot.edges.filter(edge => edge.tier !== 'extracted').flatMap(edge => [edge.subject, edge.object]));
-    const filtered = snapshot.nodes.filter(node => normalizeKind(node.kind) === kind &&
+    const filtered = snapshot.nodes.filter(node => (kind==='food_record'?node.kind==='food':kind==='exposure'?['diet','exposure'].includes(node.kind):normalizeKind(node.kind) === kind) &&
       (!query || [node.label, node.label_en || '', node.id, ...(node.aliases || [])].some(value => value.toLocaleLowerCase().includes(query))) &&
       (filters.domain === 'all' || node.domains?.includes(filters.domain) || allowedIds.has(node.id)) &&
       (filters.tier === 'all' || allowedIds.has(node.id)) &&
@@ -149,6 +150,35 @@ export async function getEntities(kind: Kind, q: string, filters: Filters, page:
   }
   const params = new URLSearchParams({ kind, q, domain: filters.domain, tier: filters.tier, include_extracted: String(filters.include_extracted), page: String(page), page_size: String(pageSize), sort, order });
   return request<{ items: Entity[]; total: number; page: number; page_size: number; release_id: string }>(`/entities?${params}`, signal);
+}
+export async function getInterventions(q: string, page=1, pageSize=25, signal?: AbortSignal) {
+  if(snapshot){
+    const nodes=snapshot.nodes.filter(node=>['diet','exposure'].includes(node.kind));
+    const items=nodes.filter(node=>{const record=exposureRecord(snapshot.node_details?.[node.id]||node);return record?interventionMatches(record,q):[node.label,node.id,...(node.aliases||[])].join(' ').toLocaleLowerCase().includes(q.trim().toLocaleLowerCase())});
+    return {items:items.slice((page-1)*pageSize,page*pageSize),total:items.length,page,page_size:pageSize,release_id:snapshot.release_id};
+  }
+  return fetchWithTimeout('/api/v1/interventions?limit=1000&offset=0',{signal},async response=>{
+    if(!response.ok)throw await serverError(response);
+    const result=await response.json() as {items:InterventionRecord[];release_id?:string;total?:number};
+    if(typeof result.total==='number'&&result.total>result.items.length)throw new Error('연구 노출 목록이 일부만 반환됐습니다. 전체 검색을 확인할 수 없습니다.');
+    const items=result.items.filter(row=>interventionMatches(row,q)).map(interventionEntity).sort((a,b)=>a.label.localeCompare(b.label,'ko'));
+    return {items:items.slice((page-1)*pageSize,page*pageSize),total:items.length,page,page_size:pageSize,release_id:result.release_id};
+  });
+}
+export interface CatalogPage {items:Entity[];total:number;page:number;page_size:number;release_id?:string;preview?:boolean;groups?:{kind:'food'|'component'|'exposure';total:number|null;shown:number}[];warnings?:string[]}
+export async function getCatalogSearch(kind:SearchKind,q:string,filters:Filters,page:number,signal?:AbortSignal):Promise<CatalogPage>{
+  if(kind==='exposure')return getInterventions(q,page,25,signal);
+  if(kind!=='inputs')return getEntities(kind==='food'?'food_record':kind,q,filters,page,25,'label','asc',signal);
+  const calls=await Promise.allSettled([getEntities('food_record',q,filters,1,8,'label','asc',signal),getEntities('component',q,filters,1,8,'label','asc',signal),getInterventions(q,1,8,signal)]);
+  if(signal?.aborted)throw new DOMException('검색이 취소되었습니다.','AbortError');
+  if(calls.every(result=>result.status==='rejected'))throw new Error('음식·성분·연구 노출을 조회하지 못했습니다. 검색 결과 0건을 뜻하지 않습니다.');
+  const kinds=['food','component','exposure'] as const;
+  const groups=calls.map((result,index)=>({kind:kinds[index],total:result.status==='fulfilled'?result.value.total:null,shown:result.status==='fulfilled'?result.value.items.length:0}));
+  const values=calls.map(result=>result.status==='fulfilled'?result.value.items:[]);
+  const releases=calls.flatMap(result=>result.status==='fulfilled'&&result.value.release_id?[result.value.release_id]:[]);
+  if(new Set(releases).size>1)throw new Error('검색 중 자료 release가 바뀌었습니다. 같은 버전으로 다시 조회해주세요.');
+  return {items:mergeCatalogPreview(values[0],values[1],values[2],q),total:groups.reduce((sum,group)=>sum+(group.total||0),0),page:1,page_size:24,release_id:releases[0],preview:true,groups,
+    warnings:calls.flatMap((result,index)=>result.status==='rejected'?[`${{food:'음식',component:'성분',exposure:'연구 노출'}[kinds[index]]} 조회 실패 · 결과 수 미확인`]:[])};
 }
 export async function getNode(id: string): Promise<NodeDetail> {
   if (snapshot) return snapshot.node_details?.[id] || { ...snapshot.nodes.find(node => node.id === id)!, gaps: ['독립 HTML에 포함된 자료만 표시합니다.'] };

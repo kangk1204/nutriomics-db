@@ -1,0 +1,77 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import Module from 'node:module';
+import { build, transform } from 'esbuild';
+
+const pure=await transform(await fs.readFile('src/catalogSearch.ts','utf8'),{loader:'ts',format:'esm'});
+const helpers=await import('data:text/javascript;base64,'+Buffer.from(pure.code).toString('base64'));
+const record=Object.freeze({id:'S03:flavanols:source-version',study_id:'S03',label:'포도씨 monomeric/oligomeric flavanols',food_terms:'["포도씨 추출물","grape seed extract"]',amount:200,unit:'mg',duration_days:56,dose_basis:'assigned mixture per day',metadata:{expert_review_status:'pending'}});
+assert.equal(helpers.interventionMatches(record,'포도씨 추출물'),true);
+assert.equal(helpers.interventionMatches(record,'GRAPE SEED EXTRACT'),true);
+assert.equal(helpers.interventionMatches(record,'포도씨추출물'),true);
+assert.equal(helpers.interventionMatches(record,'cocoa product'),false,'do not invent a cocoa mapping');
+const entity=helpers.interventionEntity(record);
+assert.equal(entity.id,'Exposure:S03:flavanols:source-version');
+assert.equal(entity.kind,'diet');assert.equal(entity.degree,undefined,'unknown is not zero');
+assert.equal(entity.metadata.composition_available,false);
+assert.equal(entity.metadata.calculation_food_id,undefined);
+assert.deepEqual(helpers.exposureRecord(entity),record);
+assert.equal(helpers.searchKindOf(entity),'exposure');
+assert.throws(()=>helpers.interventionEntity({id:'broken'}),/원본 ID/);
+const request=helpers.scientificInput(entity,100,'','6','56','daily');
+assert.equal('intake_g' in request,false,'assigned mg must not become food grams');
+assert.deepEqual(request.reference_context,{tissue:null,response_time_h:6,regimen_duration_days:56,frequency:'daily'});
+const food={id:'food-1',kind:'food',label:'Food'};
+assert.equal(helpers.scientificInput(food,150,'','','','').intake_g,150);
+assert.equal(helpers.scientificInput(food,150,'','','','').reference_context.response_time_h,null);
+assert.deepEqual(helpers.mergeCatalogPreview([food],[food],[entity],'grape').map(row=>row.id),[entity.id,food.id]);
+assert.equal(helpers.safeLayer('all',false),'dietary');
+assert.equal(helpers.safeLayer('regulatory_predicted',false),'dietary');
+assert.equal(helpers.safeLayer('literature_candidate',false),'dietary');
+assert.equal(helpers.safeLayer('regulatory_predicted',true),'regulatory_predicted');
+assert.equal(helpers.reviewLabel('source_checked'),'출처 대조 · 전문가 승인 미확인');
+assert.equal(helpers.reviewLabel(undefined),'전문가 검수 미확인');
+
+const compiled=await build({entryPoints:['src/api.ts'],bundle:true,write:false,platform:'node',format:'cjs'});
+const originalWindow=globalThis.window,originalFetch=globalThis.fetch;
+function load(snapshot){
+  globalThis.window=snapshot?{__NUTRIOMICS_SNAPSHOT__:snapshot}:{};
+  const filename=path.resolve('src/__catalog_test.cjs'),instance=new Module(filename);
+  instance.filename=filename;instance._compile(compiled.outputFiles[0].text,filename);return instance.exports;
+}
+let calls=[];
+const filters={domain:'all',tier:'all',include_extracted:false};
+const response=value=>new Response(JSON.stringify(value),{headers:{'content-type':'application/json'}});
+try{
+  const api=load();
+  globalThis.fetch=async url=>{calls.push(url);if(url.startsWith('/api/v1/interventions'))return response({items:[record],release_id:'release-1'});return response({items:[],total:0,page:1,page_size:8,release_id:'release-1'})};
+  const integrated=await api.getCatalogSearch('inputs','포도씨 추출물',filters,1);
+  assert.equal(integrated.items[0].id,entity.id);assert.equal(integrated.total,1);
+  assert.deepEqual(integrated.groups.map(group=>group.total),[0,0,1]);
+  assert.equal(integrated.preview,true);
+  assert.ok(calls.some(url=>url.includes('kind=food_record')),'strict food category is not legacy food/diet union');
+  assert.ok(calls.some(url=>url.startsWith('/api/v1/interventions')));
+  calls=[];
+  await api.getCatalogSearch('food','grape',filters,1);
+  assert.equal(calls.length,1);assert.ok(calls[0].includes('kind=food_record'));
+  globalThis.fetch=async url=>url.startsWith('/api/v1/interventions')?response({items:[record],release_id:'release-1'}):new Response('{}',{status:503});
+  const partial=await api.getCatalogSearch('inputs','grape seed',filters,1);
+  assert.equal(partial.groups[0].total,null,'failure is not a confirmed zero');
+  assert.equal(partial.warnings.length,2);assert.equal(partial.items[0].id,entity.id);
+  globalThis.fetch=async url=>response(url.startsWith('/api/v1/interventions')?{items:[record],release_id:'release-2'}:{items:[],total:0,page:1,page_size:8,release_id:'release-1'});
+  await assert.rejects(api.getCatalogSearch('inputs','grape',filters,1),/release가 바뀌었/);
+  globalThis.fetch=async()=>response({items:[record],total:2000});
+  await assert.rejects(api.getInterventions('',1),/일부만 반환/);
+  globalThis.fetch=async()=>new Response('{}',{status:503});
+  await assert.rejects(api.getCatalogSearch('inputs','',filters,1),/결과 0건을 뜻하지/);
+  const controller=new AbortController();controller.abort();
+  await assert.rejects(api.getCatalogSearch('inputs','',filters,1,controller.signal),error=>error.name==='AbortError');
+  const snapshot={release_id:'offline-1',nodes:[entity,food],edges:[],paths:[],gaps:[],node_details:{[entity.id]:entity},offline:true};
+  const local=load(snapshot);globalThis.fetch=()=>{throw new Error('offline must not fetch')};
+  const localExposure=await local.getInterventions('grape seed');
+  assert.equal(localExposure.items[0].id,entity.id);
+  const localFood=await local.getEntities('food_record','',filters,1,25,'label','asc');
+  assert.deepEqual(localFood.items.map(row=>row.id),[food.id]);
+}finally{globalThis.window=originalWindow;globalThis.fetch=originalFetch}
+console.log('Catalog/exposure regressions passed: exact source alias, no synthetic grams, strict food category, partial failure, mixed release, abort, offline scope, and explicit hypothesis opt-in. Not a scientific accuracy evaluation.');

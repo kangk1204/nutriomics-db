@@ -54,6 +54,19 @@ export interface ApplicabilityCondition {
   dimension: string; status: 'match' | 'mismatch' | 'unknown'; input?: unknown; study?: unknown; reason: string;
   contrast_id?: string;
 }
+export interface SourceClassification {
+  classification?: string; reason?: string; flags?: string[]; source_checked?: boolean;
+  primary_dietary_evidence_eligible?: boolean; supplement_attribution_established?: boolean;
+  scientific_approval?: boolean; expert_review_status?: string;
+  source_references?: {url?:string;locator?:string;sha256?:string}[];
+}
+export interface ScienceReviewContext {
+  source_classification?: SourceClassification | null; primary_dietary_evidence_eligible?: boolean;
+  scientific_approval?: boolean; publication_disposition?: string;
+  canonical_record_sha256?: string;
+  human_review?: {record_kind?:string;record_id?:string;record_sha256?:string;decision?:string;
+    reviewer_type?:string;reviewer_attestation?:boolean;reason?:string};
+}
 export interface ScientificContrast {
   id: string; series_accession?: string; contrast?: string; analysis_version?: string;
   comparison?: string; design_classification?: string; label?: string;
@@ -62,6 +75,8 @@ export interface ScientificContrast {
   source_url?: string; all_results_url?: string; applicability?: ApplicabilityCondition[]; effect_preview?: string;
   matched_exposure_role?: string; comparison_exposures?: Record<string, unknown>[]; exposure_role_note?: string;
   source_effect_total?: number | null; gene_filter_applied?: boolean;
+  study_source_classification?: SourceClassification; primary_dietary_evidence_eligible?: boolean;
+  science_review_context?: ScienceReviewContext;
 }
 export interface ScientificEvidence {
   id: string; study_id: string; study_label?: string; evidence_group?: string;
@@ -69,6 +84,8 @@ export interface ScientificEvidence {
   mapping_identity: MappingIdentity; study_evidence: StudyEvidence;
   applicability: ApplicabilityCondition[]; contrasts: ScientificContrast[]; clinical_results: Record<string, unknown>[];
   provenance: Record<string, unknown>[]; limitations: string[]; result_status?: string; export_allowed?: boolean;
+  source_classification?: SourceClassification; primary_dietary_evidence_eligible?: boolean;
+  supplement_attribution_established?: boolean; science_review_context?: ScienceReviewContext;
 }
 export interface ScientificMatchResult {
   release_id: string; rule_version: string; seed_id: string; reference_context: ReferenceContext;
@@ -85,6 +102,18 @@ export interface GraphData {
 export interface Meta {
   release_id: string; created_at: string; counts: Record<string, unknown>;
   domains?: { id: string; label: string }[]; scope?: unknown; gaps?: string[];
+  dataset_release_id?: string; service_build_id?: string; immutable_base_release_id?: string;
+  candidate_composition_release_id?: string; status?: string; submission_ready?: boolean;
+  review_summary?: Record<string, unknown>; composition_inputs?: Record<string, unknown> | unknown[];
+}
+export interface InterventionRecord {
+  id: string; study_id: string; label?: string; kind?: string; formulation?: string;
+  food_terms?: string[] | string; component_keys?: string[] | string;
+  amount?: number | null; unit?: string | null; duration_days?: number | null;
+  dose_basis?: string; source_id?: string; metadata?: Record<string, unknown>;
+  publication_review_status?: string;
+  original_record_sha256?: string; record_sha256?:string; canonical_record_sha256?:string;
+  science_review_context?: ScienceReviewContext;
 }
 export interface Filters { domain: string; tier: Tier; include_extracted: boolean; scientific_context?: ScientificContext }
 export interface ExportRequest {

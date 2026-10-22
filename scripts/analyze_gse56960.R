@@ -1,3 +1,7 @@
+# Archive-only instrumentation: preprocessing, contrasts and FDR are unchanged.
+archive_script_argument <- sub("^--file=", "", grep("^--file=", commandArgs(), value=TRUE)[1L])
+archive_helper_path <- file.path(dirname(archive_script_argument), "expression_archive_helpers.R")
+source(archive_helper_path)
 script_argument <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
 if (length(script_argument)) {
   project_root <- normalizePath(file.path(dirname(sub("^--file=", "", script_argument[[1L]])), ".."))
@@ -182,7 +186,13 @@ if (!is.finite(correlation$consensus.correlation)) stop("Repeated-measures corre
 fit <- lmFit(
   gene_expression, design, block = sample_info$subject_id, correlation = correlation$consensus.correlation
 )
+unmoderated_fit <- fit
 fit <- eBayes(contrasts.fit(fit, contrast_matrix), robust = TRUE)
+model_archive <- save_expression_model_archive(
+  gene_expression, sample_info, design, contrast_matrix, unmoderated_fit, fit,
+  file.path(output_root, "reanalysis_inputs.rds"), block=sample_info$subject_id,
+  correlation=correlation$consensus.correlation)
+
 
 write_gzip_tsv <- function(data, path) {
   connection <- gzfile(path, open = "wt")
@@ -394,7 +404,9 @@ metadata <- list(
   fgsea_random_seed = 20261001L,
   multiple_testing = if(arg_value("--bridge-contrasts","false")=="true") "Primary BH across all genes times 12 dose-change contrasts; pathway family separate; within-contrast q retained" else "BH within contrast",
   result_files = list("gene_effects.tsv.gz", "pathway_effects.tsv.gz"),
-  auxiliary_files = list("sample_metadata.tsv", "sample_qc.tsv", "rma_qc.pdf"),
+  auxiliary_files = list("sample_metadata.tsv", "sample_qc.tsv", "rma_qc.pdf", "reanalysis_inputs.rds"),
+  model_archive = model_archive,
+  helper_path = normalizePath(archive_helper_path), helper_sha256 = expression_archive_sha256(archive_helper_path),
   effect_scope = "cohort-level response to a mixed high-fat challenge; not component-specific and not an individual prediction",
   software_versions = list(
     R = as.character(getRversion()),

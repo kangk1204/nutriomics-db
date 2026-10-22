@@ -85,10 +85,11 @@ def package(output):
     files += list(ROOT.glob('source_snapshots/candidate_layers/*.py'))
     files += list(ROOT.glob('source_snapshots/clinical_layers/*.py'))
     files += list(ROOT.glob('source_snapshots/performance_layers/*.py'))
+    files += list(ROOT.glob('source_snapshots/review_evidence/*/*.R'))
     files += [ROOT/'portable-path-changes.json']
     files += [ROOT/'scripts/setup_rebuild_runtime.sh']
     files += list(ROOT.glob('config/rebuild-runtime-*.lock.txt'))
-    files += [*ROOT.glob("frontend/explorer/src/*"), *ROOT.glob("frontend/explorer/scripts/*")]
+    files += [*ROOT.glob("frontend/explorer/src/*"), *ROOT.glob("frontend/explorer/scripts/**/*")]
     files += [
         ROOT / "frontend/explorer" / f
         for f in (
@@ -128,6 +129,9 @@ def package(output):
     files += [ROOT/'docs/PUBLICATION_RUNBOOK_ko.md']
     files += [ROOT/'docs/PUBLIC_DATA_DICTIONARY.md']
     files += [ROOT/'docs/FINAL_UPGRADE_REPORTING_ko.md']
+    files += [ROOT/'docs/COMPOSED_PUBLIC_RELEASE_ko.md']
+    files += [ROOT/'docs/FINAL_UPGRADE_20261022_ko.md']
+    files += [ROOT/'docs/EXPRESSION_ARCHIVE_REPLAY_ko.md']
     files += [ROOT/'docs/ANALYSIS_INPUT_AUDIT_20261019.md']
     files += [ROOT/'docs/EXPLORER_PERFORMANCE_ko.md']
     files += list(ROOT.glob('docs/CLINICAL_ENDPOINTS*'))

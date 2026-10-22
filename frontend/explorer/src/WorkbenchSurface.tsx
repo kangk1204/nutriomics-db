@@ -1,15 +1,16 @@
 import { BookOpen, Dna, FlaskConical, GitBranch, HeartPulse, Leaf, MapPin, Network, Search, Table2 } from 'lucide-react';
 import { normalizeKind } from './api';
-import type { Entity, Kind, Meta, MappingIdentity } from './types';
+import type { Entity, Meta, MappingIdentity } from './types';
+import type { SearchKind } from './catalogSearch';
 
 export const KIND_ICONS = {food:Leaf,component:FlaskConical,gene:Dna,cpg:Dna,regulatory_region:MapPin,health:HeartPulse,pathway:GitBranch};
-const typeNames:Record<string,string>={food:'음식',diet:'실험 노출',nutrient:'영양성분',chemical:'화합물',compound:'화합물',gene:'유전자',cpg:'CpG',methylation_probe:'프로브',regulatory_region:'조절 영역',disease:'질환',outcome:'건강지표',pathway:'경로'};
+const typeNames:Record<string,string>={food:'음식',diet:'연구 노출',exposure:'연구 노출',nutrient:'영양성분',chemical:'화합물',compound:'화합물',gene:'유전자',cpg:'CpG',methylation_probe:'프로브',regulatory_region:'조절 영역',disease:'질환',outcome:'건강지표',pathway:'경로'};
 export function EntityBadge({entity}:{entity:Entity}) {
   const kind=normalizeKind(entity.kind),Icon=KIND_ICONS[kind];
   return <span className={`ws-type ws-type-${kind}`}><Icon size={14}/>{typeNames[entity.kind]||entity.kind}</span>;
 }
 
-export function WorkspaceWelcome({meta,onSearch}:{meta:Meta|null;onSearch:(kind:Kind,q:string)=>void}) {
+export function WorkspaceWelcome({meta,onSearch}:{meta:Meta|null;onSearch:(kind:SearchKind,q:string)=>void}) {
   const count=(key:string)=>typeof meta?.counts[key]==='number'?Number(meta.counts[key]).toLocaleString('ko-KR'):null;
   const nodes=count('nodes')||count('node'),edges=count('edges')||count('edge');
   return <section className="ws-welcome" aria-label="탐색 시작">
@@ -17,7 +18,7 @@ export function WorkspaceWelcome({meta,onSearch}:{meta:Meta|null;onSearch:(kind:
     <h2>하나의 항목에서 연구 근거까지</h2>
     <p>음식·성분·유전자·건강지표를 검색하고, 수록된 관계와 실제 실험 조건을 함께 확인하세요.</p>
     <div className="ws-start-grid">
-      {[{kind:'food' as Kind,q:'Yogurt',name:'요구르트',description:'식품 조성과 관련 중재',Icon:Leaf},{kind:'gene' as Kind,q:'APOE',name:'APOE',description:'발현·조절·질환 관련 근거',Icon:Dna},{kind:'health' as Kind,q:'blood pressure',name:'혈압',description:'원문에 보고된 건강지표',Icon:HeartPulse}].map(({kind,q,name,description,Icon})=><button key={kind} onClick={()=>onSearch(kind,q)}><Icon size={22}/><strong>{name}</strong><span>{description}</span><small>수록 항목 검색</small></button>)}
+      {[{kind:'inputs' as SearchKind,q:'Yogurt',name:'요구르트',description:'식품 조성과 관련 중재',Icon:Leaf},{kind:'exposure' as SearchKind,q:'포도씨 추출물',name:'포도씨 추출물',description:'배정 용량·기간으로 연구 탐색',Icon:BookOpen},{kind:'gene' as SearchKind,q:'APOE',name:'APOE',description:'발현·조절·질환 관련 근거',Icon:Dna},{kind:'health' as SearchKind,q:'blood pressure',name:'혈압',description:'원문에 보고된 건강지표',Icon:HeartPulse}].map(({kind,q,name,description,Icon})=><button key={kind} onClick={()=>onSearch(kind,q)}><Icon size={22}/><strong>{name}</strong><span>{description}</span><small>수록 항목 검색</small></button>)}
     </div>
     <div className="ws-workflows">
       <h3>선택한 항목을 네 가지 관점으로 확인합니다</h3>
@@ -39,8 +40,8 @@ export function MatchingBadge({identity}:{identity:MappingIdentity}) {
   return <span className="ws-matching-badge" title={identity.note||identity.method||'대응 방법 미확인'}>{names[identity.status||'unknown']||identity.label||'대응 미확인'}</span>;
 }
 
-export function EvidenceSummary({studies,contrasts,external,busy}:{studies:number|null;contrasts:number|null;external:number|null;busy:boolean}) {
+export function EvidenceSummary({studies,contrasts,external,busy,externalLabel='수록 외부 관계'}:{studies:number|null;contrasts:number|null;external:number|null;busy:boolean;externalLabel?:string}) {
   return <div className="ws-evidence-summary" aria-label="조회 범위" aria-busy={busy}>
-    {[['중재 대응 연구',studies,'음식·성분 대응 · 연구 ID 중복 제거'],['중재 대비',contrasts,'원본 대비 ID 중복 제거'],['수록 외부 관계',external,'현재 필터의 관계 기록 · 임상 검증과 구분']].map(([name,value,note])=><div key={String(name)}><span>{name}</span><strong>{value==null?'—':Number(value).toLocaleString('ko-KR')}</strong><small>{note}</small></div>)}
+    {[['중재 대응 연구',studies,'음식·성분·노출 대응 · 연구 ID 중복 제거'],['중재 대비',contrasts,'원본 대비 ID 중복 제거'],[externalLabel,external,'현재 필터의 기록 수 · 독립 연구 수 아님']].map(([name,value,note])=><div key={String(name)}><span>{name}</span><strong>{value==null?'—':Number(value).toLocaleString('ko-KR')}</strong><small>{note}</small></div>)}
   </div>;
 }

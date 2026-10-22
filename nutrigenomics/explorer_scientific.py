@@ -1008,6 +1008,8 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
                 "causal_inference": False,
             }
         )
+    from .composed_science import annotate_matches
+    annotate_matches(db, evidence)
     evidence.sort(
         key=lambda e: (
             e["mapping_identity"]["status"] == "related_component",

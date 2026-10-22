@@ -53,6 +53,9 @@ DOMAINS = [
 ]
 KINDS = {
     "food": ("food", "diet"),
+    # Preserve the legacy mixed tab while allowing exact food/exposure searches.
+    "food_record": ("food",),
+    "exposure": ("diet",),
     "component": ("nutrient", "chemical", "compound"),
     "gene": ("gene",),
     "health": ("disease", "outcome"),
@@ -265,6 +268,12 @@ def entities(
     allowed = KINDS[kind]
     conditions = [f"n.kind IN ({','.join('?' for _ in allowed)})"]
     args = list(allowed)
+    if kind == "exposure":
+        # A clinical-study context or generic diet is not an administered product.
+        conditions.extend([
+            "json_extract(n.metadata_json,'$.entity_type')='exposure'",
+            "n.id='Exposure:' || json_extract(n.metadata_json,'$.original_exposure.id')",
+        ])
     if q.strip():
         term = "%" + q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         conditions.append(
@@ -1056,7 +1065,66 @@ class ExportInput(BaseModel):
         return value
 
 
-def _clean_node(node):
+def _export_exposure_metadata(db, node, metadata):
+    """Preserve only rights-cleared, exact-source exposure fields in snapshots."""
+    original = metadata.get("original_exposure")
+    if original is None:
+        return {}
+
+    def withheld(reason):
+        return {"exposure_export_status": "withheld", "exposure_withheld_reason": reason}
+
+    if (not isinstance(original, dict) or node.get("kind") not in {"diet", "exposure"}
+            or not isinstance(original.get("id"), str)
+            or node.get("id") != "Exposure:" + original["id"]
+            or metadata.get("entity_type") != "exposure"):
+        return withheld("canonical_exposure_identifier_mismatch")
+    source_id = original.get("source_id")
+    if not isinstance(source_id, str) or not source_id or db is None:
+        return withheld("exposure_source_permission_unavailable")
+    if _source(db, source_id).get("export_allowed") is not True:
+        return withheld("exposure_source_redistribution_not_permitted")
+    safe = {}
+    for key in ("id", "study_id", "label", "kind", "unit", "dose_basis", "formulation",
+                "source_id", "publication_review_status", "expert_review_status"):
+        value = original.get(key)
+        if isinstance(value, str):
+            safe[key] = _public(value)
+    for key in ("amount", "duration_days"):
+        value = original.get(key)
+        if value is None and key in original:
+            safe[key] = None
+        elif isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value):
+            safe[key] = value
+    for key in ("record_sha256", "original_record_sha256", "canonical_record_sha256",
+                "source_record_sha256"):
+        value = original.get(key)
+        if isinstance(value, str) and len(value) == 64 and all(c in "0123456789abcdefABCDEF" for c in value):
+            safe[key] = value
+    original_metadata = original.get("metadata")
+    if not isinstance(original_metadata, dict):
+        original_metadata = _json(original.get("metadata_json"), {})
+    if isinstance(original_metadata, dict):
+        safe["metadata"] = {
+            key: _public(original_metadata[key]) for key in ("dose_frequency", "expert_review_status")
+            if isinstance(original_metadata.get(key), str)
+        }
+    omitted = []
+    if "food_terms" in original:
+        terms = _json(original["food_terms"], None) if isinstance(original["food_terms"], str) else original["food_terms"]
+        if (isinstance(terms, list) and len(terms) <= 50
+                and all(isinstance(term, str) and len(term) <= 250 for term in terms)):
+            safe["food_terms"] = [_public(term) for term in terms]
+        else:
+            omitted.append("food_terms")
+    result = {"original_exposure": safe, "exposure_export_status": "partial" if omitted else "permitted"}
+    if omitted:
+        result.update(exposure_withheld_fields=omitted,
+                      exposure_withheld_reason="invalid_or_oversized_source_alias_list")
+    return result
+
+
+def _clean_node(node, db=None):
     """Snapshot metadata is an allowlist, never embedded local paths/raw rows."""
     item = dict(node)
     metadata = item.get("metadata", {})
@@ -1086,6 +1154,7 @@ def _clean_node(node):
         )
         if k in metadata
     }
+    item["metadata"].update(_export_exposure_metadata(db, node, metadata))
     return item
 
 
@@ -1163,7 +1232,7 @@ def export_selection(payload: ExportInput):
                 m for m in full["measurements"] if _source(db, m["source_id"])["export_allowed"]
             ]
             withheld = len(full["measurements"]) - len(measurements)
-            detail = _clean_node(full)
+            detail = _clean_node(full, db)
             detail["measurements"] = measurements
             detail["effects"] = [e for e in full["effects"] if e["export_allowed"]]
             detail["withheld_effect_previews"] = len(full["effects"]) - len(detail["effects"])
@@ -1219,7 +1288,7 @@ def export_selection(payload: ExportInput):
                             "domains",
                             "degree",
                         )
-                    }
+                    }, db
                 )
             )
         for identifier in dict.fromkeys(payload.edge_ids):

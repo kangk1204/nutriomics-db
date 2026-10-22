@@ -11,13 +11,15 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field, FiniteFloat, field_validator
 
+from .clinical_endpoints import study_clinical_summary
+from .composed_release import validate_service_composition
+from .composed_science import record_context, selector_context
 from .composition_policy import POLICY_VERSION, assess, convert_unit, normalize_unit, select_unique
 from .explorer import MatchInput, ReferenceContext, _match, _source, attach_explorer
 from .explorer_build import canonical, sha256
 from .explorer_context import ExplorerContextMiddleware
 from .explorer_performance import read_connection
 from .release_contract import metadata_with_contract
-from .clinical_endpoints import study_clinical_summary
 
 
 class PublicMealItem(BaseModel):
@@ -63,6 +65,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     # One immutable inventory supplies file/API aliases. New releases install
     # it at build time; legacy releases compute a read-only startup fallback.
     with read_connection(database) as inventory_db:
+        validate_service_composition(inventory_db, metadata, manifest)
         metadata = metadata_with_contract(inventory_db, metadata)
     if not allow_candidate and metadata.get("submission_ready") is not True:
         raise ValueError("public deployment requires a reviewed, validated, hash-bound release gate")
@@ -113,22 +116,33 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     @app.get("/api/v1/interventions")
     def interventions():
         with read() as db:
-            return {"items": [json.loads(r[0]) for r in db.execute("SELECT metadata_json FROM science_record WHERE kind='exposure' ORDER BY id")], "release_id": metadata["release_id"]}
+            values = [(r[0], json.loads(r[1])) for r in db.execute("SELECT id,metadata_json FROM science_record WHERE kind='exposure' ORDER BY id")]
+            return {"items": [{**r, **({"science_review_context": context} if (context := record_context(db, "exposure", identifier, r)) else {})} for identifier, r in values], "release_id": metadata["release_id"]}
 
     @app.get("/api/v1/studies")
     def studies():
         with read() as db:
-            return {"items": [json.loads(r[0]) for r in db.execute("SELECT metadata_json FROM science_record WHERE kind='study' ORDER BY id")], "release_id": metadata["release_id"]}
+            values = [(r[0], json.loads(r[1])) for r in db.execute("SELECT id,metadata_json FROM science_record WHERE kind='study' ORDER BY id")]
+            return {"items": [{**r, **({"science_review_context": context} if (context := record_context(db, "study", identifier, r)) else {})} for identifier, r in values], "release_id": metadata["release_id"]}
 
     @app.get("/api/v1/studies/{identifier}")
     def study(identifier: str):
         with read() as db:
-            records = [(r["kind"], json.loads(r["metadata_json"])) for r in db.execute("SELECT * FROM science_record")]
-            root = next((r for k, r in records if k == "study" and (r["id"] == identifier or identifier in r.get("metadata", {}).get("series", []))), None)
-            if root is None:
+            records = [(r["id"], r["kind"], json.loads(r["metadata_json"])) for r in db.execute("SELECT * FROM science_record")]
+            root_entry = next(((record_id, record) for record_id, kind, record in records if kind == "study" and (str(record_id) == identifier or identifier in record.get("metadata", {}).get("series", []))), None)
+            if root_entry is None:
                 raise HTTPException(404, "study not in this public release")
-            return {"study": root, "records": [{"kind": k, "record": r} for k, r in records if r.get("study_id") == root["id"]],
-                    **study_clinical_summary(db, root["id"]), "release_id": metadata["release_id"]}
+            root_id, root = root_entry
+            context = record_context(db, "study", root_id, root)
+            related = []
+            for record_id, kind, record in records:
+                if record.get("study_id") == root_id:
+                    own = record_context(db, kind, record_id, record)
+                    related.append({"kind": kind, "record": record,
+                                    **({"science_review_context": own} if own else {})})
+            return {"study": root, "records": related,
+                    **study_clinical_summary(db, root_id), "release_id": metadata["release_id"],
+                    **({"science_review_context": context} if context else {})}
 
     @app.get("/api/v1/evidence")
     def evidence(accession: str, contrast: str, analysis_version: str,
@@ -160,10 +174,12 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
             if db.execute("SELECT 1 FROM sqlite_master WHERE name='contrast_selector'").fetchone():
                 context = db.execute("SELECT * FROM contrast_selector WHERE series_accession=? AND contrast=? AND analysis_version=?",
                                      (accession, contrast, analysis_version)).fetchone()
+            review = selector_context(db, accession, contrast, analysis_version)
             return {"items": page, "total_selector": total, "effects_status": "available" if total is not None else "not_in_public_release", "next_cursor": base64.urlsafe_b64encode(canonical([scope, page[-1]["feature_type"], page[-1]["feature_id"]]).encode()).decode() if more else None,
                     "analysis_context": dict(context) if context else None,
                     "availability_reason": "public_quantitative_results" if total is not None else "not_reported_or_withheld_in_this_release",
-                    "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]}
+                    "release_id": metadata["release_id"], "expert_review": metadata["expert_review"],
+                    **({"science_review_context": review} if review else {})}
 
     @app.post("/api/v1/meals/analyze")
     def meal(payload: PublicMeal):
