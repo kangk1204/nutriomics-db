@@ -373,6 +373,19 @@ class ExplorerReadMiddleware:
             replica_guard()
             if identity != tuple(fingerprint(p) for p in paths):
                 raise QueryUnavailable("source_changed")
+            if (self.include_public and scope["method"] == "POST"
+                    and path == "/api/v1/meals/analyze"):
+                # Meals never enter the response cache or a shared flight.
+                # Preserve the exact JSON bytes rather than wrapping a possibly
+                # very large body in another JSON string and decoding it again.
+                # Cancellation and source checks above still precede headers.
+                headers = list(head.get("headers", [])) + [
+                    (b"x-explorer-cache", b"miss"),
+                    (b"server-timing", f"total;dur={(time.monotonic()-started)*1000:.3f}, sql;dur={budget.sql_execution_seconds*1000:.3f}, db_scope;dur={budget.sql_seconds*1000:.3f}".encode()),
+                ]
+                await send({"type": "http.response.start", "status": head["status"], "headers": headers})
+                await send({"type": "http.response.body", "body": content})
+                return
             result = canonical({"status": head["status"], "headers": [[k.decode("latin1"), v.decode("latin1")] for k, v in head.get("headers", [])], "body": content.decode("utf-8")}).encode()
             safe = False
             if cacheable and head["status"] == 200:

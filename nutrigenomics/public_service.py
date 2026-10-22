@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, FiniteFloat, field_validator
 
 from .clinical_endpoints import study_clinical_summary
@@ -73,13 +74,6 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     from .public_files import attach_public_files
     attach_public_files(app, release, manifest, metadata["release_id"],
         preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
-
-    @app.middleware("http")
-    async def release_headers(request, call_next):
-        response = await call_next(request)
-        response.headers["X-NutriOmics-Release"] = metadata["release_id"]
-        response.headers["X-NutriOmics-Scope"] = "public"
-        return response
 
     @contextmanager
     def read():
@@ -265,7 +259,10 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
         gaps = list(dict.fromkeys(g for m in matches for g in m["evidence_gaps"]))
         if excluded:
             gaps.append("함량·단위·상태·가식부 기준이 미확인인 조성은 섭취량 합계에서 제외했습니다.")
-        return {"items": selected, "components": components, "provenance": provenance,
+        # This payload is constructed exclusively from validated JSON primitives.
+        # Rendering it directly retains Starlette's normal JSON representation
+        # without FastAPI recursively copying repeated scientific context again.
+        return JSONResponse({"items": selected, "components": components, "provenance": provenance,
                 "status": "partial" if components and excluded else "measured" if components else "unavailable",
                 "unquantified": [{**row, "exclusion_reasons": row["reasons"]} for row in excluded],
                 "interpretation": "함량 기준이 확인된 성분의 섭취량 계산입니다. 개인 반응 또는 건강 효과 예측이 아닙니다.",
@@ -274,9 +271,19 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                 "reference_context": (payload.reference_context or ReferenceContext()).model_dump(exclude_none=True),
                 "excluded_measurements": excluded, "individual_prediction": False,
                 "composition_policy_version": POLICY_VERSION,
-                "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]}
+                "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]})
 
     attach_explorer(app, public=True)
+
+    # Wrap the Explorer budget/source guard too: its diagnostic 503 responses
+    # must identify the requested release just like normal endpoint responses.
+    @app.middleware("http")
+    async def release_headers(request, call_next):
+        response = await call_next(request)
+        response.headers["X-NutriOmics-Release"] = metadata["release_id"]
+        response.headers["X-NutriOmics-Scope"] = "public"
+        return response
+
     # Outermost context is inherited by endpoint worker threads and all Explorer routes.
     app.add_middleware(ExplorerContextMiddleware, paths={
         "NUTRIGENOMICS_EXPLORER_DATABASE": database,
