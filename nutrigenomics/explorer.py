@@ -42,6 +42,10 @@ from .explorer_scientific import (
     path_scientific,
     scientific_matches,
 )
+from .food_search_aliases import SHA256 as SEARCH_ALIAS_SHA256
+from .food_search_aliases import VERSION as SEARCH_ALIAS_VERSION
+from .food_search_aliases import context as search_context
+from .food_search_aliases import search_clause
 from .release_contract import metadata_with_contract
 from .settings import DATA_DIR, PROJECT_ROOT
 
@@ -224,6 +228,7 @@ def meta():
                 "domains": DOMAINS,
                 "note": NOTE,
                 "prediction_available": False,
+                "food_search_aliases": {"version": SEARCH_ALIAS_VERSION, "sha256": SEARCH_ALIAS_SHA256, "purpose": "search_only"},
                 "available_filters": {
                     "entity_kinds": list(KINDS),
                     "evidence_tiers": ["all", *TIERS],
@@ -274,12 +279,6 @@ def entities(
             "json_extract(n.metadata_json,'$.entity_type')='exposure'",
             "n.id='Exposure:' || json_extract(n.metadata_json,'$.original_exposure.id')",
         ])
-    if q.strip():
-        term = "%" + q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-        conditions.append(
-            "(n.label LIKE ? ESCAPE '\\' OR n.label_en LIKE ? ESCAPE '\\' OR n.id LIKE ? ESCAPE '\\' OR n.aliases_json LIKE ? ESCAPE '\\')"
-        )
-        args.extend([term] * 4)
     if domain != "all":
         conditions.append(
             "EXISTS(SELECT 1 FROM node_domain nd WHERE nd.node_id=n.id AND nd.domain=?)"
@@ -294,12 +293,10 @@ def entities(
         )
         args.extend(ea)
     with database() as db:
-        # Candidate search only; original LIKE is the final semantics check.
-        search = q.strip()
-        if len(search) >= 3 and has_index(db, "perf_search"):
-            phrase = '"' + search.replace('"', '""') + '"'
-            conditions.append("n.id IN (SELECT c.node_id FROM perf_search f JOIN perf_search_content c ON c.rowid=f.rowid WHERE perf_search MATCH ?)")
-            args.append(phrase)
+        if q.strip():
+            clause, values = search_clause(q, indexed=has_index(db, "perf_search"), korean_foods="food" in allowed)
+            conditions.append(clause)
+            args.extend(values)
         if not include_extracted and tier != "extracted":
             source = Path(logical_connection_path(db)).resolve()
             fingerprint = source.stat()
@@ -321,6 +318,7 @@ def entities(
             "page": page,
             "page_size": page_size,
             "release_id": _meta(db).get("release_id"),
+            **({"search_context": mapping} if "food" in allowed and (mapping := search_context(q)) else {}),
         }
 
 
