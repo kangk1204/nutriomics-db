@@ -3,6 +3,8 @@ export type Kind = 'food' | 'component' | 'gene' | 'health' | 'pathway' | 'cpg' 
 export type Tier = 'all' | 'observed' | 'curated' | 'candidate' | 'extracted';
 export interface Entity {
   id: string; kind: string; label: string; label_en?: string; aliases?: string[];
+  display_name_ko?: string; search_aliases_ko?: string[];
+  name_translation?: {version:string;sha256:string;source_label_sha256:string;status:string;review_status:string;purpose:string;remaining_source_terms:string[]};
   metadata?: Record<string, unknown>; domains?: string[]; degree?: number;
 }
 export interface Measurement {

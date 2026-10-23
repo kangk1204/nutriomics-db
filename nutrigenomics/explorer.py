@@ -42,6 +42,9 @@ from .explorer_scientific import (
     path_scientific,
     scientific_matches,
 )
+from .food_names import annotate as annotate_food_name
+from .food_names import meta as food_name_meta
+from .food_names import verified_matches as food_name_matches
 from .food_search_aliases import SHA256 as SEARCH_ALIAS_SHA256
 from .food_search_aliases import VERSION as SEARCH_ALIAS_VERSION
 from .food_search_aliases import context as search_context
@@ -151,7 +154,7 @@ def _node(row) -> dict:
         ("domains_json", "domains", []),
     ]:
         item[target] = _public(_json(item.pop(source, None), default))
-    return item
+    return annotate_food_name(item)
 
 
 @lru_cache(maxsize=64)
@@ -229,6 +232,7 @@ def meta():
                 "note": NOTE,
                 "prediction_available": False,
                 "food_search_aliases": {"version": SEARCH_ALIAS_VERSION, "sha256": SEARCH_ALIAS_SHA256, "purpose": "search_only"},
+                "food_names_ko": food_name_meta(),
                 "available_filters": {
                     "entity_kinds": list(KINDS),
                     "evidence_tiers": ["all", *TIERS],
@@ -258,7 +262,7 @@ def meta():
 @router.get("/entities")
 def entities(
     kind: str = "food",
-    q: str = Query("", max_length=160),
+    q: str = Query("", max_length=512),
     domain: str = "all",
     tier: str = "all",
     page: int = Query(1, ge=1, le=100000),
@@ -293,8 +297,12 @@ def entities(
         )
         args.extend(ea)
     with database() as db:
+        matches = food_name_matches(db, q) if "food" in allowed and q.strip() else ()
         if q.strip():
             clause, values = search_clause(q, indexed=has_index(db, "perf_search"), korean_foods="food" in allowed)
+            if matches:
+                clause = "(" + clause + " OR n.id IN (" + ','.join('?' for _ in matches) + "))"
+                values.extend(identifier for identifier, _ in matches)
             conditions.append(clause)
             args.extend(values)
         if not include_extracted and tier != "extracted":
@@ -308,9 +316,19 @@ def entities(
                 args.extend(excluded)
         where = " AND ".join(conditions)
         total = db.execute("SELECT count(*) FROM node n WHERE " + where, args).fetchone()[0]
+        priority, priority_args = "", []
+        if matches and sort == 'label':
+            branches = []
+            for rank in (0, 1):
+                identifiers = [identifier for identifier, value in matches if value == rank]
+                if identifiers:
+                    branches.append("WHEN n.id IN (" + ','.join('?' for _ in identifiers) + ") THEN " + str(rank))
+                    priority_args.extend(identifiers)
+            if branches:
+                priority = "CASE " + ' '.join(branches) + " ELSE 2 END,"
         rows = db.execute(
-            f"SELECT n.* FROM node n WHERE {where} ORDER BY n.{sort} {order.upper()},n.id LIMIT ? OFFSET ?",
-            [*args, page_size, (page - 1) * page_size],
+            f"SELECT n.* FROM node n WHERE {where} ORDER BY {priority}n.{sort} {order.upper()},n.id LIMIT ? OFFSET ?",
+            [*args, *priority_args, page_size, (page - 1) * page_size],
         ).fetchall()
         return {
             "items": [_node(r) for r in rows],

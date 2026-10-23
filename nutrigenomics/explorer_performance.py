@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .explorer_context import configured_path
+from .food_names import paths as food_name_paths
 from .food_search_aliases import SHA256 as SEARCH_ALIAS_SHA256
 from .settings import DATA_DIR, PROJECT_ROOT
 from .source_replicas import ReplicaUnavailable, physical_read_path
@@ -249,6 +250,7 @@ def source_paths():
     if os.environ.get('NUTRIGENOMICS_PUBLIC_OMICS_INDEX'):
         ordered = Path(os.environ['NUTRIGENOMICS_PUBLIC_OMICS_INDEX'])
         paths.extend((ordered, ordered.with_suffix('.json')))
+    paths.extend(food_name_paths())
     return paths
 
 
