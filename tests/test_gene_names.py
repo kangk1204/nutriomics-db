@@ -79,6 +79,7 @@ def test_gene_to_intervention_uses_native_key_and_preserves_nonsignificant_value
 
 
 def test_source_corruption_is_not_reported_as_zero(named):
+    assert named['client'].get('/api/v1/explorer/entities',params={'kind':'gene','q':'CD39'}).status_code==200
     named['catalog'].with_suffix('.manifest.json').write_text('{}')
     response = named['client'].get('/api/v1/explorer/entities', params=dict(kind='gene', q='CD39'))
     assert response.status_code == 503
@@ -133,6 +134,7 @@ def test_gene_snapshot_retains_search_names_without_unpermitted_stats(named):
 
 
 def test_removed_configured_catalog_is_not_silent_missing_evidence(named):
+    assert named['client'].get('/api/v1/explorer/entities',params={'kind':'gene','q':'CD39'}).status_code==200
     named['catalog'].unlink()
     response=named['client'].get('/api/v1/explorer/entities',params={'kind':'gene','q':'CD39'})
     assert response.status_code==503
