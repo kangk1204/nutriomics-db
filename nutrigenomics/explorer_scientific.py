@@ -179,8 +179,12 @@ def exposure_match_identity(seed: dict, exposure: dict, component_ids: list[str]
     }
 
 
-def gene_feature_identifiers(node: dict) -> list[str]:
+def gene_feature_identifiers(node: dict, contrast=None) -> list[str]:
     """Namespace-aware candidates; HGNC numeric suffixes are not Entrez IDs."""
+    from .gene_names import feature_identifiers
+    resolved = feature_identifiers(node, contrast)
+    if resolved is not None:
+        return resolved
     identifier = str(node["id"])
     values = [identifier, node.get("label")]
     namespace, _, suffix = identifier.partition(":")
@@ -192,6 +196,10 @@ def gene_feature_identifiers(node: dict) -> list[str]:
 
 def feature_match_identity(node: dict, effect: dict) -> dict:
     """A label or untyped legacy verified_feature_ids never proves gene identity."""
+    from .gene_names import feature_identity
+    official = feature_identity(node, effect)
+    if official is not None:
+        return official
     for proof in node.get("metadata", {}).get("feature_identifier_mappings", []):
         taxa = [proof.get(k) for k in ("taxon", "source_taxon", "target_taxon")]
         taxa += [
@@ -610,7 +618,9 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
     conditions = "series_accession=? AND contrast=? AND analysis_version=?"
     args = [contrast[k] for k in ("series_accession", "contrast", "analysis_version")]
     if gene:
-        identifiers = gene_feature_identifiers(gene)
+        identifiers = gene_feature_identifiers(gene, contrast)
+        if not identifiers:
+            return [], 0, "available"
         conditions += (
             " AND feature_type IN ('gene_expression','expression','gene','transcript') AND feature_id IN ("
             + ",".join("?" for _ in identifiers)
@@ -763,17 +773,47 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
     evidence, gaps = [], []
     has_match_index = has_index(db, "perf_exposure_match")
     match_index = {r[0]: decoded(r[1]) for r in db.execute("SELECT exposure_id,identity_json FROM perf_exposure_match WHERE node_id=?", (seed["id"],))} if has_match_index else {}
+    gene_mode = seed.get("kind") == "gene"
+    gene_results = {}
+    gene_eligible = set()
+    if gene_mode:
+        from .gene_names import feature_contract
+        from .explorer_performance import QueryUnavailable
+        gene = seed
+        if not seed.get("gene_names"):
+            return {"rule_version": RULE_VERSION, "seed_id": seed["id"], "reference_context": reference,
+                    "observed_evidence": [], "evidence_gaps": ["공식 식별자 대응이 미확인입니다. 문자열만으로 유전자–중재 관계를 생성하지 않습니다."],
+                    "gene_query": {"status": "identity_unconfirmed", "causal_inference": False}}
+        for c in records["contrast"]:
+            contract = feature_contract(c)
+            if not contract:
+                continue
+            key = (c["series_accession"], c["contrast"], c["analysis_version"])
+            result = _contrast_effects(core_path, c, gene, projection=db)
+            if result[2] != "available":
+                raise QueryUnavailable(result[2])
+            gene_results[key] = result
+            if result[1]:
+                if not result[0] or any(e["feature_mapping"]["status"] != "source_identifier_match" for e in result[0]):
+                    raise QueryUnavailable("analysis_key_mismatch")
+                gene_eligible.add(c["id"])
     matched_exposures = []
     for original in records["exposure"]:
         curation = curated_exp.get(original["id"], {})
         exposure = {**original, **curation}
         keys = decoded(original.get("component_keys"), [])
         identity = match_index.get(original["id"], {"status": "unknown"}) if has_match_index else exposure_match_identity(seed, exposure, keys)
+        if gene_mode:
+            present = any(c["id"] in gene_eligible and original["id"] in c.get("exposure_ids", []) for c in records["contrast"])
+            identity = {"status": "measured_gene", "method": "exact_native_feature_in_analysis_contrast",
+                        "label": "해당 유전자를 측정한 중재 대비", "quantity_transfer_allowed": False,
+                        "gene_node_id": seed["id"], "hgnc_id": seed["gene_names"]["hgnc_id"],
+                        "causal_inference": False} if present else {"status": "unknown"}
         if identity["status"] == "unknown":
             continue
         matched_exposures.append((original, curation, exposure, identity))
     matched_ids = {original["id"] for original, _, _, _ in matched_exposures}
-    batch_results = _batch_contrast_effects(core_path,
+    batch_results = None if gene_mode else _batch_contrast_effects(core_path,
         [contrast for contrast in records["contrast"] if matched_ids.intersection(contrast.get("exposure_ids", []))],
         gene, db)
     for original, curation, exposure, identity in matched_exposures:
@@ -794,7 +834,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
         contrasts = []
         applicable = []
         for contrast in records["contrast"]:
-            if original["id"] not in contrast.get("exposure_ids", []):
+            if original["id"] not in contrast.get("exposure_ids", []) or (gene_mode and contrast["id"] not in gene_eligible):
                 continue
             selector = next(
                 (c for c in study_cur.get("contrast_selectors", []) if c["id"] == contrast["id"]),
@@ -802,7 +842,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
             )
             contrast = {**contrast, "comparison_kind": selector.get("comparison_kind")}
             design = contrast_classification(contrast)
-            effects, total, effects_status = _contrast_effects(core_path, contrast, gene, projection=db, batch_results=batch_results)
+            effects, total, effects_status = (gene_results[(contrast["series_accession"], contrast["contrast"], contrast["analysis_version"])] if gene_mode else _contrast_effects(core_path, contrast, gene, projection=db, batch_results=batch_results))
             source_effects = _contrast_effects(core_path, contrast, projection=db, batch_results=batch_results) if gene else (effects, total, effects_status)
             source_total = source_effects[1]
             context = _run_context(records["analysis_run"], contrast)
@@ -960,7 +1000,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
                     "actual_product_description": curation.get("actual_product_description"),
                 },
                 "mapping_identity": identity,
-                "evidence_group": "direct_context"
+                "evidence_group": "measured_gene" if gene_mode else "direct_context"
                 if identity["status"] == "same_record"
                 else ("same_analyte" if identity["status"] == "same_analyte" else "related"),
                 "study_evidence": {
@@ -979,7 +1019,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
                     "expert_review_status": "pending",
                     "count_scopes": {k: v for k, v in verified.items() if k.startswith("n_")},
                 },
-                "applicability": [
+                "applicability": ([{**_condition("gene_identity", seed["id"], seed["gene_names"]["hgnc_id"], "match", "공식 식별자와 원 분석의 gene feature 대응입니다. 식이의 유전자 조절 인과성은 별도입니다."), "quantity_transfer_allowed": False}, *applicable] if gene_mode else [
                     _condition(
                         "food_formulation",
                         seed.get("label"),
@@ -989,7 +1029,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
                     ),
                     _dose_card(seed, exposure, identity, reference, dose),
                     *applicable,
-                ],
+                ]),
                 "contrasts": contrasts,
                 "clinical_results": _clinical_results(db, original["study_id"]),
                 "provenance": provenance,
@@ -1026,7 +1066,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
     connected_studies = sorted({r["study_id"] for r in evidence if r.get("clinical_results")})
     unconnected_studies = sorted({r["study_id"] for r in evidence if not r.get("clinical_results")})
     if evidence:
-        gaps.append("관련 성분이 같아도 음식·제품·배정량·기간이 같다는 뜻은 아닙니다.")
+        gaps.append("해당 유전자를 측정한 연구의 노출·대비입니다. 유전자 변화나 중재의 건강상 이득을 보장하지 않습니다." if gene_mode else "관련 성분이 같아도 음식·제품·배정량·기간이 같다는 뜻은 아닙니다.")
         if connected_studies:
             if unconnected_studies:
                 gaps.append("반환된 중재 기록 중 일부 연구에만 임상 근거가 연결되어 있습니다. 연구별 clinical_results와 원문을 확인해야 합니다.")
@@ -1036,6 +1076,7 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
     return {
         "rule_version": RULE_VERSION,
         "seed_id": seed["id"],
+        **({"gene_query": {"version": "gene-interventions-20261023-v1", "status": "available" if evidence else "available_no_results", "hgnc_id": seed["gene_names"]["hgnc_id"], "eligible_contrasts": len(gene_eligible), "causal_inference": False, "identity_source": seed["gene_names"]["hgnc_sha256"]}} if gene_mode else {}),
         "reference_context": reference,
         "observed_evidence": evidence,
         "evidence_gaps": gaps,
