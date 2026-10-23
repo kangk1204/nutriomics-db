@@ -1,77 +1,60 @@
 # NutriOmics
 
-A research dataset and workbench for food composition and human dietary-
-intervention transcriptomic and DNA methylation results. This repository
-contains acquisition, curation, analysis, release, update and validation code.
-It does not predict individual disease risk or health benefits.
+식품 성분과 사람 식이중재 연구의 유전자 발현·DNA 메틸화 결과를 살펴보는 연구용 DB입니다.
 
-The current release is a **Data Descriptor candidate**. Scientific review,
-sealed-query evaluation, DOI registration and public hosting remain explicit
-release gates. A source-checked record is not an expert-approved result.
-The [source precheck and human-review workflow](docs/WORKBENCH_SUBMISSION_REVIEW_ko.md)
-provides hash-bound decision proposals, source-only query review and a portable
-submission supplement while preserving these gates.
+[English](README.en.md) · [심사 시 확인할 내용](docs/REVIEWER_GUIDE.ko.md) · [구축 범위와 현재 상태](docs/REVIEWER_GUIDE.ko.md) · [설치 방법](docs/GETTING_STARTED.ko.md)
 
-## Install
+음식을 검색해 성분량을 확인하고, 관련 연구에서 어떤 조건으로 무엇을 관찰했는지 살펴볼 수 있습니다.
+연구에 사용한 음식·보충제, 용량, 기간, 조직, 비교 조건과 원문 출처를 함께 보관합니다.
 
-Python 3.12, Node 24 and R/Bioconductor are used in separate project environments.
+이 저장소에는 자료 수집, 오믹스 분석, DB 구축·갱신, 웹 조회에 사용하는 코드가 있습니다.
+데이터 공개 등록과 과학적 검수는 진행 중입니다. 전체 데이터 다운로드와 외부 공개 웹 주소는 아직 제공하지 않습니다.
 
-```bash
-uv sync --frozen --extra dev
-uv run pytest
-cd frontend/explorer
-corepack pnpm install --frozen-lockfile
-corepack pnpm build
-```
+## 무엇을 확인할 수 있나요?
 
-The frontend uses React, Cytoscape.js, Dagre and TanStack Table. R analysis code
-and its environments are separate from the public read-only service.
+| 항목 | 내용 |
+|---|---|
+| 식품 성분 | 음식명, 조리상태, 성분량, 단위, 원자료 출처 |
+| 사람 중재 연구 | 섭취한 음식·보충제, 용량·기간, 연구군, 채혈 시점, 비교 조건 |
+| 분석 결과 | 유전자 발현, DNA 메틸화, 경로 분석과 보고된 임상 측정값 |
+| 연결망 | 음식·성분·유전자·관련 기록 사이의 관계와 각 관계의 출처 |
+| 구축 코드 | 수집·분석·갱신 명령과 검사 방법 |
 
-## Data and releases
+실험에서 관찰한 결과, 계산으로 예측한 관계, 문헌에서 자동 추출한 후보를 구분합니다.
+연결선이 있다는 이유만으로 식품의 건강 효과가 확인된 것은 아닙니다.
 
-Use a versioned public release's `dataset-metadata.json` for actual public counts.
-Food measurements, intervention curation, quantitative omics results and external
-regulatory context have different count units and rights. Effect rows represent
-features × contrasts × analysis versions, not independent participants.
+## 사용 예
 
-`effect` records use the five-part key:
-`series_accession, feature_type, feature_id, contrast, analysis_version`.
-SQLite and Parquet preserve nulls, original feature types, effect and statistical
-values. Source policy, file hashes, exclusions and human-review state accompany
-each release. Third-party data not cleared for redistribution must be acquired
-from the original source; the public package does not reconstruct the complete
-internal source database.
+요구르트 150 g을 입력하면 선택한 식품 기록의 함량으로 성분 섭취량을 계산합니다.
+관련 연구가 요구르트 800 g을 사용했다면 그 용량과 측정 시점을 함께 보여줍니다.
+800 g 실험의 유전자 변화를 150 g의 개인 반응으로 환산하지는 않습니다.
 
-Build candidates with `python -m scripts.build_publication_release`; prepare
-the service derivative with `python -m scripts.prepare_public_service_release`.
-Both create new directories. See [the runbook](docs/PUBLICATION_RUNBOOK_ko.md) for
-review, validation, restore, DOI deposit and monthly update procedures.
-For rebuilding on a new host from official public originals, see
-[the fresh-source rebuild procedure](docs/WORKBENCH_PUBLIC_REBUILD_ko.md).
-It includes versioned execution of the 14 analysis outcomes and separate
-computational, public-value preservation and browser/performance gates.
+## 구축 규모는 어떻게 읽어야 하나요?
 
-## Public service
+2026년 10월 22일 검토용 DB에는 식품 기록 5,794개, 성분 기록 368,208건,
+14개 분석 실행의 정량 결과 6,254,477행이 있습니다.
+수록된 연구 등록은 9개이며, 이 중 재분석 자료가 있는 연구 묶음은 8개입니다.
 
-Set `NUTRIOMICS_PUBLIC_RELEASE` explicitly and run
-`uvicorn nutrigenomics.public_service:app_factory --factory --host 127.0.0.1`.
-Only public data is loaded; write/collection/reanalysis routes are absent.
-Candidate review requires `NUTRIOMICS_ALLOW_CANDIDATE=1` and a loopback binding.
-Provider-neutral container examples are in `deploy/public`.
+식품 기록은 조리상태와 원본 코드에 따라 나뉩니다. 결과 행은 유전자·측정 위치·비교 조건·분석 버전별
+값의 수입니다. 대상자 수나 검증된 건강 효과의 수를 뜻하지 않습니다.
+이 수치는 공개가 끝난 데이터의 규모가 아니라 검토 중인 자료의 규모입니다.
+[기준 자료와 남은 작업](docs/REVIEWER_GUIDE.ko.md)을 함께 확인해 주세요.
 
-## License
+## 심사 시 확인할 자료
 
-Own software: [MIT](LICENSE). Own curation and derived analyses: CC BY 4.0
-when affirmatively cleared by the per-source/output policy. Upstream data and
-dependencies retain their own terms; see [LICENSE-DATA.md](LICENSE-DATA.md).
+- [검토 안내](docs/REVIEWER_GUIDE.ko.md): 목적, 확인 순서, 코드와 검수의 범위
+- [현재 상태](docs/REVIEWER_GUIDE.ko.md): 기준일별 규모, 진행 중인 검수, 공개 준비 상태
+- [설치 방법](docs/GETTING_STARTED.ko.md): 코드 설치, 작은 검사 실행, 데이터가 준비된 경우의 웹 실행
+- [자료 사전](docs/PUBLIC_DATA_DICTIONARY.md): 표·열의 의미와 결측값 처리
+- [재구축 방법](docs/WORKBENCH_PUBLIC_REBUILD_ko.md): 원본 수집과 분석 절차
+- [운영 방법](docs/PUBLICATION_RUNBOOK_ko.md): 갱신, 검수 반영, 배포와 복원
 
-The software is supplied for research. Dietary study conditions and observed
-gene/CpG changes do not establish individual efficacy or causal health effects.
-# Prediction and literature candidate extension
+## 사용 조건
 
-The optional update pipeline reacquires SCREEN GraphRegLR rows and a frozen PMID
-corpus from PubMed. Computational predictions, automatic text candidates and
-observed human intervention results use distinct layers and review states.
-Source-span preservation is not expert semantic validation. Article-specific
-redistribution restrictions remain enforced in the public dataset and exports.
-See [candidate layer acquisition, interpretation and verification](docs/WORKBENCH_CANDIDATE_LAYERS_ko.md).
+프로젝트 코드는 [MIT](LICENSE)를 적용합니다. 외부 자료는 각 제공기관의 이용조건을 따릅니다.
+자체 정리 자료와 분석 결과의 조건은 [LICENSE-DATA.md](LICENSE-DATA.md)에 기재했습니다.
+
+데이터와 코드의 버전 DOI는 아직 없습니다. 현재 코드를 인용할 때는 저장소 주소와 사용한 코드 버전(commit)을
+함께 적어 주세요. 데이터 등록이 끝나면 정식 인용 정보를 추가합니다.
+
+오류와 문의는 [GitHub Issues](https://github.com/kangk1204/nutriomics-db/issues)에 남길 수 있습니다.

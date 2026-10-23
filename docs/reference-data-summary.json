@@ -1,0 +1,48 @@
+{
+  "schema": "nutriomics-repository-data-summary-v1",
+  "recorded_date": "2026-10-23",
+  "data_date": "2026-10-22",
+  "release_id": "nutriomics-composed-candidate-20261022-v3",
+  "status": "candidate_pending_expert_review",
+  "submission_ready": false,
+  "full_data_download_published": false,
+  "public_https_available": false,
+  "version_dois": {
+    "data": null,
+    "code": null
+  },
+  "source_files": [
+    {
+      "filename": "dataset-metadata.json",
+      "sha256": "a27c2bac448ba21aa64b53d58fbd258c6d15447a762b6ab178e2b15e3f441f18"
+    },
+    {
+      "filename": "manifest.json",
+      "sha256": "bef5633517d019b2e89a5cc8db8080b949b163a3fbc323d84d7844f4ad5699aa"
+    }
+  ],
+  "database_sha256": "fd027bc0e24b887f4914f5c42ef4a748f20e9882c65cc38f0655f04d60e501a9",
+  "counts": {
+    "food_records_with_composition": 5794,
+    "composition_records": 368208,
+    "registered_study_groups": 9,
+    "reanalyzed_study_groups": 8,
+    "analysis_runs": 14,
+    "quantitative_result_rows": 6254477,
+    "predicted_regulatory_links": 1073409,
+    "clinical_source_summary_records": 44,
+    "core_records_awaiting_review": 263,
+    "expert_approved_records": 0,
+    "verified_independent_participants": null
+  },
+  "definitions": {
+    "quantitative_result_rows": "Measured feature by comparison by analysis version; not participants.",
+    "predicted_regulatory_links": "GraphRegLR computational predictions between regulatory regions and genes; not dietary efficacy.",
+    "registered_study_groups": "Registry records; do not infer an independently audited trial or participant total.",
+    "composition_records": "Source food-component records including measurement state; not all direct laboratory measurements."
+  },
+  "not_in_this_version": [
+    "ongoing DIRECT PLUS full analysis",
+    "ongoing literature and model integration"
+  ]
+}
