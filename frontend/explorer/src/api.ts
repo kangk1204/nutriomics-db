@@ -149,7 +149,7 @@ export async function getEntities(kind: Kind | 'food_record' | 'exposure', q: st
     return { items: filtered.slice((page - 1) * pageSize, page * pageSize), total: filtered.length, page, page_size: pageSize, release_id: snapshot.release_id };
   }
   const params = new URLSearchParams({ kind, q, domain: filters.domain, tier: filters.tier, include_extracted: String(filters.include_extracted), page: String(page), page_size: String(pageSize), sort, order });
-  return request<{ items: Entity[]; total: number; page: number; page_size: number; release_id: string }>(`/entities?${params}`, signal);
+  return request<{ items: Entity[]; total: number; page: number; page_size: number; release_id: string; search_context?:FoodSearchContext }>(`/entities?${params}`, signal);
 }
 export async function getInterventions(q: string, page=1, pageSize=25, signal?: AbortSignal) {
   if(snapshot){
@@ -165,7 +165,8 @@ export async function getInterventions(q: string, page=1, pageSize=25, signal?: 
     return {items:items.slice((page-1)*pageSize,page*pageSize),total:items.length,page,page_size:pageSize,release_id:result.release_id};
   });
 }
-export interface CatalogPage {items:Entity[];total:number;page:number;page_size:number;release_id?:string;preview?:boolean;groups?:{kind:'food'|'component'|'exposure';total:number|null;shown:number}[];warnings?:string[]}
+export interface FoodSearchContext {version:string;sha256:string;matched_term:string;english:string;mode:'source_record'|'food_family_keyword';purpose:'search_only'}
+export interface CatalogPage {items:Entity[];total:number;page:number;page_size:number;release_id?:string;preview?:boolean;groups?:{kind:'food'|'component'|'exposure';total:number|null;shown:number}[];warnings?:string[];search_context?:FoodSearchContext}
 export async function getCatalogSearch(kind:SearchKind,q:string,filters:Filters,page:number,signal?:AbortSignal):Promise<CatalogPage>{
   if(kind==='exposure')return getInterventions(q,page,25,signal);
   if(kind!=='inputs')return getEntities(kind==='food'?'food_record':kind,q,filters,page,25,'label','asc',signal);
@@ -178,6 +179,7 @@ export async function getCatalogSearch(kind:SearchKind,q:string,filters:Filters,
   const releases=calls.flatMap(result=>result.status==='fulfilled'&&result.value.release_id?[result.value.release_id]:[]);
   if(new Set(releases).size>1)throw new Error('검색 중 자료 release가 바뀌었습니다. 같은 버전으로 다시 조회해주세요.');
   return {items:mergeCatalogPreview(values[0],values[1],values[2],q),total:groups.reduce((sum,group)=>sum+(group.total||0),0),page:1,page_size:24,release_id:releases[0],preview:true,groups,
+    search_context:calls[0].status==='fulfilled'&&'search_context' in calls[0].value?calls[0].value.search_context:undefined,
     warnings:calls.flatMap((result,index)=>result.status==='rejected'?[`${{food:'음식',component:'성분',exposure:'연구 노출'}[kinds[index]]} 조회 실패 · 결과 수 미확인`]:[])};
 }
 export async function getNode(id: string): Promise<NodeDetail> {

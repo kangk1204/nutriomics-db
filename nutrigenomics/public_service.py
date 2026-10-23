@@ -20,6 +20,8 @@ from .explorer import MatchInput, ReferenceContext, _match, _source, attach_expl
 from .explorer_build import canonical, sha256
 from .explorer_context import ExplorerContextMiddleware
 from .explorer_performance import read_connection
+from .food_search_aliases import context as search_context
+from .food_search_aliases import search_clause
 from .release_contract import metadata_with_contract
 
 
@@ -104,8 +106,16 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     @app.get("/api/v1/foods")
     def foods(query: str = "", limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)):
         with read() as db:
-            rows = db.execute("SELECT * FROM node WHERE kind='food' AND (label LIKE ? OR aliases_json LIKE ? OR id=?) ORDER BY label,id LIMIT ? OFFSET ?", ("%" + query + "%", "%" + query + "%", query, limit, offset)).fetchall()
-            return {"items": [dict(r) for r in rows], "release_id": metadata["release_id"]}
+            mapping = search_context(query)
+            if mapping:
+                clause, args = search_clause(query)
+            else:
+                # Retain this older endpoint's English/wildcard behavior.
+                clause = "(n.label LIKE ? OR n.aliases_json LIKE ? OR n.id=?)"
+                args = ["%" + query + "%", "%" + query + "%", query]
+            rows = db.execute("SELECT n.* FROM node n WHERE n.kind='food' AND " + clause + " ORDER BY n.label,n.id LIMIT ? OFFSET ?", [*args, limit, offset]).fetchall()
+            return {"items": [dict(r) for r in rows], "release_id": metadata["release_id"],
+                    **({"search_context": mapping} if mapping else {})}
 
     @app.get("/api/v1/interventions")
     def interventions():
