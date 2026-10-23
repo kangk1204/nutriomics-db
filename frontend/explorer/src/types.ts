@@ -5,8 +5,16 @@ export interface Entity {
   id: string; kind: string; label: string; label_en?: string; aliases?: string[];
   display_name_ko?: string; search_aliases_ko?: string[];
   name_translation?: {version:string;sha256:string;source_label_sha256:string;status:string;review_status:string;purpose:string;remaining_source_terms:string[]};
+  gene_names?: GeneNames;
   metadata?: Record<string, unknown>; domains?: string[]; degree?: number;
 }
+export interface GeneNames {
+  hgnc_id:string; approved_symbol:string; approved_name:string; name_ko?:string|null;
+  korean_status:string; source_url:string; catalog_sha256:string; hgnc_sha256:string;
+  identity_status:string; expert_review_status:string;
+  terms:{name:string;kind:string}[]; matched_names?:{name:string;kind:string}[];
+}
+export interface GeneSearchContext {exact_hgnc_candidates:number;ambiguous:boolean;note:string}
 export interface Measurement {
   id: string; food?: string; component?: string; component_label?: string;
   amount: number | null; unit?: string; basis?: string; status?: string; source_id?: string;
@@ -92,6 +100,7 @@ export interface ScientificEvidence {
 export interface ScientificMatchResult {
   release_id: string; rule_version: string; seed_id: string; reference_context: ReferenceContext;
   observed_evidence: ScientificEvidence[]; evidence_gaps: string[]; note?: string;
+  gene_query?:{status:string;hgnc_id?:string;eligible_contrasts?:number;causal_inference:false};
 }
 export interface GraphPath {
   id: string; node_ids: string[]; edge_ids: string[]; label: string; weakest_link?: string;

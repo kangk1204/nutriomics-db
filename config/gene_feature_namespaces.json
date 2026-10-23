@@ -1,0 +1,99 @@
+{
+  "version": "gene-feature-namespaces-20261023-v1",
+  "contracts": [
+    {
+      "series_accession": "GSE127530",
+      "analysis_version": "gse127530-limma-voom-v1-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "HGNCsymbol",
+      "script_sha256": "7d4af16bb300d73ff49960b67c4b334b1452b3c2f730b0a2a64f61bde0bb60b1",
+      "source_file": "source_snapshots/review_evidence/7d4af16bb300d73ff49960b67c4b334b1452b3c2f730b0a2a64f61bde0bb60b1/analyze_gse127530.R",
+      "normalization": "edgeR TMM; limma-voom with duplicateCorrelation blocking on person",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded."
+    },
+    {
+      "series_accession": "GSE27385",
+      "analysis_version": "gse27385-rma-limma-paired-period-v2-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "NCBIGene",
+      "script_sha256": "93a3f7ab0c0792169514715adea9994bd6673c71138c0746544f4b8166e237c0",
+      "source_file": "source_snapshots/default_path_originals/analyze_gse27385.R",
+      "normalization": "Independent raw CEL RMA; unambiguous GPL570 Entrez probes averaged per gene; person and period fixed effects",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded."
+    },
+    {
+      "series_accession": "GSE56960",
+      "analysis_version": "gse56960-rma-limma-dose-change-v3-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "HGNCsymbol",
+      "script_sha256": "a299c43bf0ced378c3a77272811f32ae6b4f745ce350f699f14a33a13e1128b2",
+      "source_file": "source_snapshots/review_evidence/a299c43bf0ced378c3a77272811f32ae6b4f745ce350f699f14a33a13e1128b2/analyze_gse56960.R",
+      "normalization": "affy::rma background correction, quantile normalization, and probe summarization",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded."
+    },
+    {
+      "series_accession": "GSE56960",
+      "analysis_version": "gse56960-rma-limma-v1-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "HGNCsymbol",
+      "script_sha256": "a299c43bf0ced378c3a77272811f32ae6b4f745ce350f699f14a33a13e1128b2",
+      "source_file": "source_snapshots/review_evidence/a299c43bf0ced378c3a77272811f32ae6b4f745ce350f699f14a33a13e1128b2/analyze_gse56960.R",
+      "normalization": "affy::rma background correction, quantile normalization, and probe summarization",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded."
+    },
+    {
+      "series_accession": "GSE54325",
+      "analysis_version": "gse54325-agilent-limma-v1-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "HGNCsymbol",
+      "script_sha256": "ad5686c00f9f86be833d27367ce8e3e25f3e80081dc7a5d492008478c8c9ae13",
+      "source_file": "source_snapshots/review_evidence/ad5686c00f9f86be833d27367ce8e3e25f3e80081dc7a5d492008478c8c9ae13/analyze_gse54325.R",
+      "normalization": "limma read.maimages of gProcessedSignal/rProcessedSignal; within-array loess; gene-level probe averaging",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded."
+    },
+    {
+      "series_accession": "GSE98645",
+      "analysis_version": "gse98645-voom-acute-paired-studyfamily-v2-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "Ensembl",
+      "script_sha256": "e840abfb808a9a04b303c44484076fb417d67fc05a72e1a72079d5f9ae195dea",
+      "source_file": "source_snapshots/default_path_originals/adjust_gse98645_study_family.R",
+      "normalization": "Unfiltered public counts; edgeR filterByExpr/TMM; limma-voom; person and test-visit fixed effects",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded.",
+      "namespace_evidence": [
+        {
+          "source_file": "source_snapshots/default_path_originals/analyze_gse98645.R",
+          "sha256": "05e1d8fff1f5b26c5bba28fa05d9ac777c124a2e21c921610f3115a922fed396",
+          "locator": "ENSEMBL mapping of native rownames; subsequent study-family script preserves effects and native IDs"
+        }
+      ]
+    },
+    {
+      "series_accession": "GSE98645",
+      "analysis_version": "gse98645-voom-chronic-paired-studyfamily-v2-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "Ensembl",
+      "script_sha256": "e840abfb808a9a04b303c44484076fb417d67fc05a72e1a72079d5f9ae195dea",
+      "source_file": "source_snapshots/default_path_originals/adjust_gse98645_study_family.R",
+      "normalization": "Unfiltered counts; edgeR filterByExpr/TMM; limma-voom; person and treatment-period fixed effects",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded.",
+      "namespace_evidence": [
+        {
+          "source_file": "source_snapshots/default_path_originals/analyze_gse98645.R",
+          "sha256": "05e1d8fff1f5b26c5bba28fa05d9ac777c124a2e21c921610f3115a922fed396",
+          "locator": "ENSEMBL mapping of native rownames; subsequent study-family script preserves effects and native IDs"
+        }
+      ]
+    },
+    {
+      "series_accession": "GSE13466",
+      "analysis_version": "gse13466-rma-customcdf-limma-paired-v2-rebuild20261017-v2",
+      "feature_type": "gene",
+      "namespace": "NCBIGene",
+      "script_sha256": "ab8e2e14a9d728a3b18684764a34647449a0c5d4d476682696b586eac3628f94",
+      "source_file": "source_snapshots/default_path_originals/analyze_gse13466.R",
+      "normalization": "Independent CEL RMA using the exact deposited GPL7144 NuGO Hs_ENTREZG_10 custom CDF",
+      "basis": "Audited producer code defines the native gene feature namespace; CpG and pathway annotations are excluded."
+    }
+  ]
+}

@@ -116,6 +116,12 @@ def verify(release, application, receipt):
     if application == 'public' and os.environ.get('NUTRIGENOMICS_PUBLIC_OMICS_INDEX'):
         from nutrigenomics.public_omics_index import verify_index
         value['omics_query_index'] = verify_index(os.environ['NUTRIGENOMICS_PUBLIC_OMICS_INDEX'], database, manifest['release_id'], actual)
+    if os.environ.get("NUTRIGENOMICS_GENE_NAMES_FILE"):
+        from nutrigenomics.gene_names import catalog
+        names = catalog()
+        if not names or (names["dataset_release_id"], names["database_sha256"]) != (manifest["release_id"], actual):
+            raise ValueError("Gene name catalog is not bound to the verified database")
+        value["gene_name_catalog"] = {k: names[k] for k in ("version", "catalog_sha256", "hgnc_sha256", "database_sha256")}
     atomic_json(Path(receipt), value)
     return value
 

@@ -171,3 +171,5 @@
 .wb-studio [aria-label="오믹스 결과 표"] td:nth-child(3),.wb-studio [aria-label="오믹스 결과 표"] td:nth-child(4){min-width:96px;white-space:nowrap;word-break:normal;overflow-wrap:normal;font-variant-numeric:tabular-nums}
 .wb-studio [aria-label="오믹스 결과 표"] td:nth-child(2){min-width:200px}
 .wb-studio .ws-local-food-note{padding:12px;border:1px solid #d5dfe5;background:#f3f7fa;border-radius:4px;font-size:15px!important;line-height:1.6}
+
+.ws-gene-name{display:block;font-size:14px;line-height:1.55;color:#526b7b;white-space:normal;overflow-wrap:anywhere;margin-top:4px}.ws-gene-context{font-size:16px;line-height:1.6;margin:12px 24px;padding:12px 16px;border-left:3px solid #477e9d;background:#f2f6f9}.ws-gene-filter{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:16px 0;padding:14px;border:1px solid #cadbe6}.ws-gene-filter label{display:flex;align-items:center;gap:8px}.ws-gene-filter input[type=checkbox]{width:18px;height:18px}.ws-gene-filter small{flex-basis:100%;font-size:14px;line-height:1.6}.ws-gene-names{border-top:1px solid #dce6ee;padding-top:8px}.ws-gene-names a{display:inline-flex;align-items:center;gap:6px;min-height:40px}

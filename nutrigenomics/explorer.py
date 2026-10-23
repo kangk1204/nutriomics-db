@@ -43,6 +43,13 @@ from .explorer_scientific import (
     scientific_matches,
 )
 from .food_names import annotate as annotate_food_name
+from .gene_names import annotate as annotate_gene_name
+from .gene_names import attach as attach_gene_names
+from .gene_names import feature_identity as official_feature_identity
+from .gene_names import meta as gene_name_meta
+from .gene_names import priority_sql as gene_priority_sql
+from .gene_names import search_context as gene_search_context
+from .gene_names import search_sql as gene_search_sql
 from .food_names import meta as food_name_meta
 from .food_names import verified_matches as food_name_matches
 from .food_search_aliases import SHA256 as SEARCH_ALIAS_SHA256
@@ -146,15 +153,16 @@ def _meta(db) -> dict:
     return {r["key"]: _json(r["value_json"], None) for r in db.execute("SELECT * FROM meta")}
 
 
-def _node(row) -> dict:
+def _node(row, query=None) -> dict:
     item = dict(row)
+    source_metadata = _json(item.get("metadata_json"), {})
     for source, target, default in [
         ("aliases_json", "aliases", []),
         ("metadata_json", "metadata", {}),
         ("domains_json", "domains", []),
     ]:
         item[target] = _public(_json(item.pop(source, None), default))
-    return annotate_food_name(item)
+    return annotate_gene_name(annotate_food_name(item), query, source_metadata=source_metadata)
 
 
 @lru_cache(maxsize=64)
@@ -233,6 +241,7 @@ def meta():
                 "prediction_available": False,
                 "food_search_aliases": {"version": SEARCH_ALIAS_VERSION, "sha256": SEARCH_ALIAS_SHA256, "purpose": "search_only"},
                 "food_names_ko": food_name_meta(),
+                "gene_names": gene_name_meta(),
                 "available_filters": {
                     "entity_kinds": list(KINDS),
                     "evidence_tiers": ["all", *TIERS],
@@ -298,11 +307,16 @@ def entities(
         args.extend(ea)
     with database() as db:
         matches = food_name_matches(db, q) if "food" in allowed and q.strip() else ()
+        gene_search = "gene" in allowed and bool(q.strip()) and attach_gene_names(db)
         if q.strip():
             clause, values = search_clause(q, indexed=has_index(db, "perf_search"), korean_foods="food" in allowed)
             if matches:
                 clause = "(" + clause + " OR n.id IN (" + ','.join('?' for _ in matches) + "))"
                 values.extend(identifier for identifier, _ in matches)
+            if gene_search:
+                gene_clause, gene_args = gene_search_sql(q)
+                clause = "(" + clause + " OR (n.kind='gene' AND n.id IN (" + gene_clause + ")))"
+                values.extend(gene_args)
             conditions.append(clause)
             args.extend(values)
         if not include_extracted and tier != "extracted":
@@ -326,12 +340,17 @@ def entities(
                     priority_args.extend(identifiers)
             if branches:
                 priority = "CASE " + ' '.join(branches) + " ELSE 2 END,"
+        if gene_search and sort == "label":
+            gp, ga = gene_priority_sql(q)
+            priority += gp
+            priority_args.extend(ga)
         rows = db.execute(
             f"SELECT n.* FROM node n WHERE {where} ORDER BY {priority}n.{sort} {order.upper()},n.id LIMIT ? OFFSET ?",
             [*args, *priority_args, page_size, (page - 1) * page_size],
         ).fetchall()
         return {
-            "items": [_node(r) for r in rows],
+            "items": [_node(r, q) for r in rows],
+            **({"gene_search_context": gene_search_context(db, q)} if gene_search else {}),
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -464,9 +483,11 @@ def _effects(node, limit=50):
                 "SELECT series_accession,feature_type,feature_id,feature_label,contrast,tissue,timepoint,intervention,dose,duration,effect_estimate,standard_error,p_value,q_value,effect_unit,status,n_people,n_samples,analysis_version,metadata_json FROM " + source + " WHERE feature_type IN ('gene_expression','expression','gene','transcript') AND feature_id IN ("
                 + ",".join("?" for _ in identifiers)
                 + ") ORDER BY series_accession,analysis_version,contrast LIMIT ?",
-                [*identifiers, limit],
+                [*identifiers, -1 if node.get("gene_names") else limit],
             ).fetchall()
-            return [_effect_preview_value(node, row) for row in rows]
+            if node.get("gene_names"):
+                rows = [r for r in rows if official_feature_identity(node, dict(r))]
+            return [_effect_preview_value(node, row) for row in rows[:limit]]
     except sqlite3.OperationalError as exc:
         raise QueryUnavailable("source_unavailable") from exc
 
@@ -533,7 +554,7 @@ def _batch_export_effects(nodes, limit=50):
         candidates.sort(key=lambda row: (row["series_accession"], row["analysis_version"], row["contrast"], row["feature_id"], row["id"]))
         result = {}
         for identifier, node in genes.items():
-            selected = [row for row in candidates if row["feature_id"] in aliases[identifier]][:limit]
+            selected = [row for row in candidates if row["feature_id"] in aliases[identifier] and (not node.get("gene_names") or official_feature_identity(node, dict(row)))][:limit]
             result[identifier] = [_effect_preview_value(node, row) for row in selected]
     if source_fingerprint(core) != before:
         raise QueryUnavailable("source_changed")
@@ -1029,6 +1050,10 @@ def _match(db, payload):
         if row is None:
             raise HTTPException(422, "선택한 유전자 항목을 찾을 수 없습니다.")
         gene = _node(row)
+    if seed["kind"] == "gene":
+        if gene is not None and gene["id"] != seed["id"]:
+            raise HTTPException(422, "유전자 시작 항목과 다른 유전자 필터를 함께 사용할 수 없습니다.")
+        gene = seed
     reference = payload.reference_context.model_dump(exclude_none=True)
     if seed["kind"] == "food":
         reference["intake_g"] = payload.intake_g if payload.intake_g is not None else 100
@@ -1304,7 +1329,7 @@ def export_selection(payload: ExportInput):
                             "domains",
                             "degree",
                         )
-                    }, db
+                    } | ({"gene_names": full["gene_names"]} if "gene_names" in full else {}), db
                 )
             )
         for identifier in dict.fromkeys(payload.edge_ids):

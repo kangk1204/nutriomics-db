@@ -48,7 +48,7 @@ try{
   globalThis.fetch=async url=>{calls.push(url);if(url.startsWith('/api/v1/interventions'))return response({items:[record],release_id:'release-1'});return response({items:[],total:0,page:1,page_size:8,release_id:'release-1'})};
   const integrated=await api.getCatalogSearch('inputs','포도씨 추출물',filters,1);
   assert.equal(integrated.items[0].id,entity.id);assert.equal(integrated.total,1);
-  assert.deepEqual(integrated.groups.map(group=>group.total),[0,0,1]);
+  assert.deepEqual(integrated.groups.map(group=>group.total),[0,0,1,0]);
   assert.equal(integrated.preview,true);
   assert.ok(calls.some(url=>url.includes('kind=food_record')),'strict food category is not legacy food/diet union');
   assert.ok(calls.some(url=>url.startsWith('/api/v1/interventions')));
@@ -58,7 +58,7 @@ try{
   globalThis.fetch=async url=>url.startsWith('/api/v1/interventions')?response({items:[record],release_id:'release-1'}):new Response('{}',{status:503});
   const partial=await api.getCatalogSearch('inputs','grape seed',filters,1);
   assert.equal(partial.groups[0].total,null,'failure is not a confirmed zero');
-  assert.equal(partial.warnings.length,2);assert.equal(partial.items[0].id,entity.id);
+  assert.equal(partial.warnings.length,3);assert.equal(partial.items[0].id,entity.id);
   globalThis.fetch=async url=>response(url.startsWith('/api/v1/interventions')?{items:[record],release_id:'release-2'}:{items:[],total:0,page:1,page_size:8,release_id:'release-1'});
   await assert.rejects(api.getCatalogSearch('inputs','grape',filters,1),/release가 바뀌었/);
   globalThis.fetch=async()=>response({items:[record],total:2000});

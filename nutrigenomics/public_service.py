@@ -316,6 +316,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
         "NUTRIGENOMICS_EXPLORER_DATABASE": database,
         "NUTRIGENOMICS_EXPLORER_CORE_DATABASE": database,
         "NUTRIGENOMICS_EXPLORER_RIGHTS": release / "rights-policy.json",
+        "NUTRIGENOMICS_GENE_NAMES_FILE": Path(os.environ.get("NUTRIGENOMICS_GENE_NAMES_FILE", release / "gene-names-unconfigured.sqlite3")),
     })
     return app
 
