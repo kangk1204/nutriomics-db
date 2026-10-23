@@ -76,8 +76,19 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
         raise ValueError("public deployment requires a reviewed, validated, hash-bound release gate")
     app = FastAPI(title="NutriOmics public data", version=metadata["release_id"])
     from .public_files import attach_public_files
-    attach_public_files(app, release, manifest, metadata["release_id"],
-        preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
+    if metadata.get("bulk_download_allowed") is False:
+        @app.get("/api/v1/public/files")
+        def local_files():
+            return {"release_id": metadata["release_id"], "items": [],
+                    "availability": "withheld_for_local_source_rights",
+                    "reason": "연구실 조회용 자료를 포함해 전체 파일 재배포를 제한합니다."}
+
+        @app.get("/api/v1/public/files/{name:path}")
+        def withheld_file(name: str):
+            raise HTTPException(403, {"code": "redistribution_unconfirmed"})
+    else:
+        attach_public_files(app, release, manifest, metadata["release_id"],
+            preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
 
     @contextmanager
     def read():
@@ -86,7 +97,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
 
     @app.get("/healthz")
     def health():
-        return {"status": "ok", "release_id": metadata["release_id"], "scope": "public_only"}
+        return {"status": "ok", "release_id": metadata["release_id"], "scope": "local_research" if metadata.get("scope") == "local_research" else "public_only"}
 
     @app.get("/api/v1/public/meta")
     def meta():
@@ -297,7 +308,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     async def release_headers(request, call_next):
         response = await call_next(request)
         response.headers["X-NutriOmics-Release"] = metadata["release_id"]
-        response.headers["X-NutriOmics-Scope"] = "public"
+        response.headers["X-NutriOmics-Scope"] = "local_research" if metadata.get("scope") == "local_research" else "public"
         return response
 
     # Outermost context is inherited by endpoint worker threads and all Explorer routes.
