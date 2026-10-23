@@ -20,6 +20,8 @@ from .explorer import MatchInput, ReferenceContext, _match, _source, attach_expl
 from .explorer_build import canonical, sha256
 from .explorer_context import ExplorerContextMiddleware
 from .explorer_performance import read_connection
+from .food_names import annotate as annotate_food_name
+from .food_names import verified_matches as food_name_matches
 from .food_search_aliases import context as search_context
 from .food_search_aliases import search_clause
 from .release_contract import metadata_with_contract
@@ -113,8 +115,12 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                 # Retain this older endpoint's English/wildcard behavior.
                 clause = "(n.label LIKE ? OR n.aliases_json LIKE ? OR n.id=?)"
                 args = ["%" + query + "%", "%" + query + "%", query]
+            matches = food_name_matches(db, query)
+            if matches:
+                clause = "(" + clause + " OR n.id IN (" + ','.join('?' for _ in matches) + "))"
+                args.extend(identifier for identifier, _ in matches)
             rows = db.execute("SELECT n.* FROM node n WHERE n.kind='food' AND " + clause + " ORDER BY n.label,n.id LIMIT ? OFFSET ?", [*args, limit, offset]).fetchall()
-            return {"items": [dict(r) for r in rows], "release_id": metadata["release_id"],
+            return {"items": [annotate_food_name(dict(r)) for r in rows], "release_id": metadata["release_id"],
                     **({"search_context": mapping} if mapping else {})}
 
     @app.get("/api/v1/interventions")

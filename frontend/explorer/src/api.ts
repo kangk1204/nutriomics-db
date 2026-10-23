@@ -141,7 +141,7 @@ export async function getEntities(kind: Kind | 'food_record' | 'exposure', q: st
     const extractedIds = new Set(snapshot.edges.filter(edge => edge.tier === 'extracted').flatMap(edge => [edge.subject, edge.object]));
     const nonExtractedIds = new Set(snapshot.edges.filter(edge => edge.tier !== 'extracted').flatMap(edge => [edge.subject, edge.object]));
     const filtered = snapshot.nodes.filter(node => (kind==='food_record'?node.kind==='food':kind==='exposure'?['diet','exposure'].includes(node.kind):normalizeKind(node.kind) === kind) &&
-      (!query || [node.label, node.label_en || '', node.id, ...(node.aliases || [])].some(value => value.toLocaleLowerCase().includes(query))) &&
+      (!query || [node.label, node.label_en || '', node.display_name_ko || '', node.id, ...(node.aliases || []), ...(node.search_aliases_ko || [])].some(value => value.normalize('NFC').toLocaleLowerCase().includes(query.normalize('NFC')))) &&
       (filters.domain === 'all' || node.domains?.includes(filters.domain) || allowedIds.has(node.id)) &&
       (filters.tier === 'all' || allowedIds.has(node.id)) &&
       (filters.include_extracted || filters.tier === 'extracted' || !extractedIds.has(node.id) || nonExtractedIds.has(node.id)));
