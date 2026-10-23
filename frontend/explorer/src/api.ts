@@ -234,8 +234,16 @@ export async function getGraph(seedId: string, filters: Filters, maxNodes: numbe
 function csvCell(value: unknown) { return `"${String(value ?? '').replaceAll('"', '""')}"`; }
 export async function exportGraph(payload: ExportRequest): Promise<{ blob: Blob; filename: string }> {
   if (snapshot) {
-    const selection: Snapshot = { ...snapshot, nodes: snapshot.nodes.filter(node => payload.node_ids.includes(node.id)),
-      edges: snapshot.edges.filter(edge => payload.edge_ids.includes(edge.id)), positions: payload.positions, filters: payload.filters };
+    const nodeIds = new Set(payload.node_ids);
+    const nodes = snapshot.nodes.filter(node => nodeIds.has(node.id));
+    const selectedIds = new Set(nodes.map(node => node.id));
+    const edges = snapshot.edges.filter(edge => payload.edge_ids.includes(edge.id) && selectedIds.has(edge.subject) && selectedIds.has(edge.object));
+    const edgeIds = new Set(edges.map(edge => edge.id));
+    const selection: Snapshot = { ...snapshot, nodes, edges,
+      node_details: Object.fromEntries(Object.entries(snapshot.node_details || {}).filter(([id]) => selectedIds.has(id))),
+      edge_details: Object.fromEntries(Object.entries(snapshot.edge_details || {}).filter(([id]) => edgeIds.has(id))),
+      paths: snapshot.paths.filter(row => row.node_ids.every(id => selectedIds.has(id)) && row.edge_ids.every(id => edgeIds.has(id))),
+      positions: Object.fromEntries(Object.entries(payload.positions).filter(([id]) => selectedIds.has(id))), filters: payload.filters };
     if (payload.format === 'json') return { blob: new Blob([JSON.stringify(selection, null, 2)], { type: 'application/json' }), filename: 'nutriomics-snapshot.json' };
     if (payload.format === 'csv') return { blob: new Blob(['\uFEFF' + ['id,subject,object,relation,tier,review_status,source_ids,pmids', ...selection.edges.map(edge => [edge.id, edge.subject, edge.object, edge.relation, edge.tier, edge.review_status, edge.source_ids?.join(';'), edge.pmids?.join(';')].map(csvCell).join(','))].join('\r\n')], { type: 'text/csv;charset=utf-8' }), filename: 'nutriomics-relations.csv' };
     const clone = document.documentElement.cloneNode(true) as HTMLElement;
