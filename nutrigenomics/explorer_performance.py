@@ -251,6 +251,8 @@ def source_paths():
         ordered = Path(os.environ['NUTRIGENOMICS_PUBLIC_OMICS_INDEX'])
         paths.extend((ordered, ordered.with_suffix('.json')))
     paths.extend(food_name_paths())
+    from .gene_names import paths as gene_name_paths
+    paths.extend(gene_name_paths())
     return paths
 
 
