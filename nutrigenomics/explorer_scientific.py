@@ -122,7 +122,7 @@ def _component_key(identifier):
 def _food_categories(seed):
     # Related category retrieval only; never infer a formulation or exact identity.
     text = " ".join(
-        str(x) for x in [seed.get("label", ""), seed.get("label_en", ""), *seed.get("aliases", [])]
+        str(x or "") for x in [seed.get("label", ""), seed.get("label_en", ""), *seed.get("aliases", [])]
     ).casefold()
     patterns = {
         "yogurt": ("yogurt", "yoghurt", "요구르트", "요거트"),
@@ -145,7 +145,7 @@ def exposure_match_identity(seed: dict, exposure: dict, component_ids: list[str]
         known = set(exposure.get("food_category_codes", []))
         terms = decoded(exposure.get("food_terms"), [])
         label = " ".join(
-            [seed.get("label", ""), seed.get("label_en", ""), *seed.get("aliases", [])]
+            str(value or "") for value in [seed.get("label"), seed.get("label_en"), *seed.get("aliases", [])]
         ).casefold()
         if cats & known:
             status, method = "related_food", "food_category_correspondence"
@@ -670,7 +670,7 @@ def _dose_card(seed, exposure, identity, reference, dose):
         and dose.get("unit") == "g"
         and "product" in str(dose.get("analyte_basis", "")).casefold()
     )
-    food_label = (seed.get("label", "") + " " + seed.get("label_en", "")).casefold()
+    food_label = ((seed.get("label") or "") + " " + (seed.get("label_en") or "")).casefold()
     if any(
         term in food_label
         for term in (
