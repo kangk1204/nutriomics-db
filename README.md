@@ -4,6 +4,8 @@
 
 [English](README.en.md) · [DB 구조와 쉬운 설명](docs/DB_STRUCTURE.ko.md) · [검토 안내](docs/REVIEWER_GUIDE.ko.md) · [설치 방법](docs/GETTING_STARTED.ko.md)
 
+문헌 검색·요약·원문 근거·모델 비교를 최신 main의 DB 탐색 화면에 통합했습니다. [통합·운영 검증 기록](docs/MAIN_LITERATURE_INTEGRATION_ko.md)에서 반영 버전, 기존 DB 응답 대조와 실행 방법을 확인할 수 있습니다.
+
 음식명과 섭취량으로 성분량을 계산하고, 관련 연구에서 어떤 음식·보충제를 어느 용량으로
 얼마 동안 섭취했는지 확인할 수 있습니다. 관찰 결과에는 조직, 측정 시점, 비교 조건과 출처를 함께 남깁니다.
 

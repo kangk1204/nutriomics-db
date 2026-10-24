@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-24T07:30:58.536127+00:00",
+  "software_commit": "8d1ae42181acdf96a08182afb67b72887e961fd3",
+  "parents": {
+    "main": "649878ca5f5fec7a52c8860fa86177a2c2564c74",
+    "literature": "2244b9aa8acb5a4cbe774d0b69bfa43995dc08c4"
+  },
+  "source_archive_sha256": "ea60bae58f3ff6dc577155bdd3066c42810580003a0b2edc0f6b549dc22b34c9",
+  "frontend_archive_sha256": "a8855b0cb819b2ebe18285664d2aae9e3f4b06e8164387ba73ee9908ee70ed9f",
+  "science_release_id": "nutriomics-local-korean-foods-20261023-v2",
+  "science_database_sha256": "1a143a52320f3ca6b5c59f9adea9e55bab07f463a5912bdf041d939e28fac234",
+  "literature_snapshot_id": "literature-20261024T062701777420Z",
+  "literature_database_sha256": "fd0360d21c2f1da511e6816726cdba00aa28f09c4e165923e53103dbc5ddfbd0",
+  "python_tests": {
+    "windows": {
+      "tests": 1610,
+      "passed": 1599,
+      "skipped": 11,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 170.815,
+      "junit_sha256": "e7608c132b67deffbf9cbd91fc8451e525b1f90c9860401cfd660f2627539d35",
+      "skip_reasons": [
+        "Optional captured source unavailable",
+        "Windows denies deleting an open immutable SQLite file; actual removal is checked on Linux",
+        "atomic symlink promotion is verified on Linux",
+        "could not import 'sklearn': No module named 'sklearn'",
+        "could not import 'torch': No module named 'torch'",
+        "downloaded artifact not present",
+        "raw OA originals are in the scientific audit package, not required by the code-only distribution"
+      ]
+    },
+    "linux": {
+      "tests": 1610,
+      "passed": 1593,
+      "skipped": 17,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 277.807,
+      "junit_sha256": "df37ca892778a8560acf7318fa8ef4a4fd94f2cf4a1f8d1668e44cd3da129e9b",
+      "skip_reasons": [
+        "Actual frontend adapter check requires Node and frozen frontend dependencies",
+        "Optional captured source unavailable",
+        "Rscript unavailable",
+        "Rscript unavailable; run tests/check_direct_plus_helpers.R in locked project R",
+        "Run AST-only check using locked project R",
+        "Run small R test in the locked project environment",
+        "Run synthetic R check in project R environment",
+        "could not import 'sklearn': No module named 'sklearn'",
+        "could not import 'torch': No module named 'torch'",
+        "downloaded artifact not present",
+        "raw OA originals are in the scientific audit package, not required by the code-only distribution"
+      ]
+    }
+  },
+  "frontend": {
+    "build": "pass",
+    "offline_runtime_build": "pass",
+    "regression_suites": 19,
+    "served_files_sha256": {
+      "assets/index-CD5GZMEB.js": {
+        "bytes": 1532883,
+        "sha256": "fd9e6b02790f266b808e8f32c403e5b794e40ecdae97900bd331b338228d2fa2"
+      },
+      "assets/index-raTYE2pb.css": {
+        "bytes": 149223,
+        "sha256": "746b8e6adc56ee3031af3782d92c1c6c602d80a551383e8f22cf753c221442a6"
+      },
+      "index.html": {
+        "bytes": 634,
+        "sha256": "d5f69d83d80aed2ba5b4e306efb90c9fcc90615116cac03ed4a24d36c0e6c028"
+      },
+      "offline-runtime.css": {
+        "bytes": 149307,
+        "sha256": "358301ce270a22855aef3a3533a615d7ac69bb59b3d06aa200f9400002780bc0"
+      },
+      "offline-runtime.js": {
+        "bytes": 1595582,
+        "sha256": "11960ab58f331a7ff005a81d0633ee05cb74a8d613adba870e654171728818db"
+      }
+    }
+  },
+  "live_api": {
+    "status": "pass",
+    "research_requests": 295,
+    "pathway_rows": 50550,
+    "json_mismatches": 0,
+    "literature_requests": 40,
+    "literature_service_candidate_checks": 13,
+    "literature_service_promoted_checks": 8,
+    "operating_url_and_file_checks": 11
+  },
+  "runtime_preservation": {
+    "scientific_approvals_created": 0,
+    "database_migration": false,
+    "worker_pids_unchanged": true,
+    "worker_code_and_environment_unchanged": true,
+    "old_db_service_retained_for_rollback": true
+  },
+  "model_training_executed": false,
+  "new_model_evaluation_executed": false,
+  "scientific_validation_claimed": false
+}
