@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .explorer_context import configured_path
+from .food_names import paths as food_name_paths
+from .food_search_aliases import SHA256 as SEARCH_ALIAS_SHA256
 from .settings import DATA_DIR, PROJECT_ROOT
 from .source_replicas import ReplicaUnavailable, physical_read_path
 from .source_replicas import guard as replica_guard
@@ -126,11 +128,14 @@ def read_connection(path):
     try:
         physical = physical_read_path(path).resolve()
         immutable = '&immutable=1' if physical != path else ''
-        db = sqlite3.connect(physical.as_uri() + "?mode=ro" + immutable, uri=True, timeout=2, factory=ProfileConnection)
+        from .sqlite_read_cache import connection_settings
+        shared = connection_settings(path, physical)
+        uri = shared[0] if shared else physical.as_uri() + "?mode=ro" + immutable
+        db = sqlite3.connect(uri, uri=True, timeout=2, factory=ProfileConnection)
         db.logical_source_path = str(path)
         db.row_factory = sqlite3.Row
         db.execute("PRAGMA query_only=ON")
-        db.execute("PRAGMA cache_size=-65536")
+        db.execute("PRAGMA cache_size=-" + str(shared[1] if shared else 65536))
         if budget:
             db.set_progress_handler(lambda: int(budget.expired()), 1000)
             with budget.lock:
@@ -248,6 +253,9 @@ def source_paths():
     if os.environ.get('NUTRIGENOMICS_PUBLIC_OMICS_INDEX'):
         ordered = Path(os.environ['NUTRIGENOMICS_PUBLIC_OMICS_INDEX'])
         paths.extend((ordered, ordered.with_suffix('.json')))
+    paths.extend(food_name_paths())
+    from .gene_names import paths as gene_name_paths
+    paths.extend(gene_name_paths())
     return paths
 
 
@@ -323,7 +331,7 @@ class ExplorerReadMiddleware:
                 budget.paths[str(p)] = p.resolve()
             identity = tuple(fingerprint(p) for p in paths)
             cacheable = not export and (scope["method"] == "GET" or path.endswith("/match"))
-            key = ("http", identity, scope["method"], path, scope.get("query_string", b""), bytes(body))
+            key = ("http", SEARCH_ALIAS_SHA256, identity, scope["method"], path, scope.get("query_string", b""), bytes(body))
             if cacheable:
                 cached = CACHE.get(key)
                 if cached is not None:
@@ -373,6 +381,19 @@ class ExplorerReadMiddleware:
             replica_guard()
             if identity != tuple(fingerprint(p) for p in paths):
                 raise QueryUnavailable("source_changed")
+            if (self.include_public and scope["method"] == "POST"
+                    and path == "/api/v1/meals/analyze"):
+                # Meals never enter the response cache or a shared flight.
+                # Preserve the exact JSON bytes rather than wrapping a possibly
+                # very large body in another JSON string and decoding it again.
+                # Cancellation and source checks above still precede headers.
+                headers = list(head.get("headers", [])) + [
+                    (b"x-explorer-cache", b"miss"),
+                    (b"server-timing", f"total;dur={(time.monotonic()-started)*1000:.3f}, sql;dur={budget.sql_execution_seconds*1000:.3f}, db_scope;dur={budget.sql_seconds*1000:.3f}".encode()),
+                ]
+                await send({"type": "http.response.start", "status": head["status"], "headers": headers})
+                await send({"type": "http.response.body", "body": content})
+                return
             result = canonical({"status": head["status"], "headers": [[k.decode("latin1"), v.decode("latin1")] for k, v in head.get("headers", [])], "body": content.decode("utf-8")}).encode()
             safe = False
             if cacheable and head["status"] == 200:

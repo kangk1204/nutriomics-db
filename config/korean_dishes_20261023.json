@@ -1,0 +1,444 @@
+{
+  "version": "korean-dishes-50-20261023-v1",
+  "dataset_id": "15100070",
+  "selection_basis": "50 named prepared dishes, exact food code/name, analyzed 100g MFDS source, no meal-kit substitution",
+  "expert_review": "pending",
+  "foods": [
+    {
+      "food_code": "D306-266000000-0001",
+      "source_name": "김치찌개",
+      "label": "김치찌개",
+      "aliases": [
+        "김치 찌개",
+        "김치찌개"
+      ]
+    },
+    {
+      "food_code": "D106-275000000-0001",
+      "source_name": "된장찌개",
+      "label": "된장찌개",
+      "aliases": [
+        "된장 찌개",
+        "된장찌개"
+      ]
+    },
+    {
+      "food_code": "D106-291030000-0001",
+      "source_name": "순두부찌개_김치",
+      "label": "순두부찌개 · 김치",
+      "aliases": [
+        "김치순두부찌개",
+        "순두부 찌개_김치",
+        "순두부찌개",
+        "순두부찌개 김치",
+        "순두부찌개_김치"
+      ]
+    },
+    {
+      "food_code": "D106-284000000-0001",
+      "source_name": "부대찌개",
+      "label": "부대찌개",
+      "aliases": [
+        "부대 찌개",
+        "부대찌개"
+      ]
+    },
+    {
+      "food_code": "D106-297000000-0001",
+      "source_name": "청국장찌개",
+      "label": "청국장찌개",
+      "aliases": [
+        "청국장 찌개",
+        "청국장찌개"
+      ]
+    },
+    {
+      "food_code": "D105-199000000-0001",
+      "source_name": "갈비탕",
+      "label": "갈비탕",
+      "aliases": [
+        "갈비탕"
+      ]
+    },
+    {
+      "food_code": "D105-228000000-0001",
+      "source_name": "삼계탕",
+      "label": "삼계탕",
+      "aliases": [
+        "삼계탕"
+      ]
+    },
+    {
+      "food_code": "D106-260000000-0001",
+      "source_name": "감자탕",
+      "label": "감자탕",
+      "aliases": [
+        "감자탕"
+      ]
+    },
+    {
+      "food_code": "D105-223000000-0001",
+      "source_name": "미역국",
+      "label": "미역국",
+      "aliases": [
+        "미역국"
+      ]
+    },
+    {
+      "food_code": "D105-245000000-0001",
+      "source_name": "육개장",
+      "label": "육개장",
+      "aliases": [
+        "육개장"
+      ]
+    },
+    {
+      "food_code": "D105-253000000-0001",
+      "source_name": "콩나물국",
+      "label": "콩나물국",
+      "aliases": [
+        "콩나물국"
+      ]
+    },
+    {
+      "food_code": "D105-226000000-0001",
+      "source_name": "북어국",
+      "label": "북어국",
+      "aliases": [
+        "북어국",
+        "북엇국"
+      ]
+    },
+    {
+      "food_code": "D103-145000000-0001",
+      "source_name": "떡국",
+      "label": "떡국",
+      "aliases": [
+        "떡국"
+      ]
+    },
+    {
+      "food_code": "D303-151000000-0001",
+      "source_name": "만두국",
+      "label": "만두국",
+      "aliases": [
+        "만두국",
+        "만둣국"
+      ]
+    },
+    {
+      "food_code": "D103-146000000-0001",
+      "source_name": "떡만두국",
+      "label": "떡만두국",
+      "aliases": [
+        "떡만두국",
+        "떡만둣국"
+      ]
+    },
+    {
+      "food_code": "D103-174000000-0001",
+      "source_name": "칼국수",
+      "label": "칼국수",
+      "aliases": [
+        "칼국수"
+      ]
+    },
+    {
+      "food_code": "D103-144180000-0001",
+      "source_name": "냉면_물냉면",
+      "label": "냉면 · 물냉면",
+      "aliases": [
+        "냉면 물냉면",
+        "냉면_물냉면",
+        "물냉면"
+      ]
+    },
+    {
+      "food_code": "D103-144280000-0001",
+      "source_name": "냉면_비빔냉면",
+      "label": "냉면 · 비빔냉면",
+      "aliases": [
+        "냉면 비빔냉면",
+        "냉면_비빔냉면",
+        "비빔냉면"
+      ]
+    },
+    {
+      "food_code": "D101-018000000-0001",
+      "source_name": "비빔밥",
+      "label": "비빔밥",
+      "aliases": [
+        "비빔밥"
+      ]
+    },
+    {
+      "food_code": "D101-007000000-0001",
+      "source_name": "김밥",
+      "label": "김밥",
+      "aliases": [
+        "김밥"
+      ]
+    },
+    {
+      "food_code": "D110-467000000-0001",
+      "source_name": "떡볶이",
+      "label": "떡볶이",
+      "aliases": [
+        "떡볶이"
+      ]
+    },
+    {
+      "food_code": "D110-492000000-0001",
+      "source_name": "잡채",
+      "label": "잡채",
+      "aliases": [
+        "잡채"
+      ]
+    },
+    {
+      "food_code": "D110-465000000-0001",
+      "source_name": "돼지고기볶음(제육볶음)",
+      "label": "돼지고기볶음(제육볶음)",
+      "aliases": [
+        "돼지고기볶음(제육볶음)",
+        "제육볶음"
+      ]
+    },
+    {
+      "food_code": "D110-462000000-0001",
+      "source_name": "닭볶음(닭갈비)",
+      "label": "닭볶음(닭갈비)",
+      "aliases": [
+        "닭갈비",
+        "닭볶음(닭갈비)"
+      ]
+    },
+    {
+      "food_code": "D107-306130000-0001",
+      "source_name": "갈비찜_소고기",
+      "label": "갈비찜 · 소고기",
+      "aliases": [
+        "갈비찜 소고기",
+        "갈비찜_소고기",
+        "소갈비찜"
+      ]
+    },
+    {
+      "food_code": "D107-318000000-0001",
+      "source_name": "닭찜",
+      "label": "닭찜",
+      "aliases": [
+        "닭찜",
+        "찜닭"
+      ]
+    },
+    {
+      "food_code": "D107-317120000-0001",
+      "source_name": "달걀찜_새우젓",
+      "label": "달걀찜 · 새우젓",
+      "aliases": [
+        "계란찜",
+        "달걀찜",
+        "달걀찜 새우젓",
+        "달걀찜_새우젓"
+      ]
+    },
+    {
+      "food_code": "D101-017070000-0001",
+      "source_name": "볶음밥_김치",
+      "label": "볶음밥 · 김치",
+      "aliases": [
+        "김치볶음밥",
+        "볶음밥 김치",
+        "볶음밥_김치"
+      ]
+    },
+    {
+      "food_code": "D110-488000000-0001",
+      "source_name": "오징어볶음",
+      "label": "오징어볶음",
+      "aliases": [
+        "오징어볶음"
+      ]
+    },
+    {
+      "food_code": "D110-457000000-0001",
+      "source_name": "낙지볶음",
+      "label": "낙지볶음",
+      "aliases": [
+        "낙지볶음"
+      ]
+    },
+    {
+      "food_code": "D110-472000000-0001",
+      "source_name": "멸치볶음",
+      "label": "멸치볶음",
+      "aliases": [
+        "멸치볶음"
+      ]
+    },
+    {
+      "food_code": "D108-357110000-0001",
+      "source_name": "고등어구이_석쇠",
+      "label": "고등어구이 · 석쇠",
+      "aliases": [
+        "고등어구이",
+        "고등어구이 석쇠",
+        "고등어구이_석쇠"
+      ]
+    },
+    {
+      "food_code": "D108-383000000-0001",
+      "source_name": "삼치구이",
+      "label": "삼치구이",
+      "aliases": [
+        "삼치구이"
+      ]
+    },
+    {
+      "food_code": "D115-665000000-0001",
+      "source_name": "깍두기",
+      "label": "깍두기",
+      "aliases": [
+        "깍두기"
+      ]
+    },
+    {
+      "food_code": "D315-679000000-0002",
+      "source_name": "오이소박이",
+      "label": "오이소박이",
+      "aliases": [
+        "오이소박이"
+      ]
+    },
+    {
+      "food_code": "D113-586000000-0001",
+      "source_name": "시금치나물",
+      "label": "시금치나물",
+      "aliases": [
+        "시금치나물"
+      ]
+    },
+    {
+      "food_code": "D113-597000000-0001",
+      "source_name": "콩나물무침",
+      "label": "콩나물무침",
+      "aliases": [
+        "콩나물무침"
+      ]
+    },
+    {
+      "food_code": "D113-574000000-0001",
+      "source_name": "도라지나물무침",
+      "label": "도라지나물무침",
+      "aliases": [
+        "도라지나물",
+        "도라지나물무침"
+      ]
+    },
+    {
+      "food_code": "D113-569000000-0001",
+      "source_name": "고사리나물무침",
+      "label": "고사리나물무침",
+      "aliases": [
+        "고사리나물",
+        "고사리나물무침"
+      ]
+    },
+    {
+      "food_code": "D111-508000000-0001",
+      "source_name": "감자조림",
+      "label": "감자조림",
+      "aliases": [
+        "감자조림"
+      ]
+    },
+    {
+      "food_code": "D111-517000000-0001",
+      "source_name": "두부조림",
+      "label": "두부조림",
+      "aliases": [
+        "두부조림"
+      ]
+    },
+    {
+      "food_code": "D111-528000000-0001",
+      "source_name": "연근조림",
+      "label": "연근조림",
+      "aliases": [
+        "연근조림"
+      ]
+    },
+    {
+      "food_code": "D111-532080000-0001",
+      "source_name": "장조림_소고기",
+      "label": "장조림 · 소고기",
+      "aliases": [
+        "소고기장조림",
+        "장조림 소고기",
+        "장조림_소고기"
+      ]
+    },
+    {
+      "food_code": "D309-445000000-0001",
+      "source_name": "호박전",
+      "label": "호박전",
+      "aliases": [
+        "호박전"
+      ]
+    },
+    {
+      "food_code": "D109-441110000-0001",
+      "source_name": "파전_해물",
+      "label": "파전 · 해물",
+      "aliases": [
+        "파전 해물",
+        "파전_해물",
+        "해물파전"
+      ]
+    },
+    {
+      "food_code": "D109-412000000-0001",
+      "source_name": "김치전",
+      "label": "김치전",
+      "aliases": [
+        "김치전"
+      ]
+    },
+    {
+      "food_code": "D103-160000000-0001",
+      "source_name": "수제비",
+      "label": "수제비",
+      "aliases": [
+        "수제비"
+      ]
+    },
+    {
+      "food_code": "D105-231000000-0001",
+      "source_name": "설렁탕",
+      "label": "설렁탕",
+      "aliases": [
+        "설렁탕"
+      ]
+    },
+    {
+      "food_code": "D301-004140000-0001",
+      "source_name": "국밥_돼지고기",
+      "label": "국밥 · 돼지고기",
+      "aliases": [
+        "국밥 돼지고기",
+        "국밥_돼지고기",
+        "돼지국밥"
+      ]
+    },
+    {
+      "food_code": "D105-234000000-0001",
+      "source_name": "순대국",
+      "label": "순대국",
+      "aliases": [
+        "순대국",
+        "순댓국"
+      ]
+    }
+  ]
+}

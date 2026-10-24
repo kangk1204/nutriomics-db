@@ -346,10 +346,18 @@ def omics_results(
     page: int = Query(1, ge=1, le=100000),
     page_size: int = Query(25, ge=1, le=200),
     cursor: str | None = Query(None, max_length=3000),
+    pathway_selection: str = Query('original', pattern='^(original|corrected_if_available)$'),
 ):
     core = configured_path("NUTRIGENOMICS_EXPLORER_CORE_DATABASE", DATA_DIR / "db/nutrigenomics.sqlite3")
     with database() as projection:
         release = _meta(projection).get("release_id")
+        if feature_type == 'pathway' and pathway_selection == 'corrected_if_available':
+            from .pathway_correction_api import corrected_page
+            corrected = corrected_page(projection, release=release, series=series,
+                contrast=contrast, analysis_version=analysis_version, feature_id=feature_id,
+                page=page, page_size=page_size, cursor=cursor)
+            if corrected is not None:
+                return corrected
         # A caller cannot turn an unindexed analysis into a result of this release.
         present = False
         if _present(projection, "science_record"):
@@ -457,6 +465,8 @@ def omics_results(
                 contrast,
                 analysis_version,
             ]
+        from .feature_taxonomy import annotate_effect_record
+        rows = [annotate_effect_record(row) for row in rows]
     return {
         "release_id": release,
         "feature_type": native_type,

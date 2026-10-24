@@ -3,6 +3,46 @@ import argparse
 import json
 from pathlib import Path
 
+from nutrigenomics.reporting_review import REVIEW_KINDS
+
+
+def science_inventory(counts, review):
+    """Derive narrative grains from the actual inventory; reject stale counts."""
+    kinds = counts["science_kinds"]
+    if any(isinstance(n, bool) or not isinstance(n, int) or n < 0 for n in kinds.values()):
+        raise ValueError("Science inventory requires nonnegative integer counts")
+    total = sum(kinds.values())
+    core = sum(n for kind, n in kinds.items() if kind in REVIEW_KINDS)
+    if counts.get("science_record", total) != total or review["records"] != core:
+        raise ValueError("Science/review inventory mismatch; regenerate metadata and review")
+    excluded = {kind: n for kind, n in sorted(kinds.items()) if kind not in REVIEW_KINDS and n}
+    descriptions = {"bridge_source": "source provenance", "curation": "curation provenance"}
+    detail = ", ".join(f"{n} {descriptions.get(kind, kind)} ({kind})" for kind, n in excluded.items())
+    excluded_text = f"The {total - core} records outside the core review queue comprise {detail}." if excluded else "No science records are outside the core review queue."
+    return (f"The science inventory contains {total} records, of which {core} are core record-level review tasks. "
+            + excluded_text + " These provenance records are not endpoint-definition records or additional clinical outcomes.")
+
+
+def validate_review_binding(data, review):
+    """Never promote an unrelated review file into a release's human approvals."""
+    approved = review.get("expert_verified", 0)
+    if type(approved) is not int or not 0 <= approved <= review["records"]:
+        raise ValueError("Invalid human approval count")
+    current = data.get("review_summary", {})
+    authority = current.get("expert_approved_records")
+    if authority is None:
+        if approved:
+            raise ValueError("Human approvals require authoritative release review metadata")
+    elif type(authority) is not int or authority != approved:
+        raise ValueError("Human approval count differs from the actual release")
+    if current.get("core_records") is not None and current["core_records"] != review["records"]:
+        raise ValueError("Current release core review count differs")
+    expected = data.get("composition", {}).get("review_dependency_set_sha256")
+    if expected is not None and review.get("source_dependency_record_set_sha256") != expected:
+        raise ValueError("Review record/source dependency set differs from the actual release")
+    if review.get("release_id") is not None and review["release_id"] != data["release_id"]:
+        raise ValueError("Review release identifier differs")
+
 
 def write(metadata_path, review_path, output):
     data = json.loads(Path(metadata_path).read_text(encoding="utf-8"))
@@ -11,6 +51,8 @@ def write(metadata_path, review_path, output):
     kinds = counts["science_kinds"]
     node_counts = counts["node_kinds"]
     versions = data["release_id"]
+    inventory_text = science_inventory(counts, review)
+    validate_review_binding(data, review)
     review.setdefault("fact_candidates", review.get("primary_paper_fact_candidates", 0))
     clinical_n = kinds.get("clinical_endpoint_result", 0)
     clinical_audits = kinds.get("clinical_study_audit", 0)
@@ -82,6 +124,8 @@ All figures and tables must be regenerated from the same release metadata before
 ### 2.2. Intervention context
 
 `science_record` stores study, exposure, arm, contrast, assertion and analysis metadata. Exposures distinguish assigned dose from measured consumption and mixtures from individual chemicals. Contrasts describe within-person changes or differences in changes, as applicable to the source analysis. The public contrast register includes {counts.get('pharmacological_contrasts', 0)} pharmacological comparator(s); fenofibrate in GSE27385 is retained separately from dietary comparisons. Source participant counts, biological-sample counts, array/channel counts and fitted-model counts are retained separately when available; missing or conflicting scopes remain unresolved.
+
+{inventory_text}
 
 The dataset does not treat SuperSeries and SubSeries as independent studies. A published randomized trial does not imply that every publicly deposited subset is a randomized controlled comparison. An active-group pre/post omics subset is labelled accordingly. Likewise, weight-group comparisons and external healthy samples are not converted into randomized dietary controls.
 
