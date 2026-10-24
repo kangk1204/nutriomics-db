@@ -64,3 +64,5 @@ Code inspection, small automated checks and frontend compilation can be performe
 repository. Reproducing every omics analysis requires the relevant input files and R environment.
 We provide [setup instructions](GETTING_STARTED.md), a [data dictionary](PUBLIC_DATA_DICTIONARY.md)
 and [operating instructions](PUBLICATION_RUNBOOK_ko.md) for those steps.
+
+See the [database structure](DB_STRUCTURE.md), [24 October code update](UPDATES_20261024.md) and [current status](PROJECT_STATUS.md). The two new GSE56960 pathway output versions await additional method decisions.

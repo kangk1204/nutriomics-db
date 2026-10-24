@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="864pt" height="496.8pt" viewBox="0 0 864 496.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-24</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>NutriOmics report figure</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 496.8 
+L 864 496.8 
+L 864 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 37.18656 293.102064 
+L 188.14464 293.102064 
+Q 198.09792 293.102064 198.09792 287.975088 
+L 198.09792 182.444832 
+Q 198.09792 177.317856 188.14464 177.317856 
+L 37.18656 177.317856 
+Q 27.23328 177.317856 27.23328 182.444832 
+L 27.23328 287.975088 
+Q 27.23328 293.102064 37.18656 293.102064 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #f0f5f8; stroke: #a5bbc9; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 248.69376 293.102064 
+L 399.65184 293.102064 
+Q 409.60512 293.102064 409.60512 287.975088 
+L 409.60512 182.444832 
+Q 409.60512 177.317856 399.65184 177.317856 
+L 248.69376 177.317856 
+Q 238.74048 177.317856 238.74048 182.444832 
+L 238.74048 287.975088 
+Q 238.74048 293.102064 248.69376 293.102064 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #f0f5f8; stroke: #a5bbc9; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 460.20096 293.102064 
+L 611.15904 293.102064 
+Q 621.11232 293.102064 621.11232 287.975088 
+L 621.11232 182.444832 
+Q 621.11232 177.317856 611.15904 177.317856 
+L 460.20096 177.317856 
+Q 450.24768 177.317856 450.24768 182.444832 
+L 450.24768 287.975088 
+Q 450.24768 293.102064 460.20096 293.102064 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #f0f5f8; stroke: #a5bbc9; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 671.70816 293.102064 
+L 822.66624 293.102064 
+Q 832.61952 293.102064 832.61952 287.975088 
+L 832.61952 182.444832 
+Q 832.61952 177.317856 822.66624 177.317856 
+L 671.70816 177.317856 
+Q 661.75488 177.317856 661.75488 182.444832 
+L 661.75488 287.975088 
+Q 661.75488 293.102064 671.70816 293.102064 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #f0f5f8; stroke: #a5bbc9; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 201.756994 235.20996 
+Q 218.421049 235.20996 233.29625 235.20996 
+" clip-path="url(#p3df9616ccc)" style="fill: none; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 227.29625 232.20996 
+L 233.29625 235.20996 
+L 227.29625 238.20996 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #69869a; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 413.264194 235.20996 
+Q 429.928249 235.20996 444.80345 235.20996 
+" clip-path="url(#p3df9616ccc)" style="fill: none; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 438.80345 232.20996 
+L 444.80345 235.20996 
+L 438.80345 238.20996 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #69869a; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 624.771394 235.20996 
+Q 641.435449 235.20996 656.31065 235.20996 
+" clip-path="url(#p3df9616ccc)" style="fill: none; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 650.31065 232.20996 
+L 656.31065 235.20996 
+L 650.31065 238.20996 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #69869a; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 538.99776 141.429024 
+L 822.66624 141.429024 
+Q 832.61952 141.429024 832.61952 136.302048 
+L 832.61952 77.769072 
+Q 832.61952 72.642096 822.66624 72.642096 
+L 538.99776 72.642096 
+Q 529.04448 72.642096 529.04448 77.769072 
+L 529.04448 136.302048 
+Q 529.04448 141.429024 538.99776 141.429024 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #f8f8f8; stroke-dasharray: 4.44,1.92; stroke-dashoffset: 0; stroke: #aab5bd; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 325.926583 174.21732 
+Q 418.286284 123.650173 521.130118 111.946742 
+" clip-path="url(#p3df9616ccc)" style="fill: none; stroke-dasharray: 5.92,2.56; stroke-dashoffset: 0; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 514.82939 109.64439 
+L 521.130118 111.946742 
+L 515.5078 115.605913 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #69869a; stroke-dasharray: 5.92,2.56; stroke-dashoffset: 0; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 747.1872 145.991325 
+Q 747.1872 159.586974 747.1872 171.393768 
+" clip-path="url(#p3df9616ccc)" style="fill: none; stroke-dasharray: 5.92,2.56; stroke-dashoffset: 0; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 750.1872 165.393768 
+L 747.1872 171.393768 
+L 744.1872 165.393768 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #69869a; stroke-dasharray: 5.92,2.56; stroke-dashoffset: 0; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 460.20096 434.093904 
+L 822.66624 434.093904 
+Q 832.61952 434.093904 832.61952 428.966928 
+L 832.61952 344.799072 
+Q 832.61952 339.672096 822.66624 339.672096 
+L 460.20096 339.672096 
+Q 450.24768 339.672096 450.24768 344.799072 
+L 450.24768 428.966928 
+Q 450.24768 434.093904 460.20096 434.093904 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #f2f6fa; stroke: #a5bbc9; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 535.68 297.235031 
+Q 535.68 315.529878 535.68 332.03587 
+" clip-path="url(#p3df9616ccc)" style="fill: none; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 538.68 326.03587 
+L 535.68 332.03587 
+L 532.68 326.03587 
+z
+" clip-path="url(#p3df9616ccc)" style="fill: #69869a; stroke: #69869a; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #173b50" x="112.6656" y="209.148359" transform="rotate(-0 112.6656 209.148359)">음식·섭취량</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(54.751538 243.15362)">음식명 · 조리 상태</text>
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(59.724819 265.016807)">입력한 섭취량(g)</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #173b50" x="324.1728" y="209.148359" transform="rotate(-0 324.1728 209.148359)">영양성분·화합물</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(262.26655 244.230034)">성분량 · 단위 · 기준</text>
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(256.250925 264.014768)">사용한 성분표의 출처</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #173b50" x="535.68" y="209.148359" transform="rotate(-0 535.68 209.148359)">사람 식이중재</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(490.6175 234.337667)">음식·제품·성분</text>
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(490.6175 254.122401)">용량·기간·조직</text>
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(505.219063 273.907135)">대조 조건</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #173b50" x="747.1872" y="209.148359" transform="rotate(-0 747.1872 209.148359)">오믹스 관찰 결과</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(709.726263 244.230034)">유전자 발현</text>
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(688.287669 264.014768)">DNA 메틸화 · 경로</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 11px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #536c7b" x="218.4192" y="312.989166" transform="rotate(-0 218.4192 312.989166)">함량 계산</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 11px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #536c7b" x="429.9264" y="312.989166" transform="rotate(-0 429.9264 312.989166)">관련 연구 찾기</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 11px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #536c7b" x="641.4336" y="312.989166" transform="rotate(-0 641.4336 312.989166)">대비·버전으로 조회</text>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #173b50" x="680.832" y="94.412104" transform="rotate(-0 680.832 94.412104)">기전·계산 예측 (별도 층)</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #304e60" x="680.832" y="119.368382" transform="rotate(-0 680.832 119.368382)">종 · 조직 · 근거 수준을 구분</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 11.5px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #536c7b" transform="translate(357.897849 133.843877) rotate(-16)">관련 근거가 있을 때</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: middle; fill: #173b50" x="641.4336" y="366.802871" transform="rotate(-0 641.4336 366.802871)">같은 연구의 건강지표</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(544.220006 392.912338)">혈압 · 지질 · BMI · 허리둘레 등</text>
+    <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #304e60" transform="translate(531.128913 412.697072)">수록된 경우 연구 조건과 함께 확인</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 13px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #536c7b" transform="translate(33.8688 352.959924)">음식·제품 이름으로도 연구를 찾을 수 있습니다.</text>
+    <text style="font-size: 13px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #536c7b" transform="translate(33.8688 373.798924)">조건의 일치·불일치·미확인을 각각 표시하며,</text>
+    <text style="font-size: 13px; font-family: 'Malgun Gothic', 'DejaVu Sans'; fill: #536c7b" transform="translate(33.8688 394.637924)">연결 근거가 없는 단계는 자료 부족으로 남깁니다.</text>
+   </g>
+  </g>
+  <g id="text_18">
+   <text style="font-weight: 700; font-size: 23px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: start; fill: #173b50" x="34.56" y="22.356" transform="rotate(-0 34.56 22.356)">음식에서 사람 연구의 관찰 결과까지</text>
+  </g>
+  <g id="text_19">
+   <text style="font-size: 14px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: start; fill: #536c7b" x="34.56" y="44.712" transform="rotate(-0 34.56 44.712)">성분량을 계산하고, 실제 실험의 조건과 결과를 함께 확인하는 구조</text>
+  </g>
+  <g id="text_20">
+   <text style="font-size: 11px; font-family: 'Malgun Gothic', 'DejaVu Sans'; text-anchor: start; fill: #536c7b" x="34.56" y="484.38" transform="rotate(-0 34.56 484.38)">실선: 조성·연구 기록에 따른 조회 연결   |   파선: 별도 기전·예측 맥락   |   화살표는 인과성이나 건강상 이득을 뜻하지 않음</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p3df9616ccc">
+   <rect x="17.28" y="39.744" width="829.44" height="427.248"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,5 +1,7 @@
-import type { Entity, EvidenceEdge, EvidencePage, ExportRequest, Filters, GraphData, Kind, Locus, Meta, NodeDetail, ScientificContext, ScientificMatchResult, Snapshot, WorkbenchEvidence } from './types';
+import { geneNameMatches, geneNameRank } from './geneNameSearch';
+import type { GeneSearchContext, Entity, EvidenceEdge, EvidencePage, ExportRequest, Filters, GraphData, InterventionRecord, Kind, Locus, Meta, NodeDetail, ScientificContext, ScientificMatchResult, Snapshot, WorkbenchEvidence } from './types';
 import { recordGraphReceipt } from './renderMetrics';
+import { exposureRecord, interventionEntity, interventionMatches, mergeCatalogPreview, type SearchKind } from './catalogSearch';
 
 export const offline = Boolean(window.__NUTRIOMICS_SNAPSHOT__);
 const snapshot = window.__NUTRIOMICS_SNAPSHOT__;
@@ -108,9 +110,9 @@ export async function getLoci(seedId: string): Promise<{items:Locus[];truncated?
   }
   return request(`/loci?${new URLSearchParams({seed_id:seedId})}`);
 }
-export async function getOmicsResults(c: {series_accession?:string;contrast?:string;analysis_version?:string}, featureType:string,page:number) {
-  if (snapshot) return {items:[],total:null,status:'not_embedded',feature_type:undefined,available_feature_types:[] as string[]};
-  return request<{items:Record<string,unknown>[];total:number|null;status:string;feature_type?:string;available_feature_types?:string[]}>(`/omics/results?${new URLSearchParams({series:c.series_accession||'',feature_type:featureType,contrast:c.contrast||'',analysis_version:c.analysis_version||'',page:String(page),page_size:'25'})}`);
+export async function getOmicsResults(c: {series_accession?:string;contrast?:string;analysis_version?:string;feature_id?:string}, featureType:string,page:number) {
+  if (snapshot) return {items:[],total:null,status:'not_embedded',feature_type:undefined,available_feature_types:[] as string[],method_correction:undefined};
+  return request<{items:Record<string,unknown>[];total:number|null;status:string;feature_type?:string;available_feature_types?:string[];method_correction?:{expert_review_status:string;primary_q_family:string;selected:{analysis_version:string}}}>(`/omics/results?${new URLSearchParams({series:c.series_accession||'',feature_type:featureType,contrast:c.contrast||'',analysis_version:c.analysis_version||'',page:String(page),page_size:'25',...(c.feature_id?{feature_id:c.feature_id}:{}),...(featureType==='pathway'&&c.series_accession==='GSE56960'?{pathway_selection:'corrected_if_available'}:{})})}`);
 }
 export async function getMeta(): Promise<Meta> {
   if (snapshot) return {
@@ -132,23 +134,56 @@ function eligibleEdge(edge: EvidenceEdge, filters: Filters) {
     (filters.tier === 'all' || edge.tier === 'restricted' || tiers[filters.tier]?.includes(edge.tier)) &&
     (filters.include_extracted || filters.tier === 'extracted' || edge.tier !== 'extracted');
 }
-export async function getEntities(kind: Kind, q: string, filters: Filters, page: number, pageSize: number, sort: string, order: string, signal?: AbortSignal) {
+export async function getEntities(kind: Kind | 'food_record' | 'exposure', q: string, filters: Filters, page: number, pageSize: number, sort: string, order: string, signal?: AbortSignal) {
   if (snapshot) {
     const query = q.trim().toLocaleLowerCase();
     const allowedEdges = snapshot.edges.filter(edge => eligibleEdge(edge, filters));
     const allowedIds = new Set(allowedEdges.flatMap(edge => [edge.subject, edge.object]));
     const extractedIds = new Set(snapshot.edges.filter(edge => edge.tier === 'extracted').flatMap(edge => [edge.subject, edge.object]));
     const nonExtractedIds = new Set(snapshot.edges.filter(edge => edge.tier !== 'extracted').flatMap(edge => [edge.subject, edge.object]));
-    const filtered = snapshot.nodes.filter(node => normalizeKind(node.kind) === kind &&
-      (!query || [node.label, node.label_en || '', node.id, ...(node.aliases || [])].some(value => value.toLocaleLowerCase().includes(query))) &&
+    const filtered = snapshot.nodes.filter(node => (kind==='food_record'?node.kind==='food':kind==='exposure'?['diet','exposure'].includes(node.kind):normalizeKind(node.kind) === kind) &&
+      (!query || [node.label, node.label_en || '', node.display_name_ko || '', node.id, ...(node.aliases || []), ...(node.search_aliases_ko || [])].some(value => value.normalize('NFC').toLocaleLowerCase().includes(query.normalize('NFC'))) || geneNameMatches(node,q)) &&
       (filters.domain === 'all' || node.domains?.includes(filters.domain) || allowedIds.has(node.id)) &&
       (filters.tier === 'all' || allowedIds.has(node.id)) &&
       (filters.include_extracted || filters.tier === 'extracted' || !extractedIds.has(node.id) || nonExtractedIds.has(node.id)));
-    filtered.sort((a, b) => (sort === 'degree' ? (a.degree || 0) - (b.degree || 0) : a.label.localeCompare(b.label, 'ko')) * (order === 'desc' ? -1 : 1));
+    filtered.sort((a, b) => (sort==='label'&&kind==='gene'?geneNameRank(a,q)-geneNameRank(b,q):0) || (sort === 'degree' ? (a.degree || 0) - (b.degree || 0) : a.label.localeCompare(b.label, 'ko')) * (order === 'desc' ? -1 : 1));
     return { items: filtered.slice((page - 1) * pageSize, page * pageSize), total: filtered.length, page, page_size: pageSize, release_id: snapshot.release_id };
   }
   const params = new URLSearchParams({ kind, q, domain: filters.domain, tier: filters.tier, include_extracted: String(filters.include_extracted), page: String(page), page_size: String(pageSize), sort, order });
-  return request<{ items: Entity[]; total: number; page: number; page_size: number; release_id: string }>(`/entities?${params}`, signal);
+  return request<{ items: Entity[]; total: number; page: number; page_size: number; release_id: string; search_context?:FoodSearchContext;gene_search_context?:GeneSearchContext }>(`/entities?${params}`, signal);
+}
+export async function getInterventions(q: string, page=1, pageSize=25, signal?: AbortSignal) {
+  if(snapshot){
+    const nodes=snapshot.nodes.filter(node=>['diet','exposure'].includes(node.kind));
+    const items=nodes.filter(node=>{const record=exposureRecord(snapshot.node_details?.[node.id]||node);return record?interventionMatches(record,q):[node.label,node.id,...(node.aliases||[])].join(' ').toLocaleLowerCase().includes(q.trim().toLocaleLowerCase())});
+    return {items:items.slice((page-1)*pageSize,page*pageSize),total:items.length,page,page_size:pageSize,release_id:snapshot.release_id};
+  }
+  return fetchWithTimeout('/api/v1/interventions?limit=1000&offset=0',{signal},async response=>{
+    if(!response.ok)throw await serverError(response);
+    const result=await response.json() as {items:InterventionRecord[];release_id?:string;total?:number};
+    if(typeof result.total==='number'&&result.total>result.items.length)throw new Error('연구 노출 목록이 일부만 반환됐습니다. 전체 검색을 확인할 수 없습니다.');
+    const items=result.items.filter(row=>interventionMatches(row,q)).map(interventionEntity).sort((a,b)=>a.label.localeCompare(b.label,'ko'));
+    return {items:items.slice((page-1)*pageSize,page*pageSize),total:items.length,page,page_size:pageSize,release_id:result.release_id};
+  });
+}
+export interface FoodSearchContext {version:string;sha256:string;matched_term:string;english:string;mode:'source_record'|'food_family_keyword';purpose:'search_only'}
+export interface CatalogPage {items:Entity[];total:number;page:number;page_size:number;release_id?:string;preview?:boolean;groups?:{kind:'food'|'component'|'exposure'|'gene';total:number|null;shown:number}[];warnings?:string[];search_context?:FoodSearchContext;gene_search_context?:GeneSearchContext}
+export async function getCatalogSearch(kind:SearchKind,q:string,filters:Filters,page:number,signal?:AbortSignal):Promise<CatalogPage>{
+  if(kind==='exposure')return getInterventions(q,page,25,signal);
+  if(kind!=='inputs')return getEntities(kind==='food'?'food_record':kind,q,filters,page,25,'label','asc',signal);
+  const calls=await Promise.allSettled([getEntities('food_record',q,filters,1,8,'label','asc',signal),getEntities('component',q,filters,1,8,'label','asc',signal),getInterventions(q,1,8,signal),getEntities('gene',q,filters,1,8,'label','asc',signal)]);
+  if(signal?.aborted)throw new DOMException('검색이 취소되었습니다.','AbortError');
+  if(calls.every(result=>result.status==='rejected'))throw new Error('음식·성분·연구 노출·유전자를 조회하지 못했습니다. 검색 결과 0건을 뜻하지 않습니다.');
+  const kinds=['food','component','exposure','gene'] as const;
+  const groups=calls.map((result,index)=>({kind:kinds[index],total:result.status==='fulfilled'?result.value.total:null,shown:result.status==='fulfilled'?result.value.items.length:0}));
+  const values=calls.map(result=>result.status==='fulfilled'?result.value.items:[]);
+  const releases=calls.flatMap(result=>result.status==='fulfilled'&&result.value.release_id?[result.value.release_id]:[]);
+  if(new Set(releases).size>1)throw new Error('검색 중 자료 release가 바뀌었습니다. 같은 버전으로 다시 조회해주세요.');
+  const genes=values[3].slice().sort((a,b)=>geneNameRank(a,q)-geneNameRank(b,q));
+  return {items:[...genes.filter(g=>geneNameRank(g,q)<2),...mergeCatalogPreview(values[0],values[1],values[2],q),...genes.filter(g=>geneNameRank(g,q)>=2)],total:groups.reduce((sum,group)=>sum+(group.total||0),0),page:1,page_size:32,release_id:releases[0],preview:true,groups,
+    gene_search_context:calls[3].status==='fulfilled'&&'gene_search_context' in calls[3].value?calls[3].value.gene_search_context:undefined,
+    search_context:calls[0].status==='fulfilled'&&'search_context' in calls[0].value?calls[0].value.search_context:undefined,
+    warnings:calls.flatMap((result,index)=>result.status==='rejected'?[`${{food:'음식',component:'성분',exposure:'연구 노출',gene:'유전자'}[kinds[index]]} 조회 실패 · 결과 수 미확인`]:[])};
 }
 export async function getNode(id: string): Promise<NodeDetail> {
   if (snapshot) return snapshot.node_details?.[id] || { ...snapshot.nodes.find(node => node.id === id)!, gaps: ['독립 HTML에 포함된 자료만 표시합니다.'] };
@@ -199,8 +234,16 @@ export async function getGraph(seedId: string, filters: Filters, maxNodes: numbe
 function csvCell(value: unknown) { return `"${String(value ?? '').replaceAll('"', '""')}"`; }
 export async function exportGraph(payload: ExportRequest): Promise<{ blob: Blob; filename: string }> {
   if (snapshot) {
-    const selection: Snapshot = { ...snapshot, nodes: snapshot.nodes.filter(node => payload.node_ids.includes(node.id)),
-      edges: snapshot.edges.filter(edge => payload.edge_ids.includes(edge.id)), positions: payload.positions, filters: payload.filters };
+    const nodeIds = new Set(payload.node_ids);
+    const nodes = snapshot.nodes.filter(node => nodeIds.has(node.id));
+    const selectedIds = new Set(nodes.map(node => node.id));
+    const edges = snapshot.edges.filter(edge => payload.edge_ids.includes(edge.id) && selectedIds.has(edge.subject) && selectedIds.has(edge.object));
+    const edgeIds = new Set(edges.map(edge => edge.id));
+    const selection: Snapshot = { ...snapshot, nodes, edges,
+      node_details: Object.fromEntries(Object.entries(snapshot.node_details || {}).filter(([id]) => selectedIds.has(id))),
+      edge_details: Object.fromEntries(Object.entries(snapshot.edge_details || {}).filter(([id]) => edgeIds.has(id))),
+      paths: snapshot.paths.filter(row => row.node_ids.every(id => selectedIds.has(id)) && row.edge_ids.every(id => edgeIds.has(id))),
+      positions: Object.fromEntries(Object.entries(payload.positions).filter(([id]) => selectedIds.has(id))), filters: payload.filters };
     if (payload.format === 'json') return { blob: new Blob([JSON.stringify(selection, null, 2)], { type: 'application/json' }), filename: 'nutriomics-snapshot.json' };
     if (payload.format === 'csv') return { blob: new Blob(['\uFEFF' + ['id,subject,object,relation,tier,review_status,source_ids,pmids', ...selection.edges.map(edge => [edge.id, edge.subject, edge.object, edge.relation, edge.tier, edge.review_status, edge.source_ids?.join(';'), edge.pmids?.join(';')].map(csvCell).join(','))].join('\r\n')], { type: 'text/csv;charset=utf-8' }), filename: 'nutriomics-relations.csv' };
     const clone = document.documentElement.cloneNode(true) as HTMLElement;

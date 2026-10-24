@@ -1,6 +1,6 @@
 {
   "schema": "nutriomics-repository-data-summary-v1",
-  "recorded_date": "2026-10-23",
+  "recorded_date": "2026-10-24",
   "data_date": "2026-10-22",
   "release_id": "nutriomics-composed-candidate-20261022-v3",
   "status": "candidate_pending_expert_review",
@@ -33,7 +33,8 @@
     "clinical_source_summary_records": 44,
     "core_records_awaiting_review": 263,
     "expert_approved_records": 0,
-    "verified_independent_participants": null
+    "verified_independent_participants": null,
+    "contrasts": 53
   },
   "definitions": {
     "quantitative_result_rows": "Measured feature by comparison by analysis version; not participants.",
@@ -42,7 +43,25 @@
     "composition_records": "Source food-component records including measurement state; not all direct laboratory measurements."
   },
   "not_in_this_version": [
-    "ongoing DIRECT PLUS full analysis",
+    "DIRECT PLUS extension and its final QC/sensitivity review",
     "ongoing literature and model integration"
-  ]
+  ],
+  "review_collection_id": "nutriomics-submission-draft-20261024-v1",
+  "pathway_method_update": {
+    "study": "GSE56960",
+    "method_output_versions": 2,
+    "selected_rows_replaced": 50550,
+    "selected_row_total_changes": 0,
+    "original_fitted_analysis_runs_unchanged": true,
+    "pending_human_method_decisions": 2,
+    "original_historical_checkpoint_recovered": false
+  },
+  "local_research_addition": {
+    "food_records": 50,
+    "composition_records": 1200,
+    "total_food_records": 5844,
+    "total_composition_records": 369408,
+    "included_in_public_candidate_counts": false,
+    "source_export_conditions_pending": true
+  }
 }

@@ -552,3 +552,26 @@ def test_a_related_yogurt_category_can_compare_nominal_mass_without_quantity_tra
         },
     )
     assert card["status"] == "mismatch"
+
+
+def test_native_korean_food_without_english_name_does_not_crash_or_match_none_text():
+    seed = _node('K-FIND:test', 'food', '김치찌개')
+    seed['label_en'] = None
+    exposure = {'id': 'unrelated-product', 'food_terms': ['None'], 'food_category_codes': []}
+    identity = exposure_match_identity(seed, exposure, [])
+    assert identity['status'] == 'unknown'
+    card = _dose_card(seed, exposure, identity, {'intake_g': 200},
+                     {'amount': 800, 'unit': 'g', 'frequency': 'single', 'analyte_basis': 'whole trial product mass'})
+    assert card['status'] == 'unknown' and card['input'] is None
+    assert seed['label_en'] is None
+
+
+def test_korean_yogurt_with_null_english_name_retains_conditional_nominal_dose_comparison():
+    seed = _node('native:요거트', 'food', '요거트')
+    seed['label_en'] = None
+    exposure = {'id': 'trial', 'food_terms': ['yogurt'], 'food_category_codes': ['yogurt']}
+    identity = exposure_match_identity(seed, exposure, [])
+    assert identity['status'] == 'related_food' and identity['quantity_transfer_allowed'] is False
+    card = _dose_card(seed, exposure, identity, {'intake_g': 150},
+                     {'amount': 800, 'unit': 'g', 'frequency': 'single', 'analyte_basis': 'whole trial product mass'})
+    assert card['status'] == 'mismatch'

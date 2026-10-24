@@ -1,0 +1,88 @@
+{
+  "scope": "Additive classification fields extracted from actual composed-v3 API responses; source classifications are not human-gold labels",
+  "release_id": "nutriomics-composed-candidate-20261022-v3",
+  "response_sha256": [
+    "c13ae39133544ff0dd87831c2e72f8a8a26a17cc17dc42792b170e1eee404474",
+    "0d7965fb8ac9a139247de217abd413ae5dd75aa03fc30f75d4de447451722af0"
+  ],
+  "requests": [
+    {
+      "seed_id": "FDCNutrient:1004",
+      "reference_context": {}
+    },
+    {
+      "seed_id": "Exposure:S05:fiber:human-intervention-bridge-2026-10-01-v1",
+      "reference_context": {}
+    }
+  ],
+  "code_archive_sha256": "127288394a7895981d0745131559e4714482f8c182dfd8c59e2e5e579fec1a6b",
+  "items": [
+    {
+      "study_id": "S01",
+      "primary_dietary_evidence_eligible": false,
+      "supplement_attribution_established": false,
+      "source_classification": {
+        "classification": "supplement_mapping_unresolved",
+        "reason": "The five-person RNA subset does not establish supplement-specific visit attribution. Preserve within-visit meal responses without assigning blueberry/DHA-specific effects.",
+        "flags": [
+          "supplement_visit_mapping_unresolved",
+          "rna_and_clinical_denominators_differ",
+          "dha_formulation_amount_unresolved"
+        ],
+        "source_checked": true,
+        "primary_dietary_evidence_eligible": false,
+        "supplement_attribution_established": false,
+        "scientific_approval": false,
+        "expert_review_status": "pending",
+        "source_references": [
+          {
+            "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE127530",
+            "locator": "GEO Series_summary / Series_overall_design",
+            "sha256": "885121778da89c48ce9bcd9c7d68fe743b548b21a7165806fc6c50ce9cd40bb1"
+          },
+          {
+            "url": "https://pubmed.ncbi.nlm.nih.gov/31473510/",
+            "locator": "Original PubMed abstract, Methods/Design",
+            "sha256": "6d6c952e59f7988cacc38d121f3c463ea57912ad69bf761535b09a12ef025bb0"
+          }
+        ]
+      },
+      "science_review_context": {
+        "scientific_approval": false,
+        "publication_disposition": "pending"
+      }
+    },
+    {
+      "study_id": "S05",
+      "primary_dietary_evidence_eligible": false,
+      "source_classification": {
+        "classification": "exploratory_confounded_extraction_time",
+        "reason": "Extraction method changes with visit; dietary and extraction effects have not been separated. Retain explicitly exploratory observations, not primary dietary causal evidence.",
+        "flags": [
+          "extraction_method_aligned_with_time",
+          "uncontrolled_before_after"
+        ],
+        "source_checked": true,
+        "primary_dietary_evidence_eligible": false,
+        "scientific_approval": false,
+        "expert_review_status": "pending",
+        "source_references": [
+          {
+            "url": "https://doi.org/10.1186/s13148-022-01377-6",
+            "locator": "Controls and validation, Sec26",
+            "sha256": "7d1878ae7dc49f8cf2f131165cb5f26f642febfea5b398485fea2afaff4815fc"
+          },
+          {
+            "url": "https://doi.org/10.1186/s13148-022-01377-6",
+            "locator": "DNA extraction, Sec22",
+            "sha256": "7d1878ae7dc49f8cf2f131165cb5f26f642febfea5b398485fea2afaff4815fc"
+          }
+        ]
+      },
+      "science_review_context": {
+        "scientific_approval": false,
+        "publication_disposition": "pending"
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@ const {catalogSearchFilters}=await import('data:text/javascript;base64,'+Buffer.
 const evidenceFilters=Object.freeze({domain:'blood_pressure',tier:'observed',include_extracted:false});
 const catalogFilters=catalogSearchFilters(evidenceFilters);
 assert.equal(catalogFilters.tier,'all');
-assert.equal(catalogFilters.domain,'blood_pressure');
+assert.equal(catalogFilters.domain,'all');
 assert.equal(catalogFilters.include_extracted,false);
 assert.equal(evidenceFilters.tier,'observed');
 assert.notEqual(catalogFilters,evidenceFilters);

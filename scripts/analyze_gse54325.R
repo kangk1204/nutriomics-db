@@ -1,3 +1,7 @@
+# Archive-only instrumentation: preprocessing, contrasts and FDR are unchanged.
+archive_script_argument <- sub("^--file=", "", grep("^--file=", commandArgs(), value=TRUE)[1L])
+archive_helper_path <- file.path(dirname(archive_script_argument), "expression_archive_helpers.R")
+source(archive_helper_path)
 script_argument <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
 if (!length(script_argument)) stop("Run as an Rscript file, not an interactive selection.")
 source_root <- normalizePath(file.path(dirname(sub("^--file=", "", script_argument[[1L]])), ".."))
@@ -124,7 +128,13 @@ if (nrow(gene_m) < 1000L) stop("Too few unique gene symbols remain after probe a
 design <- matrix(1, nrow = ncol(gene_m), ncol = 1L)
 colnames(design) <- "Cy5_8w_vs_Cy3_baseline"
 rownames(design) <- colnames(gene_m)
-fit <- eBayes(lmFit(gene_m, design), robust = TRUE)
+unmoderated_fit <- lmFit(gene_m, design)
+fit <- eBayes(unmoderated_fit, robust = TRUE)
+archive_contrasts <- matrix(1, nrow=1L, ncol=1L, dimnames=list(colnames(design), colnames(design)))
+model_archive <- save_expression_model_archive(
+  gene_m, sample_info, design, archive_contrasts, unmoderated_fit, fit,
+  file.path(output_root, "reanalysis_inputs.rds"), contrast_application="identity_untransformed",
+  channel_direction=list(Cy3="baseline", Cy5="8 weeks"))
 gene_entrez <- mapIds(
   org.Hs.eg.db,
   keys = rownames(gene_m),
@@ -277,7 +287,9 @@ metadata <- list(
   normalization = "limma read.maimages of gProcessedSignal/rProcessedSignal; within-array loess; gene-level probe averaging",
   design = "One paired 8-week/baseline log2 ratio per independent participant; moderated intercept test against zero",
   result_files = list("gene_effects.tsv.gz", "pathway_effects.tsv.gz"),
-  auxiliary_files = list("sample_metadata.tsv", "sample_qc.tsv", "agilent_qc.pdf"),
+  auxiliary_files = list("sample_metadata.tsv", "sample_qc.tsv", "agilent_qc.pdf", "reanalysis_inputs.rds"),
+  model_archive = model_archive,
+  helper_path = normalizePath(archive_helper_path), helper_sha256 = expression_archive_sha256(archive_helper_path),
   effect_scope = "Seven-person cohort-level flavanol supplementation effect; not a single-food component or individual prediction",
   software_versions = list(
     R = as.character(getRversion()),

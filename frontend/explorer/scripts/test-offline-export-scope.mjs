@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import Module from 'node:module';
+import {build} from 'esbuild';
+const nodes=['a','b','c'].map(id=>({id,kind:'gene',label:id}));
+globalThis.window={__NUTRIOMICS_SNAPSHOT__:{release_id:'synthetic-offline-test',offline:true,nodes,edges:[{id:'ab',subject:'a',object:'b'},{id:'bc',subject:'b',object:'c'}],paths:[{id:'abc',node_ids:['a','b','c'],edge_ids:['ab','bc']}],node_details:Object.fromEntries(nodes.map(n=>[n.id,{...n,scope_note:'only keep selected node detail'}])),edge_details:{ab:{id:'ab'},bc:{id:'bc'}},gaps:[]}};
+const compiled=await build({entryPoints:['src/api.ts'],bundle:true,write:false,platform:'node',format:'cjs'});
+const m=new Module('offline-scope-test.cjs');m._compile(compiled.outputFiles[0].text,'offline-scope-test.cjs');
+const {blob}=await m.exports.exportGraph({format:'json',node_ids:['a','b'],edge_ids:['ab','bc'],positions:{a:{x:1,y:2},c:{x:7,y:8}},filters:{domain:'lipids',tier:'all',include_extracted:true}});
+const saved=JSON.parse(await blob.text());
+assert.deepEqual(saved.nodes.map(n=>n.id),['a','b']);assert.deepEqual(saved.edges.map(e=>e.id),['ab']);
+assert.deepEqual(Object.keys(saved.node_details),['a','b']);assert.deepEqual(Object.keys(saved.edge_details),['ab']);assert.deepEqual(saved.paths,[]);assert.deepEqual(saved.positions,{a:{x:1,y:2}});assert.equal(saved.filters.domain,'lipids');
+assert.equal(saved.node_details.a.scope_note,'only keep selected node detail');
+delete globalThis.window;
+console.log('Offline reexport keeps selected nodes, edges, detail records, paths, positions and filters; unrelated snapshot payload is excluded.');

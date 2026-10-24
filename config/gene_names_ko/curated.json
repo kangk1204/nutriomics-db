@@ -1,0 +1,1021 @@
+{
+  "version": "gene-names-ko-20261023-v1",
+  "purpose": "search and display; no clinical inference or official Korean nomenclature claim",
+  "source": "HGNC complete set 12363916be36f8f6f91879b0faade4eeaac973722de7136ec61329b77f2c2f91; authored Korean terminology",
+  "expert_review": "pending",
+  "items": [
+    {
+      "symbol": "APOE",
+      "name_ko": "아포지단백 E",
+      "aliases": [
+        "아포지단백질 E",
+        "아포리포단백질 E",
+        "아포이"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:613",
+      "approved_name": "apolipoprotein E"
+    },
+    {
+      "symbol": "APOA1",
+      "name_ko": "아포지단백 A1",
+      "aliases": [
+        "아포지단백질 A1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:600",
+      "approved_name": "apolipoprotein A1"
+    },
+    {
+      "symbol": "APOA2",
+      "name_ko": "아포지단백 A2",
+      "aliases": [
+        "아포지단백질 A2"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:601",
+      "approved_name": "apolipoprotein A2"
+    },
+    {
+      "symbol": "APOA5",
+      "name_ko": "아포지단백 A5",
+      "aliases": [
+        "아포지단백질 A5"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:17288",
+      "approved_name": "apolipoprotein A5"
+    },
+    {
+      "symbol": "APOB",
+      "name_ko": "아포지단백 B",
+      "aliases": [
+        "아포지단백질 B"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:603",
+      "approved_name": "apolipoprotein B"
+    },
+    {
+      "symbol": "APOC3",
+      "name_ko": "아포지단백 C3",
+      "aliases": [
+        "아포지단백질 C3"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:610",
+      "approved_name": "apolipoprotein C3"
+    },
+    {
+      "symbol": "LDLR",
+      "name_ko": "저밀도 지단백 수용체",
+      "aliases": [
+        "LDL 수용체"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6547",
+      "approved_name": "low density lipoprotein receptor"
+    },
+    {
+      "symbol": "PCSK9",
+      "name_ko": "전구단백질 전환효소 서브틸리신 켁신 9",
+      "aliases": [
+        "피씨에스케이9"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:20001",
+      "approved_name": "proprotein convertase subtilisin/kexin type 9"
+    },
+    {
+      "symbol": "LPL",
+      "name_ko": "지단백질 지질분해효소",
+      "aliases": [
+        "지단백 리파아제"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6677",
+      "approved_name": "lipoprotein lipase"
+    },
+    {
+      "symbol": "CETP",
+      "name_ko": "콜레스테릴 에스터 전달 단백질",
+      "aliases": [
+        "콜레스테롤 에스터 전달 단백질"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:1869",
+      "approved_name": "cholesteryl ester transfer protein"
+    },
+    {
+      "symbol": "LIPC",
+      "name_ko": "간 지질분해효소",
+      "aliases": [
+        "간 리파아제"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6619",
+      "approved_name": "lipase C, hepatic type"
+    },
+    {
+      "symbol": "LCAT",
+      "name_ko": "레시틴 콜레스테롤 아실전이효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6522",
+      "approved_name": "lecithin-cholesterol acyltransferase"
+    },
+    {
+      "symbol": "ABCA1",
+      "name_ko": "ATP 결합 카세트 수송체 A1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:29",
+      "approved_name": "ATP binding cassette subfamily A member 1"
+    },
+    {
+      "symbol": "ABCG5",
+      "name_ko": "ATP 결합 카세트 수송체 G5",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:13886",
+      "approved_name": "ATP binding cassette subfamily G member 5"
+    },
+    {
+      "symbol": "ABCG8",
+      "name_ko": "ATP 결합 카세트 수송체 G8",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:13887",
+      "approved_name": "ATP binding cassette subfamily G member 8"
+    },
+    {
+      "symbol": "PPARA",
+      "name_ko": "퍼옥시좀 증식인자 활성화 수용체 알파",
+      "aliases": [
+        "PPAR-alpha",
+        "PPARα",
+        "피파 알파"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:9232",
+      "approved_name": "peroxisome proliferator activated receptor alpha"
+    },
+    {
+      "symbol": "PPARG",
+      "name_ko": "퍼옥시좀 증식인자 활성화 수용체 감마",
+      "aliases": [
+        "PPAR-gamma",
+        "PPARγ",
+        "피파 감마"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:9236",
+      "approved_name": "peroxisome proliferator activated receptor gamma"
+    },
+    {
+      "symbol": "PPARD",
+      "name_ko": "퍼옥시좀 증식인자 활성화 수용체 델타",
+      "aliases": [
+        "PPAR-delta",
+        "PPARδ"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:9235",
+      "approved_name": "peroxisome proliferator activated receptor delta"
+    },
+    {
+      "symbol": "SREBF1",
+      "name_ko": "스테롤 조절 요소 결합 전사인자 1",
+      "aliases": [
+        "SREBP-1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11289",
+      "approved_name": "sterol regulatory element binding transcription factor 1"
+    },
+    {
+      "symbol": "SREBF2",
+      "name_ko": "스테롤 조절 요소 결합 전사인자 2",
+      "aliases": [
+        "SREBP-2"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11290",
+      "approved_name": "sterol regulatory element binding transcription factor 2"
+    },
+    {
+      "symbol": "FASN",
+      "name_ko": "지방산 합성효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:3594",
+      "approved_name": "fatty acid synthase"
+    },
+    {
+      "symbol": "ACACA",
+      "name_ko": "아세틸 코엔자임 A 카복실화효소 알파",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:84",
+      "approved_name": "acetyl-CoA carboxylase alpha"
+    },
+    {
+      "symbol": "CPT1A",
+      "name_ko": "카르니틴 팔미토일전이효소 1A",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2328",
+      "approved_name": "carnitine palmitoyltransferase 1A"
+    },
+    {
+      "symbol": "CPT2",
+      "name_ko": "카르니틴 팔미토일전이효소 2",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2330",
+      "approved_name": "carnitine palmitoyltransferase 2"
+    },
+    {
+      "symbol": "SCD",
+      "name_ko": "스테아로일 코엔자임 A 불포화효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:10571",
+      "approved_name": "stearoyl-CoA desaturase"
+    },
+    {
+      "symbol": "ELOVL6",
+      "name_ko": "긴사슬 지방산 연장효소 6",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:15829",
+      "approved_name": "ELOVL fatty acid elongase 6"
+    },
+    {
+      "symbol": "FADS1",
+      "name_ko": "지방산 불포화효소 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:3574",
+      "approved_name": "fatty acid desaturase 1"
+    },
+    {
+      "symbol": "FADS2",
+      "name_ko": "지방산 불포화효소 2",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:3575",
+      "approved_name": "fatty acid desaturase 2"
+    },
+    {
+      "symbol": "DGAT1",
+      "name_ko": "디아실글리세롤 아실전이효소 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2843",
+      "approved_name": "diacylglycerol O-acyltransferase 1"
+    },
+    {
+      "symbol": "DGAT2",
+      "name_ko": "디아실글리세롤 아실전이효소 2",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:16940",
+      "approved_name": "diacylglycerol O-acyltransferase 2"
+    },
+    {
+      "symbol": "INS",
+      "name_ko": "인슐린",
+      "aliases": [
+        "인슐린 유전자"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6081",
+      "approved_name": "insulin"
+    },
+    {
+      "symbol": "INSR",
+      "name_ko": "인슐린 수용체",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6091",
+      "approved_name": "insulin receptor"
+    },
+    {
+      "symbol": "IRS1",
+      "name_ko": "인슐린 수용체 기질 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6125",
+      "approved_name": "insulin receptor substrate 1"
+    },
+    {
+      "symbol": "IRS2",
+      "name_ko": "인슐린 수용체 기질 2",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6126",
+      "approved_name": "insulin receptor substrate 2"
+    },
+    {
+      "symbol": "AKT1",
+      "name_ko": "AKT 세린 트레오닌 인산화효소 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:391",
+      "approved_name": "AKT serine/threonine kinase 1"
+    },
+    {
+      "symbol": "AKT2",
+      "name_ko": "AKT 세린 트레오닌 인산화효소 2",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:392",
+      "approved_name": "AKT serine/threonine kinase 2"
+    },
+    {
+      "symbol": "SLC2A1",
+      "name_ko": "포도당 수송체 1",
+      "aliases": [
+        "글루트1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11005",
+      "approved_name": "solute carrier family 2 member 1"
+    },
+    {
+      "symbol": "SLC2A2",
+      "name_ko": "포도당 수송체 2",
+      "aliases": [
+        "글루트2"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11006",
+      "approved_name": "solute carrier family 2 member 2"
+    },
+    {
+      "symbol": "SLC2A4",
+      "name_ko": "포도당 수송체 4",
+      "aliases": [
+        "글루트4"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11009",
+      "approved_name": "solute carrier family 2 member 4"
+    },
+    {
+      "symbol": "GCK",
+      "name_ko": "글루코키나아제",
+      "aliases": [
+        "글루코스 인산화효소"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:4195",
+      "approved_name": "glucokinase"
+    },
+    {
+      "symbol": "G6PC1",
+      "name_ko": "포도당 6 인산 가수분해효소 촉매 소단위 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:4056",
+      "approved_name": "glucose-6-phosphatase catalytic subunit 1"
+    },
+    {
+      "symbol": "PCK1",
+      "name_ko": "포스포에놀피루브산 카복시키나아제 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:8724",
+      "approved_name": "phosphoenolpyruvate carboxykinase 1"
+    },
+    {
+      "symbol": "TCF7L2",
+      "name_ko": "전사인자 7 유사 2",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11641",
+      "approved_name": "transcription factor 7 like 2"
+    },
+    {
+      "symbol": "KCNJ11",
+      "name_ko": "내향 정류 칼륨 통로 J11",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6257",
+      "approved_name": "potassium inwardly rectifying channel subfamily J member 11"
+    },
+    {
+      "symbol": "FTO",
+      "name_ko": "FTO 알파 케토글루타르산 의존성 이산소화효소",
+      "aliases": [
+        "에프티오"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:24678",
+      "approved_name": "FTO alpha-ketoglutarate dependent dioxygenase"
+    },
+    {
+      "symbol": "MC4R",
+      "name_ko": "멜라노코르틴 수용체 4",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6932",
+      "approved_name": "melanocortin 4 receptor"
+    },
+    {
+      "symbol": "LEP",
+      "name_ko": "렙틴",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6553",
+      "approved_name": "leptin"
+    },
+    {
+      "symbol": "LEPR",
+      "name_ko": "렙틴 수용체",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6554",
+      "approved_name": "leptin receptor"
+    },
+    {
+      "symbol": "ADIPOQ",
+      "name_ko": "아디포넥틴",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:13633",
+      "approved_name": "adiponectin, C1Q and collagen domain containing"
+    },
+    {
+      "symbol": "ADIPOR1",
+      "name_ko": "아디포넥틴 수용체 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:24040",
+      "approved_name": "adiponectin receptor 1"
+    },
+    {
+      "symbol": "UCP1",
+      "name_ko": "탈결합 단백질 1",
+      "aliases": [
+        "언커플링 단백질 1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:12517",
+      "approved_name": "uncoupling protein 1"
+    },
+    {
+      "symbol": "IL6",
+      "name_ko": "인터루킨 6",
+      "aliases": [
+        "인터류킨 6",
+        "IL-6"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6018",
+      "approved_name": "interleukin 6"
+    },
+    {
+      "symbol": "TNF",
+      "name_ko": "종양괴사인자",
+      "aliases": [
+        "종양괴사인자 알파",
+        "TNF-alpha",
+        "TNFα"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11892",
+      "approved_name": "tumor necrosis factor"
+    },
+    {
+      "symbol": "IL1B",
+      "name_ko": "인터루킨 1 베타",
+      "aliases": [
+        "인터류킨 1 베타"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:5992",
+      "approved_name": "interleukin 1 beta"
+    },
+    {
+      "symbol": "IL10",
+      "name_ko": "인터루킨 10",
+      "aliases": [
+        "인터류킨 10"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:5962",
+      "approved_name": "interleukin 10"
+    },
+    {
+      "symbol": "NFKB1",
+      "name_ko": "핵인자 카파 B 소단위 1",
+      "aliases": [
+        "NF-kappaB1",
+        "NFκB1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:7794",
+      "approved_name": "nuclear factor kappa B subunit 1"
+    },
+    {
+      "symbol": "RELA",
+      "name_ko": "RELA NF 카파 B 소단위",
+      "aliases": [
+        "렐에이"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:9955",
+      "approved_name": "RELA proto-oncogene, NF-kB subunit"
+    },
+    {
+      "symbol": "NFKBIA",
+      "name_ko": "NF 카파 B 억제인자 알파",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:7797",
+      "approved_name": "NFKB inhibitor alpha"
+    },
+    {
+      "symbol": "CRP",
+      "name_ko": "C 반응성 단백질",
+      "aliases": [
+        "씨 반응성 단백질"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2367",
+      "approved_name": "C-reactive protein"
+    },
+    {
+      "symbol": "TLR4",
+      "name_ko": "톨 유사 수용체 4",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11850",
+      "approved_name": "toll like receptor 4"
+    },
+    {
+      "symbol": "NLRP3",
+      "name_ko": "NLR 계열 피린 도메인 포함 단백질 3",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:16400",
+      "approved_name": "NLR family pyrin domain containing 3"
+    },
+    {
+      "symbol": "CXCL8",
+      "name_ko": "CXC 케모카인 리간드 8",
+      "aliases": [
+        "인터루킨 8"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:6025",
+      "approved_name": "C-X-C motif chemokine ligand 8"
+    },
+    {
+      "symbol": "CCL2",
+      "name_ko": "CC 케모카인 리간드 2",
+      "aliases": [
+        "단핵구 화학주성 단백질 1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:10618",
+      "approved_name": "C-C motif chemokine ligand 2"
+    },
+    {
+      "symbol": "NFE2L2",
+      "name_ko": "핵인자 적혈구계열 2 유사 2",
+      "aliases": [
+        "엔알에프2"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:7782",
+      "approved_name": "NFE2 like bZIP transcription factor 2"
+    },
+    {
+      "symbol": "KEAP1",
+      "name_ko": "켈치 유사 ECH 관련 단백질 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:23177",
+      "approved_name": "kelch like ECH associated protein 1"
+    },
+    {
+      "symbol": "SOD1",
+      "name_ko": "초과산화물 불균등화효소 1",
+      "aliases": [
+        "슈퍼옥사이드 디스뮤타아제 1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11179",
+      "approved_name": "superoxide dismutase 1"
+    },
+    {
+      "symbol": "SOD2",
+      "name_ko": "초과산화물 불균등화효소 2",
+      "aliases": [
+        "슈퍼옥사이드 디스뮤타아제 2"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11180",
+      "approved_name": "superoxide dismutase 2"
+    },
+    {
+      "symbol": "CAT",
+      "name_ko": "카탈라아제",
+      "aliases": [
+        "카탈레이스"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:1516",
+      "approved_name": "catalase"
+    },
+    {
+      "symbol": "GPX1",
+      "name_ko": "글루타티온 과산화효소 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:4553",
+      "approved_name": "glutathione peroxidase 1"
+    },
+    {
+      "symbol": "GSR",
+      "name_ko": "글루타티온 환원효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:4623",
+      "approved_name": "glutathione-disulfide reductase"
+    },
+    {
+      "symbol": "HMOX1",
+      "name_ko": "헴 산소화효소 1",
+      "aliases": [
+        "헤모옥시게나아제 1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:5013",
+      "approved_name": "heme oxygenase 1"
+    },
+    {
+      "symbol": "MTHFR",
+      "name_ko": "메틸렌테트라하이드로엽산 환원효소",
+      "aliases": [
+        "메틸렌테트라히드로폴레이트 환원효소"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:7436",
+      "approved_name": "methylenetetrahydrofolate reductase"
+    },
+    {
+      "symbol": "MTR",
+      "name_ko": "메티오닌 합성효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:7468",
+      "approved_name": "5-methyltetrahydrofolate-homocysteine methyltransferase"
+    },
+    {
+      "symbol": "MTRR",
+      "name_ko": "메티오닌 합성효소 환원효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:7473",
+      "approved_name": "5-methyltetrahydrofolate-homocysteine methyltransferase reductase"
+    },
+    {
+      "symbol": "CBS",
+      "name_ko": "시스타티오닌 베타 합성효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:1550",
+      "approved_name": "cystathionine beta-synthase"
+    },
+    {
+      "symbol": "BHMT",
+      "name_ko": "베타인 호모시스테인 메틸전이효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:1047",
+      "approved_name": "betaine--homocysteine S-methyltransferase"
+    },
+    {
+      "symbol": "SHMT1",
+      "name_ko": "세린 하이드록시메틸전이효소 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:10850",
+      "approved_name": "serine hydroxymethyltransferase 1"
+    },
+    {
+      "symbol": "DNMT1",
+      "name_ko": "DNA 메틸전이효소 1",
+      "aliases": [
+        "디엔에이 메틸전이효소 1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2976",
+      "approved_name": "DNA methyltransferase 1"
+    },
+    {
+      "symbol": "DNMT3A",
+      "name_ko": "DNA 메틸전이효소 3A",
+      "aliases": [
+        "디엔에이 메틸전이효소 3A"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2978",
+      "approved_name": "DNA methyltransferase 3 alpha"
+    },
+    {
+      "symbol": "DNMT3B",
+      "name_ko": "DNA 메틸전이효소 3B",
+      "aliases": [
+        "디엔에이 메틸전이효소 3B"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2979",
+      "approved_name": "DNA methyltransferase 3 beta"
+    },
+    {
+      "symbol": "TET1",
+      "name_ko": "TET 메틸시토신 이산소화효소 1",
+      "aliases": [
+        "테트1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:29484",
+      "approved_name": "tet methylcytosine dioxygenase 1"
+    },
+    {
+      "symbol": "TET2",
+      "name_ko": "TET 메틸시토신 이산소화효소 2",
+      "aliases": [
+        "테트2"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:25941",
+      "approved_name": "tet methylcytosine dioxygenase 2"
+    },
+    {
+      "symbol": "SIRT1",
+      "name_ko": "시르투인 1",
+      "aliases": [
+        "서투인 1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:14929",
+      "approved_name": "sirtuin 1"
+    },
+    {
+      "symbol": "MTOR",
+      "name_ko": "라파마이신 표적 인산화효소",
+      "aliases": [
+        "엠토르"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:3942",
+      "approved_name": "mechanistic target of rapamycin kinase"
+    },
+    {
+      "symbol": "PRKAA1",
+      "name_ko": "AMP 활성화 단백질 인산화효소 촉매 알파 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:9376",
+      "approved_name": "protein kinase AMP-activated catalytic subunit alpha 1"
+    },
+    {
+      "symbol": "VDR",
+      "name_ko": "비타민 D 수용체",
+      "aliases": [
+        "비타민디 수용체"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:12679",
+      "approved_name": "vitamin D receptor"
+    },
+    {
+      "symbol": "FOLR1",
+      "name_ko": "엽산 수용체 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:3791",
+      "approved_name": "folate receptor alpha"
+    },
+    {
+      "symbol": "VEGFA",
+      "name_ko": "혈관내피 성장인자 A",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:12680",
+      "approved_name": "vascular endothelial growth factor A"
+    },
+    {
+      "symbol": "NOS3",
+      "name_ko": "내피 산화질소 합성효소",
+      "aliases": [
+        "산화질소 합성효소 3"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:7876",
+      "approved_name": "nitric oxide synthase 3"
+    },
+    {
+      "symbol": "ACE",
+      "name_ko": "안지오텐신 전환효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:2707",
+      "approved_name": "angiotensin I converting enzyme"
+    },
+    {
+      "symbol": "AGT",
+      "name_ko": "안지오텐시노겐",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:333",
+      "approved_name": "angiotensinogen"
+    },
+    {
+      "symbol": "REN",
+      "name_ko": "레닌",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:9958",
+      "approved_name": "renin"
+    },
+    {
+      "symbol": "TP53",
+      "name_ko": "종양단백질 p53",
+      "aliases": [
+        "티피53"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:11998",
+      "approved_name": "tumor protein p53"
+    },
+    {
+      "symbol": "BRCA1",
+      "name_ko": "BRCA1 DNA 복구 관련 유전자",
+      "aliases": [
+        "브라카1"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:1100",
+      "approved_name": "BRCA1 DNA repair associated"
+    },
+    {
+      "symbol": "ACTB",
+      "name_ko": "베타 액틴",
+      "aliases": [
+        "액틴 베타"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:132",
+      "approved_name": "actin beta"
+    },
+    {
+      "symbol": "GAPDH",
+      "name_ko": "글리세르알데하이드 3 인산 탈수소효소",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:4141",
+      "approved_name": "glyceraldehyde-3-phosphate dehydrogenase"
+    },
+    {
+      "symbol": "H19",
+      "name_ko": "H19 각인 모계 발현 전사체",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:4713",
+      "approved_name": "H19 imprinted maternally expressed transcript"
+    },
+    {
+      "symbol": "XIST",
+      "name_ko": "X 염색체 비활성화 특이 전사체",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:12810",
+      "approved_name": "X inactive specific transcript"
+    },
+    {
+      "symbol": "MALAT1",
+      "name_ko": "전이 관련 폐선암 전사체 1",
+      "aliases": [],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:29665",
+      "approved_name": "metastasis associated lung adenocarcinoma transcript 1"
+    },
+    {
+      "symbol": "MIR21",
+      "name_ko": "마이크로RNA 21",
+      "aliases": [
+        "미르21"
+      ],
+      "status": "authored_search_terminology_not_official_translation",
+      "expert_review": "pending",
+      "hgnc_id": "HGNC:31586",
+      "approved_name": "microRNA 21"
+    }
+  ]
+}

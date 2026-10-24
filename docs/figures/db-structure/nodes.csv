@@ -1,0 +1,7 @@
+﻿id,label,storage
+food,음식·섭취량,"node(food), API items.food_id/amount_g"
+component,영양성분·화합물,"measurement, node(component)"
+intervention,사람 식이중재,science_record(study/exposure/arm/contrast)
+omics,발현·메틸화·경로,"study_effect, Parquet, five-part analysis key"
+health,같은 연구의 건강지표,"science_record(clinical_endpoint_result), node(outcome)"
+context,기전·계산 예측,edge with source/tier/taxon/tissue

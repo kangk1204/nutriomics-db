@@ -1,0 +1,23 @@
+# A saved weighted model must reproduce the fitted effects and statistics.
+suppressPackageStartupMessages(library(limma))
+args<-commandArgs(trailingOnly=TRUE)
+nodes<-parse(args[[1]])
+definition<-Filter(function(x)is.call(x)&&identical(x[[1]],as.name("<-"))&&identical(x[[2]],as.name("archive_expression_state")),as.list(nodes))
+stopifnot(length(definition)==1L);eval(definition[[1]])
+set.seed(7801)
+expression<-matrix(rnorm(120*12),120,12,dimnames=list(paste0("gene",1:120),paste0("sample",1:12)))
+weights<-matrix(exp(rnorm(120*12)),120,12)
+sample_info<-data.frame(subject_id=rep(1:6,2),condition=rep(c("a","b"),each=6))
+design<-model.matrix(~factor(subject_id)+condition,sample_info)
+contrasts<-matrix(0,nrow=ncol(design),ncol=1,dimnames=list(colnames(design),"b_vs_a"));contrasts[nrow(contrasts),1]<-1
+voom_object<-new("EList",list(E=expression,weights=weights))
+fitted<-lmFit(voom_object,design);fit<-eBayes(contrasts.fit(fitted,contrasts),robust=TRUE)
+path<-tempfile(fileext=".rds");on.exit(unlink(path),add=TRUE)
+archive_expression_state(expression,sample_info,design,contrasts,fitted,fit,voom_object,path)
+restored<-readRDS(path)
+replay<-eBayes(contrasts.fit(lmFit(restored$voom_object,restored$design),restored$contrasts),robust=TRUE)
+stopifnot(identical(restored$voom_weights,weights),isTRUE(all.equal(replay$coefficients,fit$coefficients)),
+          isTRUE(all.equal(replay$p.value,fit$p.value)),isTRUE(all.equal(replay$s2.post,fit$s2.post)))
+unweighted<-eBayes(contrasts.fit(lmFit(expression,design),contrasts),robust=TRUE)
+stopifnot(!isTRUE(all.equal(unweighted$coefficients,fit$coefficients)))
+cat("Weighted archive round-trip and effect/P/moderation replay passed\n")

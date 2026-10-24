@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 23 October 2026. Data version described below: 22 October 2026.
+Updated: 24 October 2026. Base component: 22 October 2026; method-review collection: 24 October 2026.
 
 [Overview](../README.en.md) · [한국어 안내](../README.md) · [Review guide](REVIEWER_GUIDE.md)
 
@@ -32,13 +32,13 @@ to that version. The source archive itself is not included in this code reposito
 
 | Item | Status |
 |---|---|
-| Human review | Decisions on the 263 core records remain pending |
+| Human review | Decisions on 263 core records and two new pathway output versions remain pending |
 | Final query evaluation | Awaits reviewed reference answers and a fixed final data version |
 | Data access conditions | Source and output conditions need final confirmation before deposit |
 | Data and code version DOIs | Not registered |
 | Full data archive | Prepared for review; final downloadable deposit not published |
 | External website | No public HTTPS service is provided at present |
-| DIRECT PLUS extension | QC, normalization and intervention analysis in progress; excluded from the counts above |
+| DIRECT PLUS extension | Primary and sensitivity/QC work is managed separately; final extension validation and inclusion review are incomplete; excluded from the counts above |
 | Literature and model integration | Development in a separate branch; excluded from the counts above |
 
 The project should therefore be described as a research database under review.
@@ -52,3 +52,7 @@ should be reported with the exact code revision and data version used.
 
 The data identifiers and existing result values are preserved when a new interpretation or
 analysis version is prepared. New analyses receive their own versions; they are not additional subjects.
+
+The GSE56960 method update selects 50,550 replacement rows and preserves their historical versions. It adds two output versions, not participants or independent fitted study models. The selected total remains 6,254,477 rows. The final merged code still requires its own operational performance checks.
+
+[Structure and joins](DB_STRUCTURE.md) · [Code update and validation scope](UPDATES_20261024.md)

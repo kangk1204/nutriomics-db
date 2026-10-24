@@ -18,3 +18,11 @@ renv/library/
 renv/staging/
 toolchain/
 
+
+# Local build and test products
+.venv-*/
+node_modules/
+frontend/explorer/dist/
+.ruff_cache/
+*.egg-info/
+portable-tests.xml
