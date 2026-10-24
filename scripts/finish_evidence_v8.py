@@ -16,7 +16,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "literature_service"))
-from deploy_evidence_v8 import ALLOWED_HOSTS, PROJECT, remote, run_remote
+from deploy_evidence_v8 import ALLOWED_HOSTS, PROJECT, RemoteTransportError, remote, run_remote
 
 
 def write_recovered_file(output, name, value):
@@ -118,6 +118,19 @@ with zipfile.ZipFile(sys.stdout.buffer,'w',zipfile.ZIP_DEFLATED) as z:
                "full_scientific_source_verification": source_verification}
     atomic(output / "transport-verification.json", receipt, True)
     return receipt
+
+
+def recover_with_checkpoint(host, output, experiment, state, recoverer=None):
+    """Retry authenticated export after network loss without hiding invalid data."""
+    recoverer = recoverer or recover
+    state['recovery_attempts'] = state.get('recovery_attempts', 0) + 1
+    try:
+        state['transport'] = recoverer(host, output, experiment)
+    except (RemoteTransportError, TimeoutError, subprocess.TimeoutExpired) as error:
+        state.update(recovery_pending=True, recovery_error=type(error).__name__ + ': ' + str(error)[:400])
+        return False
+    state.update(recovery_pending=False, recovery_error=None)
+    return True
 
 
 def id_transition_counts(reference, decisions):
@@ -323,7 +336,10 @@ def main():
                     time.sleep(60)
                     continue
                 if observed.get("predictions_ready"):
-                    state["transport"] = recover(args.host, output, args.remote_experiment)
+                    if not recover_with_checkpoint(args.host, output, args.remote_experiment, state):
+                        atomic(path, state)
+                        time.sleep(60)
+                        continue
                     from nutri_literature.evidence_v8.runner import evaluate_saved
                     first, second = evaluate_saved(), evaluate_saved()
                     if first != second:

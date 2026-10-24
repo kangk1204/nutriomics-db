@@ -87,6 +87,21 @@ def test_authenticated_disconnect_does_not_replay_a_remote_command(monkeypatch):
     assert len(calls)==1
 
 
+@pytest.mark.parametrize('code,message,transient',[
+    (255,b'Connection reset by peer',True),
+    (255,b'Host key verification failed. Connection closed.',False),
+    (255,b'Permission denied (publickey). Connection closed.',False),
+    (255,b'Permission denied (publickey).'+b'x'*1400+b'Connection closed.',False),
+    (1,b'ValueError: frozen data mismatch; Connection closed',False),
+])
+def test_transport_classification_does_not_hide_authentication_or_data_failures(monkeypatch,code,message,transient):
+    from scripts import deploy_evidence_v8 as deployment
+    from types import SimpleNamespace
+    monkeypatch.setattr(deployment.subprocess,'run',lambda *a,**k:SimpleNamespace(returncode=code,stdout=b'',stderr=message))
+    with pytest.raises(RuntimeError) as error:deployment.remote('100.93.148.94','print(1)')
+    assert isinstance(error.value,deployment.RemoteTransportError) is transient
+
+
 def test_new_peer_requires_unchanged_authenticated_host_key_receipt(tmp_path, monkeypatch):
     from scripts import deploy_evidence_v8 as deployment
     keyfile = tmp_path / 'known_hosts'

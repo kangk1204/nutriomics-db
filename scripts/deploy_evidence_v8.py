@@ -27,6 +27,10 @@ VERIFIED_TAILSCALE_V6 = {"100.84.183.6": "fd7a:115c:a1e0::134:b707"}
 ORIGINAL = "/home/keunsoo/projects/nutriomics-relation-v6-gpu-r2/runtime/relation-repair-v6-gpu-r2"
 
 
+class RemoteTransportError(RuntimeError):
+    """A failed SSH transport, distinct from authentication or remote computation."""
+
+
 def ssh(host, *, ipv6=False):
     if host not in ALLOWED_HOSTS:
         raise ValueError("GPU host is outside the verified deployment allowlist")
@@ -66,7 +70,15 @@ def run_remote(host, code, payload=b"", *, timeout=180, stdout=subprocess.PIPE):
     except subprocess.TimeoutExpired:
         raise TimeoutError(f"SSH host {host} exceeded {timeout}s; remote completion unconfirmed") from None
     if p.returncode:
-        raise RuntimeError("Remote operation failed: " + p.stderr.decode(errors="replace")[-1200:])
+        full_message = p.stderr.decode(errors="replace")
+        message = full_message[-1200:]
+        lower = full_message.lower()
+        authentication = any(s in lower for s in ['host key', 'host identification', 'permission denied', 'authenticat'])
+        transport = any(s in lower for s in ['connection timed out', 'connection reset', 'connection refused',
+            'connection closed', 'closed by remote host', 'network is unreachable', 'no route to host', 'broken pipe'])
+        if p.returncode == 255 and transport and not authentication:
+            raise RemoteTransportError("Remote transport failed: " + message)
+        raise RuntimeError("Remote operation failed: " + message)
     return p
 
 

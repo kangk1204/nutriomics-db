@@ -91,6 +91,29 @@ def test_documentation_requires_complete_scoring_and_preserves_results_when_git_
     assert calls==[('verified-report',{'branch':'feature/test','push':True})]
 
 
+def test_prediction_export_retries_network_loss_but_preserves_the_checkpoint(tmp_path):
+    state={'running':True};calls=[]
+    def exporter(*args):
+        calls.append(args)
+        if len(calls)==1:raise module.RemoteTransportError('Connection reset by peer')
+        return {'archive_sha256':'verified'}
+    assert module.recover_with_checkpoint('host',tmp_path,'experiment',state,exporter) is False
+    assert state['recovery_pending'] is True and state['running'] is True
+    assert 'evaluation_complete' not in state
+    assert module.recover_with_checkpoint('host',tmp_path,'experiment',state,exporter) is True
+    assert state['transport']=={'archive_sha256':'verified'}
+    assert state['recovery_attempts']==2 and state['recovery_pending'] is False
+
+
+@pytest.mark.parametrize('error',[ValueError('Frozen hash mismatch'),RuntimeError('Remote export verification failed')])
+def test_prediction_integrity_or_remote_computation_errors_are_not_retried(tmp_path,error):
+    state={}
+    def exporter(*args):raise error
+    with pytest.raises(type(error),match=str(error)):
+        module.recover_with_checkpoint('host',tmp_path,'experiment',state,exporter)
+    assert state['recovery_attempts']==1 and not state.get('recovery_pending')
+
+
 def test_all_native_scorer_dependencies_are_bound_before_evaluation(tmp_path):
     source=tmp_path/'source';output=tmp_path/'experiment';source.mkdir();output.mkdir()
     path=source/'native_scorer.py';path.write_bytes(b'unchanged raw ID and type rules')

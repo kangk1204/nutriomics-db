@@ -90,8 +90,9 @@ def update(directory, *, root=ROOT, branch, push=False):
     root = Path(root).resolve()
     if git(root, 'branch', '--show-current') != branch:
         raise ValueError('Documentation branch changed; no files written')
-    if git(root, 'status', '--porcelain'):
-        raise ValueError('Documentation requires a clean worktree; no files written')
+    protected = ['README.md', 'docs/status/literature-2026-10-24.json']
+    if git(root, 'status', '--porcelain', '--', *protected):
+        raise ValueError('Documentation inputs contain existing changes; no files written')
     if push and git(root, 'remote', 'get-url', 'origin') != 'https://github.com/kangk1204/nutriomics-db.git':
         raise ValueError('Documentation push destination changed; no files written')
     baseline = json.loads((root / 'docs/status/literature-2026-10-24.json').read_text(encoding='utf8'))
@@ -101,8 +102,11 @@ def update(directory, *, root=ROOT, branch, push=False):
         raise ValueError('Invalid report identity')
     relative = 'docs/reports/v8-evaluation-' + digest[:16]
     destination = root / relative
+    if git(root, 'status', '--porcelain', '--', relative):
+        raise ValueError('The target documentation report has existing changes')
     readme = root / 'README.md'
-    replacement = readme_result(readme.read_text(encoding='utf8'), payload, measured, relative)
+    original = readme.read_bytes()
+    replacement = readme_result(original.decode('utf8').replace('\r\n', '\n'), payload, measured, relative)
     files = {**blobs, 'report-manifest.json':(Path(directory) / 'report-manifest.json').read_bytes()}
     for name, blob in files.items():
         existing = destination / name
@@ -111,17 +115,19 @@ def update(directory, *, root=ROOT, branch, push=False):
     destination.mkdir(parents=True, exist_ok=True)
     for name, blob in files.items():
         (destination / name).write_bytes(blob)
-    readme.write_text(replacement, encoding='utf8')
+    if readme.read_bytes() != original:
+        raise ValueError('README changed while preparing the report')
+    readme.write_text(replacement, encoding='utf8', newline='\n')
     paths = ['README.md', *[relative + '/' + name for name in files]]
     git(root, 'add', '--', *paths)
-    staged = git(root, 'diff', '--cached', '--name-only').splitlines()
-    if set(staged) - set(paths) or git(root, 'branch', '--show-current') != branch:
+    staged = git(root, 'diff', '--cached', '--name-only', '--', *paths).splitlines()
+    if git(root, 'branch', '--show-current') != branch:
         raise ValueError('Concurrent Git changes require manual documentation review')
     if staged:
         author = git(root, 'log', '-1', '--format=%an')
         email = git(root, 'log', '-1', '--format=%ae')
         git(root, '-c', 'user.name=' + author, '-c', 'user.email=' + email,
-            'commit', '-m', 'Report verified v8 development evaluation')
+            'commit', '--only', '-m', 'Report verified v8 development evaluation', '--', *paths)
     head = git(root, 'rev-parse', 'HEAD')
     if push:
         git(root, 'push', 'origin', 'HEAD:refs/heads/' + branch)

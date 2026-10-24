@@ -170,7 +170,9 @@ python scripts/finish_evidence_v8.py \
   --push-documentation
 ```
 
-로컬 후속 작업을 실행하는 PC를 켜 둡니다. 진행은 해당 home의 `local-finisher/state.json`에 기록됩니다. README 게시에는 깨끗한 작업 폴더, 지정 브랜치, 현재 GitHub 원격 주소가 필요합니다. 문서 반영 조건이 맞지 않으면 평가와 보고서를 저장하고 `documentation_pending`으로 기록합니다. 보고서가 이미 저장됐으면 다음 명령으로 문서 반영을 재개합니다.
+로컬 후속 작업을 실행하는 PC를 켜 둡니다. 진행은 해당 home의 `local-finisher/state.json`에 기록됩니다. 문서 게시에는 README·비교 기준·대상 보고서의 변경 충돌이 없는 상태, 지정 브랜치, 현재 GitHub 원격 주소가 필요합니다. 다른 파일의 staged·unstaged·untracked 작업은 유지하고 문서만 커밋합니다. 문서 반영 조건이 맞지 않으면 평가와 보고서를 저장하고 `documentation_pending`으로 기록합니다. 보고서가 이미 저장됐으면 다음 명령으로 문서 반영을 재개합니다.
+
+예측 회수 중 네트워크가 끊기면 `recovery_pending`과 시도 횟수를 저장하고 동일한 동결 결과를 다시 회수합니다. 인증 실패·원문/모델/예측 해시 불일치·서버 검증 오류는 별도 실패로 기록합니다. 회수한 결과의 해시와 두 번 재채점 결과가 일치한 뒤 문서 게시로 넘어갑니다.
 
 ```bash
 python scripts/update_v8_result_docs.py \

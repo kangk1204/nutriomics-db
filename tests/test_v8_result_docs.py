@@ -74,3 +74,20 @@ def test_tampered_report_and_different_cohort_are_rejected(publication):
     with pytest.raises(ValueError,match='cohort and gold'):verified_bundle(report,other)
     (report/'report.md').write_bytes(b'Changed')
     with pytest.raises(ValueError,match='hash mismatch'):verified_bundle(report,baseline)
+
+
+def test_scoped_commit_preserves_unrelated_staged_unstaged_and_untracked_work(publication):
+    root,report,_=publication
+    source=root/'source.py';source.write_text('base\n')
+    git(root,'add','source.py');git(root,'commit','-m','Synthetic source')
+    source.write_text('staged change\n');git(root,'add','source.py')
+    source.write_text('working change\n')
+    untracked=root/'other-work.txt';untracked.write_text('Uncommitted user work')
+    staged=git(root,'diff','--cached','--','source.py')
+    unstaged=git(root,'diff','--','source.py')
+    result=update(report,root=root,branch='feature/test')
+    assert result['pushed'] is False
+    assert git(root,'show','HEAD:source.py')=='base'
+    assert git(root,'diff','--cached','--','source.py')==staged
+    assert git(root,'diff','--','source.py')==unstaged
+    assert source.read_text()=='working change\n' and untracked.read_text()=='Uncommitted user work'

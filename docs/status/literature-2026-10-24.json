@@ -1,12 +1,12 @@
 {
   "as_of": "2026-10-24",
-  "data_observed_at": "2026-10-24T02:01:01.639170+00:00",
-  "v8_observed_at": "2026-10-24T02:01:01.639170+00:00",
+  "data_observed_at": "2026-10-24T02:22:27.481468+00:00",
+  "v8_observed_at": "2026-10-24T02:22:27.481468+00:00",
   "default_engine": "heuristic-v1",
   "collection": {
-    "live_stored_unique_papers": 42622,
-    "live_abstract_papers": 41183,
-    "live_oa_available_papers": 2187,
+    "live_stored_unique_papers": 42967,
+    "live_abstract_papers": 41526,
+    "live_oa_available_papers": 2203,
     "extraction_success_papers": null,
     "extraction_read_status": "deadline_exceeded",
     "last_verified_extraction": {
@@ -98,29 +98,30 @@
     "v8": {
       "stage": "train-id",
       "status": "running",
-      "completed_ner_models": 6,
-      "completed_ner_profiles": 5,
+      "completed_ner_models": 9,
+      "completed_ner_profiles": 7,
       "completed_id_outer_folds": 0,
       "completed_relation_outer_folds": 0,
       "ner_training_manifest_exists": true,
       "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
-      "observed_at": "2026-10-24T02:01:01.639170+00:00"
+      "observed_at": "2026-10-24T02:22:27.481468+00:00",
+      "progress_scope": "NER model and profile counts include nested upstream fits used by ID validation"
     },
     "r2": {
       "stage": "train-relation",
       "completed_outer_folds": 2,
       "evaluation": "pending",
-      "observed_at": "2026-10-24T02:01:01.639170+00:00"
+      "observed_at": "2026-10-24T02:22:27.481468+00:00"
     },
     "native": {
       "stage": "train-drugprot",
       "completed_outer_folds": {
-        "drugprot": 2,
+        "drugprot": 3,
         "cg": 0
       },
       "evaluation": "pending",
-      "observed_at": "2026-10-24T02:01:01.639170+00:00",
-      "completed_neural_model_files": 20
+      "observed_at": "2026-10-24T02:22:27.481468+00:00",
+      "completed_neural_model_files": 21
     }
   },
   "upstream_ner_training": [
