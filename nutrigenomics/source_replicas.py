@@ -298,6 +298,8 @@ def _check(active):
 
 
 def guard():
+    from .sqlite_read_cache import guard as page_cache_guard
+    page_cache_guard()
     if not os.environ.get(ENV):
         if _ACTIVE is not None:
             raise ReplicaUnavailable('An active replica map cannot be silently disabled')

@@ -22,6 +22,26 @@ SECRET = "restricted-assay-payload"
 ATTACK = "</script><script>window.harmlessFixtureMarker=1</script>"
 
 
+def test_strict_food_and_exposure_searches_preserve_legacy_mixed_tab(explorer):
+    client = explorer["client"]
+    with sqlite3.connect(explorer["db"]) as db:
+        for identifier, metadata in [
+            ("Exposure:source-DASH", {"entity_type": "exposure", "original_exposure": {"id": "source-DASH"}}),
+            ("ClinicalStudy:DASH", {"entity_type": "clinical_study"}),
+            ("Exposure:wrong-id", {"entity_type": "exposure", "original_exposure": {"id": "another-source"}}),
+        ]:
+            db.execute("INSERT INTO node SELECT ?,kind,label,label_en,aliases_json,?,domains_json,degree FROM node WHERE id='diet:DASH'",
+                       (identifier, json.dumps(metadata)))
+    legacy = client.get("/api/v1/explorer/entities", params={"kind": "food", "page_size": 200}).json()
+    foods = client.get("/api/v1/explorer/entities", params={"kind": "food_record", "page_size": 200}).json()
+    exposures = client.get("/api/v1/explorer/entities", params={"kind": "exposure", "page_size": 200}).json()
+    assert all(r["kind"] == "food" for r in foods["items"])
+    assert {r["id"] for r in exposures["items"]} == {"Exposure:source-DASH"}
+    assert {r["id"] for r in legacy["items"]} >= {r["id"] for r in foods["items"] + exposures["items"]}
+    assert {"diet:DASH", "ClinicalStudy:DASH", "Exposure:wrong-id"} <= {r["id"] for r in legacy["items"]}
+    assert legacy["total"] > foods["total"] + exposures["total"]
+
+
 def test_cached_candidate_eligibility_keeps_filters_and_invalidates_on_source_change(explorer):
     with sqlite3.connect(explorer["db"]) as db:
         db.execute(

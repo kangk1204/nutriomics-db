@@ -1,0 +1,124 @@
+{
+  "schema": "nutriomics-code-integration-validation-v1",
+  "date_kst": "2026-10-24",
+  "status": "local_code_and_document_validation_passed_ci_separate",
+  "upstream_main": "26fab07b690f1c87fd49e942609326b338b9bd4c",
+  "integrated_core_head": "982c8672b631594f03969c106579063b0c5920cd",
+  "literature_branch_modified": false,
+  "source_data_or_models_uploaded": false,
+  "human_scientific_approvals_created": 0,
+  "final_30_query_accuracy_evaluated": false,
+  "final_serving_performance_evaluated": false,
+  "submission_ready": false,
+  "environment": "Windows 11, Python 3.12.14, existing project virtual environment; fresh hosted CI runs separately",
+  "python": {
+    "command": "python -X utf8 -m pytest -q --junitxml=python-windows.xml",
+    "collected": 1383,
+    "passed": 1378,
+    "skipped": 5,
+    "failed": 0,
+    "seconds": 141.181,
+    "skip_reasons": [
+      {
+        "name": "test_source_hashes_and_specific_ccby_permissions",
+        "reason": "raw OA originals are in the scientific audit package, not required by the code-only distribution"
+      },
+      {
+        "name": "test_table_denominators_and_original_units_are_preserved",
+        "reason": "Optional captured source unavailable"
+      },
+      {
+        "name": "test_actual_snapshots_have_verified_hashes",
+        "reason": "downloaded artifact not present"
+      },
+      {
+        "name": "test_source_change_precedes_cached_response[remove]",
+        "reason": "Windows denies deleting an open immutable SQLite file; actual removal is checked on Linux"
+      },
+      {
+        "name": "test_promote_and_rollback",
+        "reason": "atomic symlink promotion is verified on Linux"
+      }
+    ],
+    "raw_junit_sha256": "c5b882fa4ace5b96e160106abdbfa49286f40eb0acf7006e7811105aa20bd867"
+  },
+  "frontend": {
+    "locked_install_passed": true,
+    "typecheck_and_build_passed": true,
+    "portable_suites_passed": 19,
+    "suites": [
+      "test-api-timeout.mjs",
+      "test-catalog-search.mjs",
+      "test-clinical-presentation.mjs",
+      "test-evidence-conditions.mjs",
+      "test-evidence-summary.mjs",
+      "test-food-identity.mjs",
+      "test-gene-search.mjs",
+      "test-meal-presentation.mjs",
+      "test-network-model.mjs",
+      "test-offline-export-scope.mjs",
+      "test-reading-order.mjs",
+      "test-release-presentation.mjs",
+      "test-render-metrics.mjs",
+      "test-research-presentation.mjs",
+      "test-review-presentation.mjs",
+      "test-scroll-panes.mjs",
+      "test-search-lifecycle.mjs",
+      "test-search-scope.mjs",
+      "test-workbench-inputs.mjs"
+    ],
+    "real_data_suites_not_rerun": [
+      "test-cached-scientific.mjs",
+      "test-production-snapshot.mjs"
+    ],
+    "actual_browser_verified_in_this_run": false,
+    "large_bundle_warning_preserved": true
+  },
+  "documents": {
+    "status": "pass",
+    "scope": "Front-door local document links, count semantics, language links, figure parity and bounded changed-file credential-pattern screen",
+    "links": 113,
+    "broken_links": 0,
+    "figure_parity": [
+      {
+        "format": "png",
+        "identical_to_visually_checked_report_figure": true
+      },
+      {
+        "format": "svg",
+        "identical_to_visually_checked_report_figure": true
+      },
+      {
+        "format": "pdf",
+        "identical_to_visually_checked_report_figure": true
+      }
+    ],
+    "files_screened": 149,
+    "credential_pattern_findings": 0,
+    "scientific_review_created": false,
+    "submission_ready": false
+  },
+  "figure": {
+    "structural_profile": "publication",
+    "formats": [
+      "PNG",
+      "SVG",
+      "PDF"
+    ],
+    "byte_identical_to_visually_checked_report_figure": true,
+    "scientific_claims_approved": false
+  },
+  "ci": {
+    "platforms": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "result": "See commit-specific GitHub Actions results; not replaced by local results"
+  },
+  "source_inventory": {
+    "path": "code-files.sha256.json",
+    "excludes_itself": true,
+    "verification_command": "python scripts/verify_repository_files.py"
+  },
+  "interpretation": "Code/document checks only. Not expert approval, final retrieval accuracy, operational SLOs, a data DOI or submission readiness."
+}

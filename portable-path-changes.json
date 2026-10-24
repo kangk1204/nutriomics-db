@@ -15,9 +15,9 @@
   },
   {
     "file": "scripts/analyze_direct_plus.R",
-    "original_sha256": "204ad4a94bea6d4cc0d41e32d2c127aa6ad1060734ccd5421b53b54d66db3591",
+    "original_sha256": "5b91dfaaf1a01b4c37b8e32d1b294ece3271c43fbe00a2d6387b171fb1f2599b",
     "original_bytes_path": "source_snapshots/default_path_originals/analyze_direct_plus.R",
-    "portable_sha256": "8e936058e6ba1b7074605343341c13b7be5114a71a131643e21a37a1f08ab12f",
+    "portable_sha256": "403ae083c26d4c984a95343e4ae89c477103c22763104e779084ddd70bbe6f4c",
     "change": "default root argument only; exact original producer bytes archived separately"
   },
   {

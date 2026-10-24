@@ -9,15 +9,22 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, FiniteFloat, field_validator
 
+from .clinical_endpoints import study_clinical_summary
+from .composed_release import validate_service_composition
+from .composed_science import record_context, selector_context
 from .composition_policy import POLICY_VERSION, assess, convert_unit, normalize_unit, select_unique
 from .explorer import MatchInput, ReferenceContext, _match, _source, attach_explorer
 from .explorer_build import canonical, sha256
 from .explorer_context import ExplorerContextMiddleware
 from .explorer_performance import read_connection
+from .food_names import annotate as annotate_food_name
+from .food_names import verified_matches as food_name_matches
+from .food_search_aliases import context as search_context
+from .food_search_aliases import search_clause
 from .release_contract import metadata_with_contract
-from .clinical_endpoints import study_clinical_summary
 
 
 class PublicMealItem(BaseModel):
@@ -63,20 +70,25 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     # One immutable inventory supplies file/API aliases. New releases install
     # it at build time; legacy releases compute a read-only startup fallback.
     with read_connection(database) as inventory_db:
+        validate_service_composition(inventory_db, metadata, manifest)
         metadata = metadata_with_contract(inventory_db, metadata)
     if not allow_candidate and metadata.get("submission_ready") is not True:
         raise ValueError("public deployment requires a reviewed, validated, hash-bound release gate")
     app = FastAPI(title="NutriOmics public data", version=metadata["release_id"])
     from .public_files import attach_public_files
-    attach_public_files(app, release, manifest, metadata["release_id"],
-        preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
+    if metadata.get("bulk_download_allowed") is False:
+        @app.get("/api/v1/public/files")
+        def local_files():
+            return {"release_id": metadata["release_id"], "items": [],
+                    "availability": "withheld_for_local_source_rights",
+                    "reason": "연구실 조회용 자료를 포함해 전체 파일 재배포를 제한합니다."}
 
-    @app.middleware("http")
-    async def release_headers(request, call_next):
-        response = await call_next(request)
-        response.headers["X-NutriOmics-Release"] = metadata["release_id"]
-        response.headers["X-NutriOmics-Scope"] = "public"
-        return response
+        @app.get("/api/v1/public/files/{name:path}")
+        def withheld_file(name: str):
+            raise HTTPException(403, {"code": "redistribution_unconfirmed"})
+    else:
+        attach_public_files(app, release, manifest, metadata["release_id"],
+            preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
 
     @contextmanager
     def read():
@@ -85,7 +97,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
 
     @app.get("/healthz")
     def health():
-        return {"status": "ok", "release_id": metadata["release_id"], "scope": "public_only"}
+        return {"status": "ok", "release_id": metadata["release_id"], "scope": "local_research" if metadata.get("scope") == "local_research" else "public_only"}
 
     @app.get("/api/v1/public/meta")
     def meta():
@@ -107,28 +119,51 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     @app.get("/api/v1/foods")
     def foods(query: str = "", limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)):
         with read() as db:
-            rows = db.execute("SELECT * FROM node WHERE kind='food' AND (label LIKE ? OR aliases_json LIKE ? OR id=?) ORDER BY label,id LIMIT ? OFFSET ?", ("%" + query + "%", "%" + query + "%", query, limit, offset)).fetchall()
-            return {"items": [dict(r) for r in rows], "release_id": metadata["release_id"]}
+            mapping = search_context(query)
+            if mapping:
+                clause, args = search_clause(query)
+            else:
+                # Retain this older endpoint's English/wildcard behavior.
+                clause = "(n.label LIKE ? OR n.aliases_json LIKE ? OR n.id=?)"
+                args = ["%" + query + "%", "%" + query + "%", query]
+            matches = food_name_matches(db, query)
+            if matches:
+                clause = "(" + clause + " OR n.id IN (" + ','.join('?' for _ in matches) + "))"
+                args.extend(identifier for identifier, _ in matches)
+            rows = db.execute("SELECT n.* FROM node n WHERE n.kind='food' AND " + clause + " ORDER BY n.label,n.id LIMIT ? OFFSET ?", [*args, limit, offset]).fetchall()
+            return {"items": [annotate_food_name(dict(r)) for r in rows], "release_id": metadata["release_id"],
+                    **({"search_context": mapping} if mapping else {})}
 
     @app.get("/api/v1/interventions")
     def interventions():
         with read() as db:
-            return {"items": [json.loads(r[0]) for r in db.execute("SELECT metadata_json FROM science_record WHERE kind='exposure' ORDER BY id")], "release_id": metadata["release_id"]}
+            values = [(r[0], json.loads(r[1])) for r in db.execute("SELECT id,metadata_json FROM science_record WHERE kind='exposure' ORDER BY id")]
+            return {"items": [{**r, **({"science_review_context": context} if (context := record_context(db, "exposure", identifier, r)) else {})} for identifier, r in values], "release_id": metadata["release_id"]}
 
     @app.get("/api/v1/studies")
     def studies():
         with read() as db:
-            return {"items": [json.loads(r[0]) for r in db.execute("SELECT metadata_json FROM science_record WHERE kind='study' ORDER BY id")], "release_id": metadata["release_id"]}
+            values = [(r[0], json.loads(r[1])) for r in db.execute("SELECT id,metadata_json FROM science_record WHERE kind='study' ORDER BY id")]
+            return {"items": [{**r, **({"science_review_context": context} if (context := record_context(db, "study", identifier, r)) else {})} for identifier, r in values], "release_id": metadata["release_id"]}
 
     @app.get("/api/v1/studies/{identifier}")
     def study(identifier: str):
         with read() as db:
-            records = [(r["kind"], json.loads(r["metadata_json"])) for r in db.execute("SELECT * FROM science_record")]
-            root = next((r for k, r in records if k == "study" and (r["id"] == identifier or identifier in r.get("metadata", {}).get("series", []))), None)
-            if root is None:
+            records = [(r["id"], r["kind"], json.loads(r["metadata_json"])) for r in db.execute("SELECT * FROM science_record")]
+            root_entry = next(((record_id, record) for record_id, kind, record in records if kind == "study" and (str(record_id) == identifier or identifier in record.get("metadata", {}).get("series", []))), None)
+            if root_entry is None:
                 raise HTTPException(404, "study not in this public release")
-            return {"study": root, "records": [{"kind": k, "record": r} for k, r in records if r.get("study_id") == root["id"]],
-                    **study_clinical_summary(db, root["id"]), "release_id": metadata["release_id"]}
+            root_id, root = root_entry
+            context = record_context(db, "study", root_id, root)
+            related = []
+            for record_id, kind, record in records:
+                if record.get("study_id") == root_id:
+                    own = record_context(db, kind, record_id, record)
+                    related.append({"kind": kind, "record": record,
+                                    **({"science_review_context": own} if own else {})})
+            return {"study": root, "records": related,
+                    **study_clinical_summary(db, root_id), "release_id": metadata["release_id"],
+                    **({"science_review_context": context} if context else {})}
 
     @app.get("/api/v1/evidence")
     def evidence(accession: str, contrast: str, analysis_version: str,
@@ -160,10 +195,12 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
             if db.execute("SELECT 1 FROM sqlite_master WHERE name='contrast_selector'").fetchone():
                 context = db.execute("SELECT * FROM contrast_selector WHERE series_accession=? AND contrast=? AND analysis_version=?",
                                      (accession, contrast, analysis_version)).fetchone()
+            review = selector_context(db, accession, contrast, analysis_version)
             return {"items": page, "total_selector": total, "effects_status": "available" if total is not None else "not_in_public_release", "next_cursor": base64.urlsafe_b64encode(canonical([scope, page[-1]["feature_type"], page[-1]["feature_id"]]).encode()).decode() if more else None,
                     "analysis_context": dict(context) if context else None,
                     "availability_reason": "public_quantitative_results" if total is not None else "not_reported_or_withheld_in_this_release",
-                    "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]}
+                    "release_id": metadata["release_id"], "expert_review": metadata["expert_review"],
+                    **({"science_review_context": review} if review else {})}
 
     @app.post("/api/v1/meals/analyze")
     def meal(payload: PublicMeal):
@@ -249,7 +286,10 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
         gaps = list(dict.fromkeys(g for m in matches for g in m["evidence_gaps"]))
         if excluded:
             gaps.append("함량·단위·상태·가식부 기준이 미확인인 조성은 섭취량 합계에서 제외했습니다.")
-        return {"items": selected, "components": components, "provenance": provenance,
+        # This payload is constructed exclusively from validated JSON primitives.
+        # Rendering it directly retains Starlette's normal JSON representation
+        # without FastAPI recursively copying repeated scientific context again.
+        return JSONResponse({"items": selected, "components": components, "provenance": provenance,
                 "status": "partial" if components and excluded else "measured" if components else "unavailable",
                 "unquantified": [{**row, "exclusion_reasons": row["reasons"]} for row in excluded],
                 "interpretation": "함량 기준이 확인된 성분의 섭취량 계산입니다. 개인 반응 또는 건강 효과 예측이 아닙니다.",
@@ -258,14 +298,25 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
                 "reference_context": (payload.reference_context or ReferenceContext()).model_dump(exclude_none=True),
                 "excluded_measurements": excluded, "individual_prediction": False,
                 "composition_policy_version": POLICY_VERSION,
-                "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]}
+                "release_id": metadata["release_id"], "expert_review": metadata["expert_review"]})
 
     attach_explorer(app, public=True)
+
+    # Wrap the Explorer budget/source guard too: its diagnostic 503 responses
+    # must identify the requested release just like normal endpoint responses.
+    @app.middleware("http")
+    async def release_headers(request, call_next):
+        response = await call_next(request)
+        response.headers["X-NutriOmics-Release"] = metadata["release_id"]
+        response.headers["X-NutriOmics-Scope"] = "local_research" if metadata.get("scope") == "local_research" else "public"
+        return response
+
     # Outermost context is inherited by endpoint worker threads and all Explorer routes.
     app.add_middleware(ExplorerContextMiddleware, paths={
         "NUTRIGENOMICS_EXPLORER_DATABASE": database,
         "NUTRIGENOMICS_EXPLORER_CORE_DATABASE": database,
         "NUTRIGENOMICS_EXPLORER_RIGHTS": release / "rights-policy.json",
+        "NUTRIGENOMICS_GENE_NAMES_FILE": Path(os.environ.get("NUTRIGENOMICS_GENE_NAMES_FILE", release / "gene-names-unconfigured.sqlite3")),
     })
     return app
 

@@ -1,0 +1,765 @@
+{
+  "schema": "nutriomics-public-code-serving-parity-v1",
+  "candidate_status": "pending_scientific_review_not_submission_ready",
+  "expert_approved_records": 0,
+  "candidate_archive": {
+    "filename": "nutriomics-code-review.zip",
+    "sha256": "67bf27a3972920d2d6638640eabc8e2f341446a53e02ca5c4b90a24306919a36",
+    "source_files": 518,
+    "source_manifest_sha256": "56bf86966d8a46175750eaa27c60df7d5d4c488d6b103849cbc0ad93bdf22cc8"
+  },
+  "serving_reader_archive": {
+    "filename": "reader-v4-source.zip",
+    "sha256": "3ae67490265f31dd30df84fff89fb223bf4de64726c7f164fda512cd86ac8490",
+    "source_files": 281
+  },
+  "comparison": {
+    "core_definition": "Every nutrigenomics/*.py member in the frozen serving-reader archive; byte identity only, not a claim that every module was loaded or every behavior tested.",
+    "core_modules_checked": 63,
+    "core_modules_equal": 63,
+    "core_modules": [
+      {
+        "path": "nutrigenomics/__init__.py",
+        "reader_sha256": "e28a68e5478d67e1461994c150688175a8679149d620a0276234a9aa5866f069",
+        "candidate_sha256": "e28a68e5478d67e1461994c150688175a8679149d620a0276234a9aa5866f069",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/analysis_downloads.py",
+        "reader_sha256": "f7173f65aa8bf09e10824762afd418caa2fab90dbfb60c93409d1d5a63ededb8",
+        "candidate_sha256": "f7173f65aa8bf09e10824762afd418caa2fab90dbfb60c93409d1d5a63ededb8",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/annotations.py",
+        "reader_sha256": "0666085149ffa20b78967baaefdc84b63ad34782508b06ddebc57bd4430c7e06",
+        "candidate_sha256": "0666085149ffa20b78967baaefdc84b63ad34782508b06ddebc57bd4430c7e06",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/api.py",
+        "reader_sha256": "97df7d713eaddcaadc1716d8ea313130ddd1b30bf5639b94dba912a2a26a2753",
+        "candidate_sha256": "97df7d713eaddcaadc1716d8ea313130ddd1b30bf5639b94dba912a2a26a2753",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/bridge.py",
+        "reader_sha256": "5f1524144b5191d4fd951713ff3bf80000d25158cc801554e8f6b6cc34092657",
+        "candidate_sha256": "5f1524144b5191d4fd951713ff3bf80000d25158cc801554e8f6b6cc34092657",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/bridge_models.py",
+        "reader_sha256": "e676ab3a25178516c73cd03167eb3bbfd8c6bbfb98246ce0b1df9d28f7a9ad9a",
+        "candidate_sha256": "e676ab3a25178516c73cd03167eb3bbfd8c6bbfb98246ce0b1df9d28f7a9ad9a",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/candidate_layers.py",
+        "reader_sha256": "2dce4651a10f8f84f334a535ab757fbbbb6b7823db3f7b99cc705b66b97282ac",
+        "candidate_sha256": "2dce4651a10f8f84f334a535ab757fbbbb6b7823db3f7b99cc705b66b97282ac",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/candidate_rules/__init__.py",
+        "reader_sha256": "586db9565fd4e251cafd0dcf44488073c5099f9675a3f01c795333b143990ee4",
+        "candidate_sha256": "586db9565fd4e251cafd0dcf44488073c5099f9675a3f01c795333b143990ee4",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/candidate_rules/dictionaries.py",
+        "reader_sha256": "02213838def395768892344f9d8a0174d6449cdee678c03aeb502e82c5d098eb",
+        "candidate_sha256": "02213838def395768892344f9d8a0174d6449cdee678c03aeb502e82c5d098eb",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/candidate_rules/extraction.py",
+        "reader_sha256": "4c1f71f1f26d6a9df3760797d0110e82fe9fd6605b4a879f1d4ee75789bb79e8",
+        "candidate_sha256": "4c1f71f1f26d6a9df3760797d0110e82fe9fd6605b4a879f1d4ee75789bb79e8",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/candidate_rules/text.py",
+        "reader_sha256": "b2cc517751d89323bb8dd0d1598ce9bf167ff85b86341e679c38a076feebdcc7",
+        "candidate_sha256": "b2cc517751d89323bb8dd0d1598ce9bf167ff85b86341e679c38a076feebdcc7",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/clinical_api.py",
+        "reader_sha256": "10bd1af0e779192acda55a83a30554e96c80fba843aeccd81b46a37c17018aef",
+        "candidate_sha256": "10bd1af0e779192acda55a83a30554e96c80fba843aeccd81b46a37c17018aef",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/clinical_endpoints.py",
+        "reader_sha256": "52a04e89c10a56e90e467ce92577c200b8571ebfa66e12ac98c0757ad4d11c40",
+        "candidate_sha256": "52a04e89c10a56e90e467ce92577c200b8571ebfa66e12ac98c0757ad4d11c40",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/composed_release.py",
+        "reader_sha256": "cfe0e60060beb8bd5f9144dd9c4d566e237babb0348e6a9efcb8a9a7272965ca",
+        "candidate_sha256": "cfe0e60060beb8bd5f9144dd9c4d566e237babb0348e6a9efcb8a9a7272965ca",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/composed_science.py",
+        "reader_sha256": "b1c829d6990d1a87d37037bdb5d008e4c22c3782788e7d29c19ebdc65d2a5375",
+        "candidate_sha256": "b1c829d6990d1a87d37037bdb5d008e4c22c3782788e7d29c19ebdc65d2a5375",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/composition.py",
+        "reader_sha256": "cfbd50e63b373a739c029aa7b823a232fcb2e05bc102220d4693a5f8afb830a9",
+        "candidate_sha256": "cfbd50e63b373a739c029aa7b823a232fcb2e05bc102220d4693a5f8afb830a9",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/composition_policy.py",
+        "reader_sha256": "6b6949ad327aa9d6aa4976efa056dfd75c968e1f7d8eee0efc1607953e561317",
+        "candidate_sha256": "6b6949ad327aa9d6aa4976efa056dfd75c968e1f7d8eee0efc1607953e561317",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/context_joins.py",
+        "reader_sha256": "852614e0451ba7c9b2f62328b701d6b0ce0527e9a818064547094dcd4c3762af",
+        "candidate_sha256": "852614e0451ba7c9b2f62328b701d6b0ce0527e9a818064547094dcd4c3762af",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/db.py",
+        "reader_sha256": "414175965d98aa56f498220588f151c16614d2e457808a2c2fc1794cb382077f",
+        "candidate_sha256": "414175965d98aa56f498220588f151c16614d2e457808a2c2fc1794cb382077f",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/download_budget.py",
+        "reader_sha256": "2d149ff1feea26f53691682329b009127816f2c36504f95bbc80cf5ea3fa2d0b",
+        "candidate_sha256": "2d149ff1feea26f53691682329b009127816f2c36504f95bbc80cf5ea3fa2d0b",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/effect_batch.py",
+        "reader_sha256": "f35f71179521b631ae770836a9eb8bc9bedf4bc89701802f005b57bc65a3e48c",
+        "candidate_sha256": "f35f71179521b631ae770836a9eb8bc9bedf4bc89701802f005b57bc65a3e48c",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/evidence_paging.py",
+        "reader_sha256": "f6e111a376ac665ff5dc564ca66f6869a9993763a4c9b14d4546102e7fb25bf3",
+        "candidate_sha256": "f6e111a376ac665ff5dc564ca66f6869a9993763a4c9b14d4546102e7fb25bf3",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/evidence_query.py",
+        "reader_sha256": "db97e0765ec7216657d61de4c62d517b56edad936dabc580d5a88656512b7b68",
+        "candidate_sha256": "db97e0765ec7216657d61de4c62d517b56edad936dabc580d5a88656512b7b68",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/expansion.py",
+        "reader_sha256": "d3f294b80299849b76058f616d43686e77bbc991f0d2836850afc64f1a4694ef",
+        "candidate_sha256": "d3f294b80299849b76058f616d43686e77bbc991f0d2836850afc64f1a4694ef",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer.py",
+        "reader_sha256": "5da893e2c28bd5c843f05f13801a9847455abf6fe53b2c7db3d6a1011266cdf8",
+        "candidate_sha256": "5da893e2c28bd5c843f05f13801a9847455abf6fe53b2c7db3d6a1011266cdf8",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_build.py",
+        "reader_sha256": "a8745f8c8d0c7c1c016b1b3a9eb17a9d0972137dc5a11c3b6c6c36e96806cc04",
+        "candidate_sha256": "a8745f8c8d0c7c1c016b1b3a9eb17a9d0972137dc5a11c3b6c6c36e96806cc04",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_context.py",
+        "reader_sha256": "53c2564fa87b20066c403de8a0b62da7f2b1eedbd758bd7a99adfd61079ab1a4",
+        "candidate_sha256": "53c2564fa87b20066c403de8a0b62da7f2b1eedbd758bd7a99adfd61079ab1a4",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_graph_reads.py",
+        "reader_sha256": "1c8740f4b4e207ea1d9735505eb12b9a7ac9d3e65f506fb199750f190004dafd",
+        "candidate_sha256": "1c8740f4b4e207ea1d9735505eb12b9a7ac9d3e65f506fb199750f190004dafd",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_performance.py",
+        "reader_sha256": "6ece53c6ea06154665f8cf86e339b13673d734170d93160ffb9c0b456f7cd7b0",
+        "candidate_sha256": "6ece53c6ea06154665f8cf86e339b13673d734170d93160ffb9c0b456f7cd7b0",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_performance_build.py",
+        "reader_sha256": "61f727666f28e946a96d7a1577aaa43d29d4b1b8546830d41e1902cf19b6ddbb",
+        "candidate_sha256": "61f727666f28e946a96d7a1577aaa43d29d4b1b8546830d41e1902cf19b6ddbb",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_scientific.py",
+        "reader_sha256": "7e7d641075ad250ebb31a5417c2fcd13c78af62014224f19bf8867197c1d387a",
+        "candidate_sha256": "7e7d641075ad250ebb31a5417c2fcd13c78af62014224f19bf8867197c1d387a",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_scientific_build.py",
+        "reader_sha256": "4a346bb6596ef371a9da680369736e29c44ff38a7165f30e6862e5f3a2e053f9",
+        "candidate_sha256": "4a346bb6596ef371a9da680369736e29c44ff38a7165f30e6862e5f3a2e053f9",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/explorer_workbench.py",
+        "reader_sha256": "b7cf46d5dbb933ad7a427ce3582bd1be567810b5b383516c362e5fc0bd950f14",
+        "candidate_sha256": "b7cf46d5dbb933ad7a427ce3582bd1be567810b5b383516c362e5fc0bd950f14",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/food_semantic_precheck.py",
+        "reader_sha256": "c19ab8571a514dea9e3599f4ce59741a789639ac6461552a2a1b1c7b5dfe0875",
+        "candidate_sha256": "c19ab8571a514dea9e3599f4ce59741a789639ac6461552a2a1b1c7b5dfe0875",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/foodb.py",
+        "reader_sha256": "47f20edd49faa37790cf730771c2263d0868bbef8e2f9a1c658ab078646d3686",
+        "candidate_sha256": "47f20edd49faa37790cf730771c2263d0868bbef8e2f9a1c658ab078646d3686",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/ingest.py",
+        "reader_sha256": "b11e184ed9f60f56f16fdf4f0c560d1fe530ccfae7c8a920f7f765d22de1bad9",
+        "candidate_sha256": "b11e184ed9f60f56f16fdf4f0c560d1fe530ccfae7c8a920f7f765d22de1bad9",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/kfind.py",
+        "reader_sha256": "1f38552c904cee816de3d7efa6657391578f215ca29558bca2b7380f542ca88f",
+        "candidate_sha256": "1f38552c904cee816de3d7efa6657391578f215ca29558bca2b7380f542ca88f",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/metabolomics.py",
+        "reader_sha256": "8719d01a5b57a0cd4fff7ee8f115853aa77bbe95995e72b43d3bf3f9cbf4a70c",
+        "candidate_sha256": "8719d01a5b57a0cd4fff7ee8f115853aa77bbe95995e72b43d3bf3f9cbf4a70c",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/models.py",
+        "reader_sha256": "d0bb35e77ac0e29901fe59942d559e314f5b7f3be17702c1890d07cbe4ac7f32",
+        "candidate_sha256": "d0bb35e77ac0e29901fe59942d559e314f5b7f3be17702c1890d07cbe4ac7f32",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/personal_impact.py",
+        "reader_sha256": "67c4dbcebfcd934a2d8a3f894cd1aeda904f6d651d549ebcc8f179b578baeaac",
+        "candidate_sha256": "67c4dbcebfcd934a2d8a3f894cd1aeda904f6d651d549ebcc8f179b578baeaac",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/platform_mapping.py",
+        "reader_sha256": "4ce872f1007509da215c1bf427825b10bca396e9756e31bee953f54995ca0f00",
+        "candidate_sha256": "4ce872f1007509da215c1bf427825b10bca396e9756e31bee953f54995ca0f00",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/preview_startup.py",
+        "reader_sha256": "18f98c2b733c1dd9e62834c2511421697c5cb964fb49e7e2c6d28cdf7dd7ae0d",
+        "candidate_sha256": "18f98c2b733c1dd9e62834c2511421697c5cb964fb49e7e2c6d28cdf7dd7ae0d",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/primary_tables.py",
+        "reader_sha256": "aa46189a9bc351e5f3183e9dcaa3712fe2b46a6369797b304f742de3714eca86",
+        "candidate_sha256": "aa46189a9bc351e5f3183e9dcaa3712fe2b46a6369797b304f742de3714eca86",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/public_files.py",
+        "reader_sha256": "848532511fb2b3ff6df336605747f7179fa20598c747df4dff353e337dcfe86a",
+        "candidate_sha256": "848532511fb2b3ff6df336605747f7179fa20598c747df4dff353e337dcfe86a",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/public_omics_index.py",
+        "reader_sha256": "188c57101192c2929127c27ffa97e7dbeb733254e28c9a889342060412ed84e1",
+        "candidate_sha256": "188c57101192c2929127c27ffa97e7dbeb733254e28c9a889342060412ed84e1",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/public_quality.py",
+        "reader_sha256": "8b46af0ab2883cd76bad278a07ee02a0dccffd5afac3e8dbb58fc4454232d78a",
+        "candidate_sha256": "8b46af0ab2883cd76bad278a07ee02a0dccffd5afac3e8dbb58fc4454232d78a",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/public_service.py",
+        "reader_sha256": "181cdf5dc1e2aa60c1a02f1d75ea840f7d59edb5f7c4d663f4d6a9f61364053d",
+        "candidate_sha256": "181cdf5dc1e2aa60c1a02f1d75ea840f7d59edb5f7c4d663f4d6a9f61364053d",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/publication.py",
+        "reader_sha256": "0f73fae2b1d70af78da8df08db5ed35f539642a99e1defcde3fc151408646e9a",
+        "candidate_sha256": "0f73fae2b1d70af78da8df08db5ed35f539642a99e1defcde3fc151408646e9a",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/release_contract.py",
+        "reader_sha256": "81ad5c4be6f9d84f3664dacd6d0f39f04830eeb949bf8a100cf37b950af2377c",
+        "candidate_sha256": "81ad5c4be6f9d84f3664dacd6d0f39f04830eeb949bf8a100cf37b950af2377c",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/release_rights.py",
+        "reader_sha256": "5848280d3e943072c5698e65bc0fa1bcea16c855ec8bcf892687708c522c7ec1",
+        "candidate_sha256": "5848280d3e943072c5698e65bc0fa1bcea16c855ec8bcf892687708c522c7ec1",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/reporting_review.py",
+        "reader_sha256": "8f3bdc319fdc3588696a6b1afa408564057572058d19d665fcd0d3187ee22aba",
+        "candidate_sha256": "8f3bdc319fdc3588696a6b1afa408564057572058d19d665fcd0d3187ee22aba",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/repository_bridge.py",
+        "reader_sha256": "f3f169c8f02c2ce5923ece0897400a7431db3999c3b8879b5db2d0025af89532",
+        "candidate_sha256": "f3f169c8f02c2ce5923ece0897400a7431db3999c3b8879b5db2d0025af89532",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/retrieval_input_diagnostics.py",
+        "reader_sha256": "012f1bf8047aee95e96fbcf4d5e168f9c87fdda01c3982e3457cc34baf9472e3",
+        "candidate_sha256": "012f1bf8047aee95e96fbcf4d5e168f9c87fdda01c3982e3457cc34baf9472e3",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/retrieval_review.py",
+        "reader_sha256": "61766c674cce089bcb79913d4e17efae7c6638e75f1c67347c88cd9896e29507",
+        "candidate_sha256": "61766c674cce089bcb79913d4e17efae7c6638e75f1c67347c88cd9896e29507",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/schemas.py",
+        "reader_sha256": "e3f413031fcd7d4d062d8fdc776ad8203e9d72ffa6ca5eb43a278cdca8dc28b6",
+        "candidate_sha256": "e3f413031fcd7d4d062d8fdc776ad8203e9d72ffa6ca5eb43a278cdca8dc28b6",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/scientific_precheck.py",
+        "reader_sha256": "f4a2c8e35bf1aa02cc0efc528271e1d6bf4f2f3f113c9d25d656a7207d743575",
+        "candidate_sha256": "f4a2c8e35bf1aa02cc0efc528271e1d6bf4f2f3f113c9d25d656a7207d743575",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/settings.py",
+        "reader_sha256": "48ceec1299c912afd723dbd54f8128fdde5c8c3a9141ed562f04251ef3fcfd6e",
+        "candidate_sha256": "48ceec1299c912afd723dbd54f8128fdde5c8c3a9141ed562f04251ef3fcfd6e",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/source_replicas.py",
+        "reader_sha256": "1e1cae15d0dcf3f1d7fea97e7ecaf4e521cc469691cb69e78278b0a9b06ea217",
+        "candidate_sha256": "1e1cae15d0dcf3f1d7fea97e7ecaf4e521cc469691cb69e78278b0a9b06ea217",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/source_updates.py",
+        "reader_sha256": "376471b98c41ed844cff1b4b8240df9196dc83e2d2883a752762434014dbb1d2",
+        "candidate_sha256": "376471b98c41ed844cff1b4b8240df9196dc83e2d2883a752762434014dbb1d2",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/submission_package.py",
+        "reader_sha256": "4caf1bb83c21e4d42a95aab4cad2bd2f80fee761f1ac141dea805901e92cac2d",
+        "candidate_sha256": "4caf1bb83c21e4d42a95aab4cad2bd2f80fee761f1ac141dea805901e92cac2d",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/submission_upgrade.py",
+        "reader_sha256": "997dd7bbcd466cfb76583e8a179df66e99e32ce633d7986e16898918a56bdd16",
+        "candidate_sha256": "997dd7bbcd466cfb76583e8a179df66e99e32ce633d7986e16898918a56bdd16",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/validation_receipts.py",
+        "reader_sha256": "3aa0d521948736463e7993cc9488f0ae0bfdb86ca5da1ef6971d093087eb3cea",
+        "candidate_sha256": "3aa0d521948736463e7993cc9488f0ae0bfdb86ca5da1ef6971d093087eb3cea",
+        "byte_equal": true
+      },
+      {
+        "path": "nutrigenomics/workbench_build.py",
+        "reader_sha256": "aca5b42fd40e1be3d739091a51f2a07376ddb041ce2e7ceb78022b17fff371d7",
+        "candidate_sha256": "aca5b42fd40e1be3d739091a51f2a07376ddb041ce2e7ceb78022b17fff371d7",
+        "byte_equal": true
+      }
+    ],
+    "all_shared_files": 253,
+    "all_shared_equal": 245,
+    "shared_different": [
+      {
+        "path": "config/explorer_evidence_curations.json",
+        "reader_sha256": "f08c5c4ed202477162557c3e867bdd9e7cd6c651782fc1faf6ea7764da8337fa",
+        "candidate_sha256": "62551aa0963158ec31c2c6a587e7cfd47bd1b5cdb17a7ae64c9a00e7f3fbc812"
+      },
+      {
+        "path": "config/explorer_scope.json",
+        "reader_sha256": "36a50c00edd620a8c518958e0c68caa317f4a625f9c38245f378e424e05bd38f",
+        "candidate_sha256": "f7ff6a08c548f82aa8baefbb181a52db77220440d9c3726ca0aec15c6274e488"
+      },
+      {
+        "path": "config/foodb_food_crosswalk.template.json",
+        "reader_sha256": "55ca19d8fd96d59a84f028a52b6198394e5eb5d633c5f5e876fc32071b8a05e4",
+        "candidate_sha256": "3e36faa657c9b33cb9763c9945b9ff70da2181e56a3b7a4417cde054e655bea4"
+      },
+      {
+        "path": "config/kfind_food_selection.json",
+        "reader_sha256": "e2b80fec5674a1c181633832b9b48484c1dada15cfe0c511a2c413ff88b6dfb4",
+        "candidate_sha256": "2bd73027e536262d9e0da50f834b617f16e4520c4f76f65c025732c340827c9d"
+      },
+      {
+        "path": "config/literature_candidate_entities.json",
+        "reader_sha256": "6c60b64ef8cf142f22f898a48dab967de89acd741f3bef0fb57bbfe0e2089778",
+        "candidate_sha256": "819145d034ec5f5b056a94abbbe02e63722e38a975bb6a492e2c3eb597ba2055"
+      },
+      {
+        "path": "config/study_groups.json",
+        "reader_sha256": "c38698aee38c4c239e2e43e0061b7bb15b20b89afeaefe5799a17fdc028f2ec1",
+        "candidate_sha256": "65192da60fa5eb3249c97b43c5a985f622528705a0d66f8abdc284bc1e229bc3"
+      },
+      {
+        "path": "config/update_sources.json",
+        "reader_sha256": "c9762eeb3817d9cf7dd07c1f358a0cedb549b4acafa438166095309fb47c4f93",
+        "candidate_sha256": "40a37ec4037c359fa2a973b7e2582f41e289c5c2033cd64941f41b86fbe08b93"
+      },
+      {
+        "path": "scripts/package_workbench_code.py",
+        "reader_sha256": "6f15b2cbd315bacf8e32cb2786843aac5493ac520516d3d962672d82df1d285f",
+        "candidate_sha256": "b39f981930c01c77cc83dd5b3106633f1e23562dad24dea59b7420adb68f4f9b"
+      }
+    ],
+    "reader_only_paths": [
+      "config/public_expansion_plan.json",
+      "scripts/audit_secondary_producer_output.py",
+      "scripts/deploy_explorer_performance.py",
+      "scripts/deploy_explorer_server.py",
+      "scripts/deploy_source_patch.py",
+      "scripts/download_workbench_publication.py",
+      "scripts/extend_omics_release.py",
+      "scripts/finalize_release_checks.py",
+      "scripts/finalize_workbench_release.py",
+      "scripts/inspect_staging_runtime.py",
+      "scripts/inspect_workbench_progress.py",
+      "scripts/launch_final_workbench.py",
+      "scripts/promote_bridge_release.py",
+      "scripts/promote_memory_clone.py",
+      "scripts/publication_stage_job.py",
+      "scripts/recover_tailscale_snapshot.py",
+      "scripts/restart_workbench_pipeline.py",
+      "scripts/resume_owned_workbench.py",
+      "scripts/run_bridge_release_completion.py",
+      "scripts/run_workbench_pipeline.py",
+      "scripts/smoke_test_remote.py",
+      "scripts/stage_workbench_server.py",
+      "scripts/start_verified_workbench_staging.py",
+      "scripts/stop_explorer_staging.py",
+      "scripts/tailscale_explorer_tunnel.py",
+      "scripts/tailscale_project.py",
+      "scripts/verify_explorer_server_state.py",
+      "scripts/write_workbench_publication_index.py"
+    ],
+    "candidate_only_paths": [
+      ".gitattributes",
+      ".github/workflows/public-code.yml",
+      ".gitignore",
+      "CITATION.cff",
+      "LICENSE",
+      "LICENSE-DATA.md",
+      "LICENSE-NOTICE.md",
+      "README.md",
+      "config/rebuild-runtime-linux-64-20261017.lock.txt",
+      "deploy/public/Caddyfile.example",
+      "deploy/public/Dockerfile",
+      "deploy/public/compose.yaml",
+      "docs/ANALYSIS_INPUT_AUDIT_20261019.md",
+      "docs/CLINICAL_ENDPOINT_SOURCE_AUDIT_20261019.md",
+      "docs/COMPOSED_PUBLIC_RELEASE_ko.md",
+      "docs/EXPLORER_PERFORMANCE_ko.md",
+      "docs/EXPRESSION_ARCHIVE_REPLAY_ko.md",
+      "docs/FINAL_UPGRADE_20261022_ko.md",
+      "docs/FINAL_UPGRADE_REPORTING_ko.md",
+      "docs/MDPI_DATA_SUBMISSION_PREPARATION_ko.md",
+      "docs/PUBLICATION_RUNBOOK_ko.md",
+      "docs/PUBLIC_DATA_DICTIONARY.md",
+      "docs/PUBLIC_README.md",
+      "docs/WORKBENCH_CANDIDATE_LAYERS_ko.md",
+      "docs/WORKBENCH_DATA_DICTIONARY.md",
+      "docs/WORKBENCH_NETWORK_ko.md",
+      "docs/WORKBENCH_PUBLIC_OMICS_INDEX.md",
+      "docs/WORKBENCH_PUBLIC_REBUILD_ko.md",
+      "docs/WORKBENCH_SOURCE_RAM_REPLICAS_ko.md",
+      "docs/WORKBENCH_STUDIO_UPGRADE_20261009_ko.md",
+      "docs/WORKBENCH_SUBMISSION_REVIEW_ko.md",
+      "docs/WORKBENCH_UPDATE_ko.md",
+      "environment-python-windows.lock.txt",
+      "environment-r.yml",
+      "excluded-tests.json",
+      "frontend/explorer/README.md",
+      "frontend/explorer/index.html",
+      "frontend/explorer/package.json",
+      "frontend/explorer/pnpm-lock.yaml",
+      "frontend/explorer/pnpm-workspace.yaml",
+      "frontend/explorer/scripts/build-offline.mjs",
+      "frontend/explorer/scripts/fixtures/research-classification-shapes.json",
+      "frontend/explorer/scripts/run-portable-tests.mjs",
+      "frontend/explorer/scripts/smoke-offline.mjs",
+      "frontend/explorer/scripts/test-api-timeout.mjs",
+      "frontend/explorer/scripts/test-cached-scientific.mjs",
+      "frontend/explorer/scripts/test-catalog-search.mjs",
+      "frontend/explorer/scripts/test-clinical-presentation.mjs",
+      "frontend/explorer/scripts/test-evidence-conditions.mjs",
+      "frontend/explorer/scripts/test-evidence-summary.mjs",
+      "frontend/explorer/scripts/test-food-identity.mjs",
+      "frontend/explorer/scripts/test-meal-presentation.mjs",
+      "frontend/explorer/scripts/test-network-model.mjs",
+      "frontend/explorer/scripts/test-production-snapshot.mjs",
+      "frontend/explorer/scripts/test-reading-order.mjs",
+      "frontend/explorer/scripts/test-release-presentation.mjs",
+      "frontend/explorer/scripts/test-render-metrics.mjs",
+      "frontend/explorer/scripts/test-research-presentation.mjs",
+      "frontend/explorer/scripts/test-review-presentation.mjs",
+      "frontend/explorer/scripts/test-search-scope.mjs",
+      "frontend/explorer/scripts/test-workbench-inputs.mjs",
+      "frontend/explorer/src/App.tsx",
+      "frontend/explorer/src/ClinicalEndpoints.tsx",
+      "frontend/explorer/src/GraphView.tsx",
+      "frontend/explorer/src/LazyDetails.tsx",
+      "frontend/explorer/src/NetworkDetails.tsx",
+      "frontend/explorer/src/ReleaseInventory.tsx",
+      "frontend/explorer/src/ScientificEvidence.tsx",
+      "frontend/explorer/src/Workbench.tsx",
+      "frontend/explorer/src/WorkbenchSurface.tsx",
+      "frontend/explorer/src/api.ts",
+      "frontend/explorer/src/catalogSearch.ts",
+      "frontend/explorer/src/clinicalPresentation.ts",
+      "frontend/explorer/src/evidenceConditions.ts",
+      "frontend/explorer/src/evidenceSummary.ts",
+      "frontend/explorer/src/foodIdentity.ts",
+      "frontend/explorer/src/graphFocus.ts",
+      "frontend/explorer/src/main.tsx",
+      "frontend/explorer/src/mealPresentation.ts",
+      "frontend/explorer/src/network.css",
+      "frontend/explorer/src/networkModel.ts",
+      "frontend/explorer/src/releasePresentation.ts",
+      "frontend/explorer/src/renderMetrics.ts",
+      "frontend/explorer/src/researchPresentation.ts",
+      "frontend/explorer/src/reviewPresentation.ts",
+      "frontend/explorer/src/searchScope.ts",
+      "frontend/explorer/src/studio.css",
+      "frontend/explorer/src/styles.css",
+      "frontend/explorer/src/types.ts",
+      "frontend/explorer/src/vendor.d.ts",
+      "frontend/explorer/src/workbench.css",
+      "frontend/explorer/tsconfig.json",
+      "frontend/explorer/vite.config.ts",
+      "portable-path-changes.json",
+      "pyproject.toml",
+      "scripts/adjust_gse98645_study_family.R",
+      "scripts/analyze_blood_composition_closed_sensitivity.R",
+      "scripts/analyze_blood_composition_sensitivity.R",
+      "scripts/analyze_direct_plus.R",
+      "scripts/analyze_direct_plus_blood_sensitivity.R",
+      "scripts/analyze_dmrcate_sensitivity.R",
+      "scripts/analyze_gse127530.R",
+      "scripts/analyze_gse13466.R",
+      "scripts/analyze_gse27385.R",
+      "scripts/analyze_gse54325.R",
+      "scripts/analyze_gse54643_methylation.R",
+      "scripts/analyze_gse56960.R",
+      "scripts/analyze_gse98645.R",
+      "scripts/analyze_methylation_geo.R",
+      "scripts/analyze_methylation_pathways.R",
+      "scripts/analyze_methylation_qc_sensitivity.R",
+      "scripts/analyze_methylation_regions.R",
+      "scripts/bridge_omics_helpers.R",
+      "scripts/check_preprocess_core.R",
+      "scripts/check_r_syntax.R",
+      "scripts/direct_plus_helpers.R",
+      "scripts/expression_archive_helpers.R",
+      "scripts/gse54643_methylation_helpers.R",
+      "scripts/pathway_replay_provenance.R",
+      "scripts/replay_saved_expression_archive.R",
+      "scripts/setup_rebuild_runtime.sh",
+      "source_snapshots/candidate_layers/candidate_internal_builder_v3.py",
+      "source_snapshots/candidate_layers/candidate_projection_v3.py",
+      "source_snapshots/candidate_layers/candidate_public_builder_v1.py",
+      "source_snapshots/candidate_layers/evidence_paging_v2.py",
+      "source_snapshots/clinical_layers/build_curated_facts.py",
+      "source_snapshots/default_path_originals/adjust_gse98645_study_family.R",
+      "source_snapshots/default_path_originals/analyze_blood_composition_sensitivity.R",
+      "source_snapshots/default_path_originals/analyze_direct_plus.R",
+      "source_snapshots/default_path_originals/analyze_gse13466.R",
+      "source_snapshots/default_path_originals/analyze_gse27385.R",
+      "source_snapshots/default_path_originals/analyze_gse98645.R",
+      "source_snapshots/performance_layers/public_omics_index_v1.py",
+      "source_snapshots/review_evidence/7352a30f2162fc2e02c529ff728a0862b5c898f63b81abca1eb5f27e65fe5f87/bridge_omics_helpers.R",
+      "source_snapshots/review_evidence/7d4af16bb300d73ff49960b67c4b334b1452b3c2f730b0a2a64f61bde0bb60b1/analyze_gse127530.R",
+      "source_snapshots/review_evidence/a299c43bf0ced378c3a77272811f32ae6b4f745ce350f699f14a33a13e1128b2/analyze_gse56960.R",
+      "source_snapshots/review_evidence/ad5686c00f9f86be833d27367ce8e3e25f3e80081dc7a5d492008478c8c9ae13/analyze_gse54325.R",
+      "tests/check_direct_plus_blood_sensitivity.R",
+      "tests/check_direct_plus_helpers.R",
+      "tests/check_expression_archive.R",
+      "tests/check_expression_archive_only_ast.R",
+      "tests/check_expression_model_archive.R",
+      "tests/check_pathway_replay_provenance.R",
+      "tests/check_saved_expression_replay.R",
+      "tests/test_analysis_audits.py",
+      "tests/test_analysis_download_integrity.py",
+      "tests/test_analysis_download_lifecycle.py",
+      "tests/test_analysis_import.py",
+      "tests/test_analysis_input_audit.py",
+      "tests/test_analysis_provenance_package.py",
+      "tests/test_analysis_release_gate.py",
+      "tests/test_backup_sqlite.py",
+      "tests/test_bridge_annotations.py",
+      "tests/test_bridge_api.py",
+      "tests/test_bridge_benchmark.py",
+      "tests/test_bridge_downloader.py",
+      "tests/test_bridge_index.py",
+      "tests/test_bridge_sample_import.py",
+      "tests/test_candidate_layers.py",
+      "tests/test_candidate_subset.py",
+      "tests/test_catalog_runtime_provenance.py",
+      "tests/test_clinical_endpoints.py",
+      "tests/test_clinical_update_sources.py",
+      "tests/test_composed_release.py",
+      "tests/test_composed_review_precedence.py",
+      "tests/test_composition.py",
+      "tests/test_composition_policy.py",
+      "tests/test_context_joins.py",
+      "tests/test_deposition_plan.py",
+      "tests/test_direct_plus_blood_sensitivity.py",
+      "tests/test_direct_plus_r_structure.py",
+      "tests/test_direct_plus_source.py",
+      "tests/test_download_temp_budget.py",
+      "tests/test_evidence_pagination.py",
+      "tests/test_evidence_paging.py",
+      "tests/test_explorer_api.py",
+      "tests/test_explorer_build.py",
+      "tests/test_explorer_performance.py",
+      "tests/test_explorer_scientific.py",
+      "tests/test_explorer_scientific_api.py",
+      "tests/test_explorer_scientific_build.py",
+      "tests/test_explorer_singleflight_failure.py",
+      "tests/test_export_effect_batch.py",
+      "tests/test_exposure_snapshot_export.py",
+      "tests/test_expression_model_archive.py",
+      "tests/test_extract_geo_archives.py",
+      "tests/test_fdc_derivation.py",
+      "tests/test_fdc_resource_provenance.py",
+      "tests/test_final_upgrade_release.py",
+      "tests/test_food_semantic_precheck.py",
+      "tests/test_foodb_import.py",
+      "tests/test_freeze_final_upgrade_performance.py",
+      "tests/test_geo_design_audit.py",
+      "tests/test_graph_covering_topk.py",
+      "tests/test_graph_lazy_reads.py",
+      "tests/test_gse32357_primary.py",
+      "tests/test_gse54643_methylation.R",
+      "tests/test_hgnc_identifiers.py",
+      "tests/test_human_bridge_import.py",
+      "tests/test_internal_core_readiness.py",
+      "tests/test_kfind_download.py",
+      "tests/test_kfind_import.py",
+      "tests/test_kfind_values.py",
+      "tests/test_mechanism_source_check_gates.py",
+      "tests/test_metabolomics.py",
+      "tests/test_omics_bundle_completion.py",
+      "tests/test_omics_replay.py",
+      "tests/test_packaged_r_source_bytes.py",
+      "tests/test_parity_checkpoint.py",
+      "tests/test_performance_benchmark.py",
+      "tests/test_performance_release_flows.py",
+      "tests/test_platform_mapping.py",
+      "tests/test_prepare_expression_archive_replay.py",
+      "tests/test_preview_startup.py",
+      "tests/test_primary_publication_manifest.py",
+      "tests/test_primary_tables.py",
+      "tests/test_promote_verified_release.py",
+      "tests/test_public_binary_streaming.py",
+      "tests/test_public_build_resume.py",
+      "tests/test_public_download_files.py",
+      "tests/test_public_expansion.py",
+      "tests/test_public_food_validation_accounting.py",
+      "tests/test_public_omics_index.py",
+      "tests/test_public_rebuild_recipe.py",
+      "tests/test_public_reference_payloads.py",
+      "tests/test_public_service_isolation.py",
+      "tests/test_publication.py",
+      "tests/test_publication_release_gate.py",
+      "tests/test_publication_updates.py",
+      "tests/test_pubtator_candidates.py",
+      "tests/test_quantitative_ranges.py",
+      "tests/test_reacquired_accuracy.py",
+      "tests/test_regulatory_expansion.py",
+      "tests/test_release_contract.py",
+      "tests/test_release_dictionary_api.py",
+      "tests/test_release_rights.py",
+      "tests/test_replica_logical_identity.py",
+      "tests/test_reporting_review.py",
+      "tests/test_repository_bridge.py",
+      "tests/test_restore_geo_download_flags.py",
+      "tests/test_retrieval_input_diagnostics.py",
+      "tests/test_retrieval_review.py",
+      "tests/test_scientific_clinical_gaps.py",
+      "tests/test_scientific_effect_batch.py",
+      "tests/test_scientific_precheck.py",
+      "tests/test_separate_meal_storage.py",
+      "tests/test_soft_channels.py",
+      "tests/test_source_replicas.py",
+      "tests/test_study_detail.py",
+      "tests/test_submission_descriptor.py",
+      "tests/test_submission_figure_metrics.py",
+      "tests/test_submission_package.py",
+      "tests/test_submission_upgrade.py",
+      "tests/test_table_digest_multiset.py",
+      "tests/test_trial_context.py",
+      "tests/test_ui_snapshot.py",
+      "tests/test_validate_final_upgrade_data.py",
+      "tests/test_validation_receipts.py",
+      "tests/test_verified_release_server.py",
+      "tests/test_verify_final_upgrade_exports.py",
+      "tests/test_verify_final_upgrade_staging_restore.py",
+      "tests/test_version_only_export.py",
+      "tests/test_workbench.py",
+      "ui/app.py",
+      "uv.lock"
+    ]
+  },
+  "scope": "518 frozen public source/config/test/license files plus the source hash manifest. This parity report is an additional repository audit artifact, not a member of the frozen 518-file archive.",
+  "repository_policy": {
+    "readme_unchanged_from_public_base": true,
+    "github_workflow_unchanged_from_public_base": true,
+    "gitignore_unchanged_from_public_base": true,
+    "tracked_obsolete_files_removed": 0
+  },
+  "prepublication_screening": {
+    "all_frozen_file_hashes_verified": true,
+    "dataset_or_output_files_in_candidate": 0,
+    "credential_pattern_matches": 0,
+    "new_personal_contact_or_user_path_diffs": 0,
+    "limitation": "Pattern screening is bounded; it does not establish the absence of arbitrary unknown credentials."
+  },
+  "unresolved_gates": [
+    "Expert human approvals remain zero.",
+    "DIRECT PLUS raw acquisition is incomplete and is not a completed quantitative analysis.",
+    "Historical pathway exact reproducibility remains unresolved; later reruns do not recover missing historical RNG/t-statistic provenance.",
+    "No dataset DOI is assigned and no dataset deposition is claimed.",
+    "This is a candidate code change, not a statement that all manuscript submission gates have passed."
+  ],
+  "excluded_tests_manifest": "excluded-tests.json",
+  "portable_path_changes": "portable-path-changes.json"
+}

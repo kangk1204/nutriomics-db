@@ -1,0 +1,8 @@
+﻿source,target,meaning,scope
+food,component,섭취량에 따른 성분량 계산,confirmed composition basis
+component,intervention,관련 성분·실험 조건 대응,match/mismatch/unknown; no automatic causal transfer
+food,intervention,음식·제품 이름으로도 조회,same record or related-food correspondence
+intervention,omics,해당 대비의 관찰 결과 조회,study and five-part result key
+intervention,health,같은 연구 ID로 함께 조회,"co-context, not mediation"
+component,context,관련 근거가 있을 때 참고,"optional, source-specific mechanism or prediction"
+context,omics,유전자·조절 영역의 해석 참고,separate from dietary intervention evidence
