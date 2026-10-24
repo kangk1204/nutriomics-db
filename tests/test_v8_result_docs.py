@@ -27,7 +27,8 @@ def publication(tmp_path):
         '| chatgpt-repair-v5-r1 | 65 | 63 | 89 | 50.78% | 42.21% | 46.10% |\n'
         '| nutriomics-evidence-v8 | 평가 대기 | — | — | — | — | — |\n\n'
         '개발 목표는 **TP ≥65, 재현율 ≥65/154(42.21%), 정밀도 ≥85%**입니다.\n\n'
-        '| v8 run5 | 학습 중 |\n',encoding='utf8')
+        '| v8 run5 | 학습 중 |\n\n'
+        '- v8 ID·관계 학습, 모델 동결, 동일 100편 전체 예측·재평가, 기존 구성과 비교.\n',encoding='utf8')
     git(root,'add','.');git(root,'commit','-m','Synthetic base')
     report=tmp_path/'report';report.mkdir()
     payload={'gold_sha256':'a'*64,'cohort_pmids_sha256':'b'*64,
@@ -49,6 +50,7 @@ def test_report_commit_preserves_prior_rows_default_and_is_idempotent(publicatio
     assert '| nutriomics-evidence-v8 | 65 | 10 | 89 | 86.67% | 42.21% | 56.77% |' in text
     assert '| chatgpt-repair-v5-r1 | 65 | 63 | 89 | 50.78% | 42.21% | 46.10% |' in text
     assert '기본 엔진은 `heuristic-v1`' in text
+    assert '- v8 ID·관계 학습' not in text
     assert result['commit']!=before and result['pushed'] is False
     assert not git(root,'status','--porcelain')
     repeated=update(report,root=root,branch='feature/test')

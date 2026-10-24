@@ -1,12 +1,12 @@
 {
   "as_of": "2026-10-24",
-  "data_observed_at": "2026-10-24T01:50:36.426238+00:00",
-  "v8_observed_at": "2026-10-24T01:50:36.426238+00:00",
+  "data_observed_at": "2026-10-24T02:01:01.639170+00:00",
+  "v8_observed_at": "2026-10-24T02:01:01.639170+00:00",
   "default_engine": "heuristic-v1",
   "collection": {
-    "live_stored_unique_papers": 42487,
-    "live_abstract_papers": 41053,
-    "live_oa_available_papers": 2176,
+    "live_stored_unique_papers": 42622,
+    "live_abstract_papers": 41183,
+    "live_oa_available_papers": 2187,
     "extraction_success_papers": null,
     "extraction_read_status": "deadline_exceeded",
     "last_verified_extraction": {
@@ -96,22 +96,21 @@
   },
   "training": {
     "v8": {
-      "status": "connection_unavailable",
-      "stage": null,
-      "last_verified": {
-        "observed_at": "2026-10-24T01:44:07.535243+00:00",
-        "stage": "train-ner",
-        "status": "running",
-        "completed_ner_models": 4,
-        "completed_ner_profiles": 4,
-        "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4"
-      }
+      "stage": "train-id",
+      "status": "running",
+      "completed_ner_models": 6,
+      "completed_ner_profiles": 5,
+      "completed_id_outer_folds": 0,
+      "completed_relation_outer_folds": 0,
+      "ner_training_manifest_exists": true,
+      "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
+      "observed_at": "2026-10-24T02:01:01.639170+00:00"
     },
     "r2": {
       "stage": "train-relation",
       "completed_outer_folds": 2,
       "evaluation": "pending",
-      "observed_at": "2026-10-24T01:50:36.426238+00:00"
+      "observed_at": "2026-10-24T02:01:01.639170+00:00"
     },
     "native": {
       "stage": "train-drugprot",
@@ -120,70 +119,130 @@
         "cg": 0
       },
       "evaluation": "pending",
-      "observed_at": "2026-10-24T01:50:36.426238+00:00",
+      "observed_at": "2026-10-24T02:01:01.639170+00:00",
       "completed_neural_model_files": 20
     }
   },
   "upstream_ner_training": [
     {
+      "engine": "nutriomics-evidence-v8-run5",
       "arm": "chemical_ner_and_dictionary",
-      "engine": "nutriomics-evidence-v8-run4",
-      "independent_final_performance": false,
+      "papers": 415,
       "metrics": {
-        "f1": 0.7413247980014833,
-        "fn": 2226,
+        "tp": 19019,
+        "fp": 11092,
+        "fn": 2199,
+        "precision": 0.6316296370097306,
+        "recall": 0.8963615797907437,
+        "f1": 0.7410625572288569
+      },
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
+    },
+    {
+      "engine": "nutriomics-evidence-v8-run5",
+      "arm": "chemical_ner_only",
+      "papers": 415,
+      "metrics": {
+        "tp": 18150,
+        "fp": 4417,
+        "fn": 3068,
+        "precision": 0.8042717241990517,
+        "recall": 0.8554057875388821,
+        "f1": 0.829051044878383
+      },
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
+    },
+    {
+      "engine": "nutriomics-evidence-v8-run5",
+      "arm": "gene_ner_and_dictionary",
+      "papers": 415,
+      "metrics": {
+        "tp": 7663,
+        "fp": 8811,
+        "fn": 675,
+        "precision": 0.4651572174335316,
+        "recall": 0.919045334612617,
+        "f1": 0.6176849911333225
+      },
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
+    },
+    {
+      "engine": "nutriomics-evidence-v8-run5",
+      "arm": "gene_ner_only",
+      "papers": 415,
+      "metrics": {
+        "tp": 7292,
+        "fp": 1926,
+        "fn": 1046,
+        "precision": 0.7910609676719462,
+        "recall": 0.874550251858959,
+        "f1": 0.8307131465026202
+      },
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
+    },
+    {
+      "engine": "nutriomics-evidence-v8-run4",
+      "arm": "chemical_ner_and_dictionary",
+      "papers": 415,
+      "metrics": {
+        "tp": 18992,
         "fp": 11028,
+        "fn": 2226,
         "precision": 0.6326449033977348,
         "recall": 0.8950890753134131,
-        "tp": 18992
+        "f1": 0.7413247980014833
       },
-      "papers": 415,
-      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도"
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
     },
     {
-      "arm": "chemical_ner_only",
       "engine": "nutriomics-evidence-v8-run4",
-      "independent_final_performance": false,
+      "arm": "chemical_ner_only",
+      "papers": 415,
       "metrics": {
-        "f1": 0.8299590510832018,
-        "fn": 3078,
+        "tp": 18140,
         "fp": 4355,
+        "fn": 3078,
         "precision": 0.8064014225383419,
         "recall": 0.8549344895843152,
-        "tp": 18140
+        "f1": 0.8299590510832018
       },
-      "papers": 415,
-      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도"
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
     },
     {
-      "arm": "gene_ner_and_dictionary",
       "engine": "nutriomics-evidence-v8-run4",
-      "independent_final_performance": false,
+      "arm": "gene_ner_and_dictionary",
+      "papers": 415,
       "metrics": {
-        "f1": 0.6195630306200459,
-        "fn": 639,
+        "tp": 7699,
         "fp": 8816,
+        "fn": 639,
         "precision": 0.46618225855283074,
         "recall": 0.9233629167666108,
-        "tp": 7699
+        "f1": 0.6195630306200459
       },
-      "papers": 415,
-      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도"
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
     },
     {
-      "arm": "gene_ner_only",
       "engine": "nutriomics-evidence-v8-run4",
-      "independent_final_performance": false,
+      "arm": "gene_ner_only",
+      "papers": 415,
       "metrics": {
-        "f1": 0.833465593470128,
-        "fn": 986,
+        "tp": 7352,
         "fp": 1952,
+        "fn": 986,
         "precision": 0.7901977644024075,
         "recall": 0.8817462221156153,
-        "tp": 7352
+        "f1": 0.833465593470128
       },
-      "papers": 415,
-      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도"
+      "scope": "공식 학습 자료의 문헌 단위 OOF 경계 진단·100편 관계 평가와 별도",
+      "independent_final_performance": false
     }
   ],
   "clinical_diagnostics": [

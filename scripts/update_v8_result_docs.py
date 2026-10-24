@@ -65,7 +65,7 @@ def readme_result(text, payload, measured, relative):
     # The scientific default and the previous model rows are preserved.
     text = re.sub(r'^\| v8 run5 \|[^\n]*',
                   '| v8 run5 | NER·ID·관계 학습, 동결, 100편 예측·재평가 완료 |', text, flags=re.M)
-    text = re.sub(r'^- v8 NER·ID·관계 학습, 모델 동결, 동일 100편 전체 예측·재평가, 기존 구성과 비교\.\n',
+    text = re.sub(r'^- v8 (?:NER·)?ID·관계 학습, 모델 동결, 동일 100편 전체 예측·재평가, 기존 구성과 비교\.\n',
                   '', text, flags=re.M)
     target = (measured['tp'] >= 65 and measured['recall'] >= 65 / 154
               and measured['precision'] is not None and measured['precision'] >= .85)
