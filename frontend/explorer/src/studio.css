@@ -177,3 +177,8 @@
 .ws-search-selection-cleared{padding:12px 16px;margin:0;border-bottom:1px solid #d6e3eb;background:#f3f7fa;color:#35556c;font-size:15px;line-height:1.6}.ws-unselected-search{padding:40px 0;color:#47647b}.ws-unselected-search h2{font-size:24px;color:#193b50}.ws-unselected-search strong{overflow-wrap:anywhere}
 
 .ws-name-match{font-size:13px!important;color:#435d70!important;padding:3px 7px;border:1px solid #d4e1e9;border-radius:3px;display:inline-block!important;background:#f4f7f9}
+
+/* Search controls must not shrink the results viewport to zero on short windows.
+   The outer pane scrolls when controls and one full result card do not fit. */
+.wb-studio .wb-browser{overflow-y:auto}
+.wb-studio .wb-entity-list{flex:1 0 220px;min-height:220px;overflow-y:auto}
