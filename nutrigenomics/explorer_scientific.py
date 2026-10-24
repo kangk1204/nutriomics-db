@@ -630,7 +630,6 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
     try:
         with read_connection(core_path) as core:
             public_total = None
-            query_source = 'study_effect'
             if core.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='effect_selector'").fetchone():
                 public_total = core.execute(
                     "SELECT sum(total) FROM effect_selector WHERE series_accession=? AND contrast=? AND analysis_version=?",
@@ -640,8 +639,6 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
                     # A curated trial can remain visible when its numeric data
                     # is withheld. This is not a confirmed zero-result analysis.
                     raise QueryUnavailable("not_in_public_release")
-                from .public_contrast_source import indexed_contrast_source
-                query_source = indexed_contrast_source(core)
             selector = selector_key(contrast)
             indexed = projection is not None and indexed_source(projection, core_path)
             summary = projection.execute("SELECT total FROM perf_effect_selector WHERE selector=?", (selector,)).fetchone() if indexed else None
@@ -661,12 +658,12 @@ def _cached_effects(core_path, contrast, gene, limit, projection=None):
                         raise QueryUnavailable("analysis_key_mismatch")
                     rows.append(r)
             else:
-                total = public_total if public_total is not None and not gene else core.execute("SELECT count(*) FROM " + query_source + " WHERE " + conditions, args).fetchone()[0]
+                total = public_total if public_total is not None and not gene else core.execute("SELECT count(*) FROM study_effect WHERE " + conditions, args).fetchone()[0]
                 if not gene and total == 0 and projection is not None and has_index(projection, "perf_effect_selector"):
                     original_total = projection.execute("SELECT total FROM perf_effect_selector WHERE selector=?", (selector,)).fetchone()
                     if original_total is not None and original_total[0] > 0:
                         raise QueryUnavailable("analysis_key_mismatch")
-                rows = core.execute("SELECT * FROM " + query_source + " WHERE " + conditions + " ORDER BY feature_type,feature_id LIMIT ?", [*args, limit]).fetchall()
+                rows = core.execute("SELECT * FROM study_effect WHERE " + conditions + " ORDER BY feature_type,feature_id LIMIT ?", [*args, limit]).fetchall()
             effects = []
             for row in rows:
                 effects.append(_format_effect(row, gene))
@@ -787,12 +784,14 @@ def scientific_matches(db, seed, core_path, reference_context=None, gene=None):
             return {"rule_version": RULE_VERSION, "seed_id": seed["id"], "reference_context": reference,
                     "observed_evidence": [], "evidence_gaps": ["공식 식별자 대응이 미확인입니다. 문자열만으로 유전자–중재 관계를 생성하지 않습니다."],
                     "gene_query": {"status": "identity_unconfirmed", "causal_inference": False}}
+        from .public_gene_previews import batch_gene_previews
+        gene_batch=batch_gene_previews(core_path,[c for c in records['contrast'] if feature_contract(c)],gene,db)
         for c in records["contrast"]:
             contract = feature_contract(c)
             if not contract:
                 continue
             key = (c["series_accession"], c["contrast"], c["analysis_version"])
-            result = _contrast_effects(core_path, c, gene, projection=db)
+            result = _contrast_effects(core_path, c, gene, projection=db,batch_results=gene_batch)
             if result[2] != "available":
                 raise QueryUnavailable(result[2])
             gene_results[key] = result
