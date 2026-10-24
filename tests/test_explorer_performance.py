@@ -14,6 +14,49 @@ from nutrigenomics.explorer_performance import CACHE, ByteCache, QueryUnavailabl
 from nutrigenomics.explorer_performance_build import build_performance_release
 
 
+@pytest.mark.parametrize("setting,normal", [(None, 10), ("15", 15), ("30", 30)])
+def test_configured_read_budget_keeps_export_budget_and_profiles_status(monkeypatch, tmp_path, setting, normal):
+    from fastapi import FastAPI, HTTPException
+    from fastapi.testclient import TestClient
+    from nutrigenomics.explorer_performance import CURRENT, ExplorerReadMiddleware
+    if setting is None:
+        monkeypatch.delenv("NUTRIGENOMICS_READ_TIMEOUT_SECONDS", raising=False)
+    else:
+        monkeypatch.setenv("NUTRIGENOMICS_READ_TIMEOUT_SECONDS", setting)
+    profile = tmp_path / "requests.jsonl"
+    monkeypatch.setenv("NUTRIGENOMICS_EXPLORER_PROFILE", str(profile))
+    app = FastAPI()
+
+    @app.post("/api/v1/explorer/budget-probe")
+    @app.post("/api/v1/explorer/budget-probe/export")
+    def probe():
+        return {"remaining": CURRENT.get().deadline - time.monotonic()}
+
+    @app.post("/api/v1/explorer/budget-probe/failure")
+    def failure():
+        raise HTTPException(503, {"code": "source_unavailable"})
+
+    app.add_middleware(ExplorerReadMiddleware)
+    with TestClient(app) as client:
+        response = client.post("/api/v1/explorer/budget-probe")
+        assert response.status_code == 200 and normal - 1 < response.json()["remaining"] <= normal
+        response = client.post("/api/v1/explorer/budget-probe/export")
+        assert response.status_code == 200 and 44 < response.json()["remaining"] <= 45
+        assert client.post("/api/v1/explorer/budget-probe/failure").status_code == 503
+    rows = [json.loads(line) for line in profile.read_text().splitlines()]
+    assert [r["status"] for r in rows] == [200, 200, 503]
+    assert [r["deadline_seconds"] for r in rows] == [normal, 45, normal]
+    assert all("parameters" not in r and "body" not in r for r in rows)
+
+
+@pytest.mark.parametrize("setting", ["", "0", "9", "31", "60", "nan", "30.5"])
+def test_unbounded_or_invalid_read_budget_is_rejected(monkeypatch, setting):
+    from nutrigenomics.explorer_performance import ExplorerReadMiddleware
+    monkeypatch.setenv("NUTRIGENOMICS_READ_TIMEOUT_SECONDS", setting)
+    with pytest.raises(ValueError, match="integer from 10 to 30"):
+        ExplorerReadMiddleware(None)
+
+
 def upgrade(explorer, monkeypatch):
     parent = explorer["db"].parent
     original = parent / "explorer.sqlite"

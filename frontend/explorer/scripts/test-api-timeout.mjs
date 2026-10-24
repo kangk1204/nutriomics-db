@@ -24,7 +24,7 @@ const originalWindow = globalThis.window;
 const scheduled = [];
 const active = new Set();
 const cases = [];
-// Production 30/60-second deadlines are recorded exactly, then accelerated.
+// Production 45/60-second deadlines are recorded exactly, then accelerated.
 globalThis.setTimeout = (callback, delay, ...args) => {
   const handle = originalSetTimeout(() => { active.delete(handle); callback(...args); }, delay >= 30_000 ? 20 : delay);
   active.add(handle); scheduled.push(delay); return handle;
@@ -35,7 +35,7 @@ const wait = milliseconds => new Promise(resolve => originalSetTimeout(resolve, 
 async function check(name, run) { await run(); assert.equal(active.size, 0, `${name}: deadline cleanup`); cases.push({ name, status: 'pass' }); }
 try {
   const api = load();
-  assert.equal(api.REQUEST_TIMEOUT_MS, 30_000);
+  assert.equal(api.REQUEST_TIMEOUT_MS, 45_000);
   assert.equal(api.EXPORT_TIMEOUT_MS, 60_000);
   const timedOut = error => error instanceof api.RequestTimeoutError && error.name !== 'AbortError' && /서버 연결.*다시 시도/.test(error.message);
   let transportSignal;
@@ -72,18 +72,18 @@ try {
     await assert.rejects(api.fetchWithTimeout('/test', { signal: external.signal }, response => response.json()), error => error.name === 'AbortError');
     assert.equal(calls, 0);
   });
-  await check('fast_response_and_all_normal_routes_use_30_seconds', async () => {
+  await check('fast_response_and_all_normal_routes_use_45_seconds', async () => {
     globalThis.fetch = async () => new Response(JSON.stringify({ release_id: 'transport-test', items: [], nodes: [], edges: [], total: 0 }), { headers: { 'Content-Type': 'application/json' } });
     const filters = { domain: 'all', tier: 'all', include_extracted: false };
     const before = scheduled.length;
     await api.getMeta(); await api.getNode('transport-test'); await api.getEdge('transport-test');
     await api.getEntities('food', '', filters, 1, 50, 'label', 'asc'); await api.getGraph('transport-test', filters, 80, 200);
     await api.getScientificMatches({ seed_id: 'transport-test', reference_context: {} }); await api.analyzeFood('transport-test', 100);
-    assert.deepEqual(scheduled.slice(before), Array(7).fill(30_000));
+    assert.deepEqual(scheduled.slice(before), Array(7).fill(45_000));
   });
   await check('match_timeout_is_visible_and_retryable', async () => {
     globalThis.fetch = async () => never();
-    await assert.rejects(api.getScientificMatches({ seed_id: 'transport-test', reference_context: {} }), error => timedOut(error) && /30초/.test(error.message));
+    await assert.rejects(api.getScientificMatches({ seed_id: 'transport-test', reference_context: {} }), error => timedOut(error) && /45초/.test(error.message));
   });
   await check('network_failure_has_korean_retry_message', async () => {
     globalThis.fetch = async () => { throw new TypeError('Failed to fetch'); };
@@ -93,6 +93,13 @@ try {
     globalThis.fetch = async () => new Response(JSON.stringify({ detail: { code: 'query_timeout' } }), { status: 503, headers: { 'Content-Type': 'application/json' } });
     await assert.rejects(api.getScientificMatches({ seed_id: 'transport-test', reference_context: {} }), error => /시간 한도/.test(error.message) && /0건을 의미하지 않습니다/.test(error.message) && !/아직 준비/.test(error.message));
     await assert.rejects(api.getMeta(), error => /0건을 의미하지 않습니다/.test(error.message));
+    await assert.rejects(api.analyzeFood('transport-test', 100), error => /시간 한도/.test(error.message) && /0건을 의미하지 않습니다/.test(error.message) && !/기준을 확인할 수 없습니다/.test(error.message));
+  });
+  await check('meal_source_failure_is_not_a_food_composition_fact', async () => {
+    globalThis.fetch = async () => new Response(JSON.stringify({ detail: { code: 'source_unavailable' } }), { status: 503 });
+    await assert.rejects(api.analyzeFood('transport-test', 100), error => /원본 자료를 현재 조회할 수 없습니다/.test(error.message) && !/이 식품의.*기준/.test(error.message));
+    globalThis.fetch = async () => new Response('', { status: 503 });
+    await assert.rejects(api.analyzeFood('transport-test', 100), error => /503/.test(error.message) && !/이 식품의.*기준/.test(error.message));
   });
   await check('changed_source_is_a_retryable_error', async () => {
     globalThis.fetch = async () => new Response(JSON.stringify({ detail: { code: 'source_changed' } }), { status: 503 });
@@ -131,7 +138,7 @@ try {
     await assert.rejects(offlineApi.analyzeFood(node.id, 100), /독립 HTML/);
     assert.equal(calls, 0); assert.equal(scheduled.length, before);
   });
-  const report = { status: 'pass', cases, request_timeout_ms: 30_000, export_timeout_ms: 60_000, deadline_timers_remaining: active.size, accelerated_deadlines: true, browser_verification: false, node: process.version, completed_at: new Date().toISOString() };
+  const report = { status: 'pass', cases, request_timeout_ms: 45_000, export_timeout_ms: 60_000, deadline_timers_remaining: active.size, accelerated_deadlines: true, browser_verification: false, node: process.version, completed_at: new Date().toISOString() };
   const destination = path.join(project, '../../outputs/explorer/verification/frontend-api-timeout-regression.json');
   await fs.mkdir(path.dirname(destination), { recursive: true }); await fs.writeFile(destination, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
