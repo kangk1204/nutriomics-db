@@ -41,3 +41,15 @@ def test_no_silent_fallback_when_layer_is_missing_or_unapproved(exported):
 
 def test_legacy_run_without_operational_layer_stays_supported(tmp_path):
     assert finish.verify_operational_export(tmp_path) is None
+
+
+def test_cache_resolution_policy_must_have_its_own_approved_hash_and_scope(exported):
+    d=exported/'runtime-control';p=d/'execution.json';value=json.loads(p.read_text())
+    value['scope']='resource_admission_and_cached_model_resolution';p.write_text(json.dumps(value))
+    sha=hashlib.sha256(p.read_bytes()).hexdigest()
+    e=exported/'resource-execution-expected.json';expected=json.loads(e.read_text());expected['sha256']=sha;e.write_text(json.dumps(expected))
+    p=d/'manifest.json';value=json.loads(p.read_text());value['scope']='resource_admission_and_cached_model_resolution'
+    value['configuration_sha256']=sha;value['files']['execution.json']=sha;p.write_text(json.dumps(value))
+    assert finish.verify_operational_export(exported)['scope']==value['scope']
+    value['scope']='resource_admission_only';p.write_text(json.dumps(value))
+    with pytest.raises(ValueError,match='contract mismatch'):finish.verify_operational_export(exported)

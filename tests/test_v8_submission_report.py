@@ -100,6 +100,10 @@ def test_operational_guard_provenance_never_changes_scientific_scores(inputs,tmp
     assert 'GPU 자원 검사 변경 이력' in report.markdown(data)
     assert '자원 진입 검사만 변경' in report.html_report(data)
     assert 'a'*64 in report.csv_report(data)
+    v['scope']='resource_admission_and_cached_model_resolution';put(path,v)
+    data=report.build_payload(progress,history_paths=histories,resource_execution_path=path)
+    assert '고정 모델 캐시 정책' in report.markdown(data)
+    assert data['relation_comparison']==base['relation_comparison']
     v['configuration_sha256']='/private/path';put(path,v)
     with pytest.raises(ValueError,match='hashes'):report.build_payload(progress,history_paths=histories,resource_execution_path=path)
 
@@ -181,6 +185,18 @@ def test_target_is_conjunctive_and_internal():
     assert not report.target_passed(score(64,0,90))
     assert not report.target_passed(score(65,12,89))
     assert not report.TARGET['agreement_target_verified']
+
+
+def test_checkpoint_progress_does_not_imply_fold_completion_or_measured_accuracy(inputs):
+    progress,histories=inputs;v=json.loads(progress.read_text(encoding='utf8'))
+    v['v8']={'nutriomics-evidence-v8-run5':{'stage':'train-id','status':'running','supervisor_alive':True,
+       'completed_id_outer_folds':0,'completed_id_linear_fits':2,'completed_id_neural_fits':1,
+       'latest_training_checkpoint':{'task':'id','epoch':2,'optimizer_updated':True,'modified_at_unix':1792812074}}}
+    put(progress,v);data=report.build_payload(progress,history_paths=histories)
+    detail=next(r['progress_detail'] for r in data['pipelines'] if r['model'].endswith('run5'))
+    assert 'ID 선형 모델 2개 완료' in detail and 'ID 외부 fold 0개 완료' in detail
+    assert '체크포인트 epoch 2' in detail and '+09:00' in detail
+    assert data['relation_comparison'][-1]['metrics'] is None
 
 
 def test_output_is_hash_bound_immutable_and_html_escaped(inputs,tmp_path):

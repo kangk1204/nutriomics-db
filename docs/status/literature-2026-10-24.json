@@ -1,13 +1,13 @@
 {
   "as_of": "2026-10-24",
-  "data_observed_at": "2026-10-24T03:18:05.860590+00:00",
-  "v8_observed_at": "2026-10-24T03:18:05.860590+00:00",
+  "data_observed_at": "2026-10-24T03:46:00.652825+00:00",
+  "v8_observed_at": "2026-10-24T03:46:00.652825+00:00",
   "default_engine": "heuristic-v1",
   "collection": {
-    "live_stored_unique_papers": 44235,
-    "live_abstract_papers": 42781,
-    "live_oa_available_papers": 2269,
-    "extraction_success_papers": 28682
+    "live_stored_unique_papers": 44828,
+    "live_abstract_papers": 43365,
+    "live_oa_available_papers": 2314,
+    "extraction_success_papers": 28977
   },
   "search_expected_papers": 133261,
   "relation_evaluation": {
@@ -93,21 +93,32 @@
     "v8": {
       "stage": "train-id",
       "status": "running",
-      "completed_ner_models": 11,
-      "completed_ner_profiles": 10,
+      "completed_ner_models": 12,
+      "completed_ner_profiles": 11,
       "completed_id_outer_folds": 0,
       "completed_relation_outer_folds": 0,
       "ner_training_manifest_exists": true,
       "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
-      "observed_at": "2026-10-24T03:18:05.860590+00:00",
+      "observed_at": "2026-10-24T03:46:00.652825+00:00",
       "progress_scope": "NER model and profile counts include nested upstream fits used by ID validation",
-      "operational_resource_configuration_sha256": "07106631b98cdf961e01c0112700a30c633eaa2d4f07d3e81e9f201add4097f8"
+      "operational_resource_configuration_sha256": "4b91d028612b98bf272004a4273987b946b0385a3122fefc323f97465c005051",
+      "completed_id_linear_fits": 0,
+      "completed_id_neural_fits": 0,
+      "completed_relation_neural_fits": 0,
+      "latest_training_checkpoint": {
+        "task": "ner",
+        "epoch": 3,
+        "optimizer_updated": true,
+        "modified_at_unix": 1792812081.9470887,
+        "scope": "Training progress only; not relation accuracy or fold completion"
+      },
+      "smoke_neural_fits_excluded": 1
     },
     "r2": {
       "stage": "train-relation",
       "completed_outer_folds": 2,
       "evaluation": "pending",
-      "observed_at": "2026-10-24T03:18:05.860590+00:00"
+      "observed_at": "2026-10-24T03:46:00.652825+00:00"
     },
     "native": {
       "stage": "train-drugprot",
@@ -116,7 +127,7 @@
         "cg": 0
       },
       "evaluation": "pending",
-      "observed_at": "2026-10-24T03:18:05.860590+00:00",
+      "observed_at": "2026-10-24T03:46:00.652825+00:00",
       "completed_neural_model_files": 21
     }
   },
@@ -292,57 +303,61 @@
     "receipt": "nlp-validation-2026-10-24.json"
   },
   "operational_resource_execution": {
-    "observed_at": "2026-10-24T03:18:38.586683+00:00",
-    "scope": "resource_admission_only",
-    "cause": "Small Chrome GPU and Nautilus desktop processes were classified as foreign compute",
+    "observed_at": "2026-10-24T03:46:00.652825+00:00",
+    "scope": "resource_admission_and_cached_model_resolution",
+    "cause": "Fixed BERT tokenizer blocked on Hugging Face template listing TLS handshake after connectivity loss",
+    "trace_components": [
+      "huggingface_hub",
+      "list_repo_templates",
+      "do_handshake",
+      "KeyboardInterrupt"
+    ],
+    "owned_child_interrupted": true,
+    "protected_files": 42,
+    "protected_bytes": 24463852709,
+    "changed_protected_files": [],
+    "interruption_receipt_sha256": "d9e23b79b645db6076abac8d7e7594f3e8628b3b630f4a01ce3c211a23448b8c",
     "scientific_source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
-    "configuration_sha256": "07106631b98cdf961e01c0112700a30c633eaa2d4f07d3e81e9f201add4097f8",
+    "configuration_sha256": "4b91d028612b98bf272004a4273987b946b0385a3122fefc323f97465c005051",
     "operational_files": {
-      "desktop-policy.json": "a08bf8c7e003a11f448292842d93b8f4e16b46064e135afdaa4b80ee91a35707",
+      "desktop-policy.json": "8b310abe0255977685a08f3cf40fa88db28b47295f67928a7334707eca485188",
       "supervisor.py": "b8c229611a9258d288d767a552a29a8f648bf61d22b6abfc1fb638248f095d8c",
-      "v8_resource_layer.py": "d0d4042fcc3d9f11377676482ba762b1396dd0bbd909301af7398da468fc4749"
+      "v8_resource_layer.py": "8dda13b882cd775e4b86068dab3718ec168847713f589734f957cfcc21ebe6dd"
     },
-    "policy": {
-      "same_real_and_effective_uid": true,
-      "nautilus_maximum_mib": 64,
-      "chrome_gpu_role_maximum_mib": 256,
-      "maximum_total_desktop_mib": 512,
-      "unknown_compute_allowed": false,
-      "gpu_gib": 13,
-      "rss_gib": 8
+    "previous_configuration_sha256": "07106631b98cdf961e01c0112700a30c633eaa2d4f07d3e81e9f201add4097f8",
+    "cache_probe": {
+      "network_access_disabled": true,
+      "loaded": true,
+      "seconds": 2.3906282839889172,
+      "base_weights_sha256": "e837888c5184965c44f2e21de674b171ec4eab2e2c469e3efd418535864198ea",
+      "tokenizer_vocab_sha256": "78b67e809947d48f1460996f15d6bfc23838dcea3c9c72d5029def09d19a3957",
+      "missing_cache_refused": true,
+      "revision": "e1354b7a3a09615f6aba48dfad4b7a613eef7062"
     },
-    "validation": {
-      "scientific_source_files_verified": 272,
-      "protected_file_count": 36,
-      "changed_protected_files": [],
-      "checkpoint_manifest_sha256": "655f683ebf4037a0fb65f6efc283c3323475160be3292b159cfe5c4cb2196f73",
-      "local_tests_passed": 78,
-      "linux_tests_passed": 17,
-      "real_gpu_probe_passed": true
+    "library_policy": {
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1",
+      "missing_cache": "fail"
     },
-    "resumption": {
+    "tests": {
+      "local_passed": 83,
+      "linux_passed": 55,
+      "duplicate_test_groups_not_summed": true
+    },
+    "same_100_paper_evaluation": "pending",
+    "additional_generative_model_calls": 0,
+    "default_engine": "heuristic-v1",
+    "resumed_learning": {
+      "observed_at": "2026-10-24T03:47:55.675227+00:00",
       "stage": "train-id",
-      "status": "running",
-      "gpu": "2897 MiB, 97 %",
-      "peak_child_rss_bytes": 3223056384,
-      "accepted_desktop_mib": [
-        38.0,
-        62.0
-      ],
-      "additional_model_calls": 0,
-      "other_jobs_modified": false,
-      "same_100_paper_evaluation": "pending"
-    },
-    "training_update_confirmed": {
-      "observed_at": "2026-10-24T03:21:14.687788+00:00",
-      "task": "Nested upstream NER inside the ID validation stage",
-      "epochs_with_optimizer_update": 2,
+      "gpu": "2921 MiB, 97 %",
+      "external_network_connections": 0,
+      "upstream_ner_epochs_with_optimizer_update": 2,
       "training_loss": [
-        0.2083230826764302,
-        0.04256002714703308
+        0.3908868963332427,
+        0.09399618473323669
       ],
-      "validation_is_training_loss": true,
-      "relationship_accuracy_measured": false
+      "scope": "Nested upstream NER inside ID validation; not relation accuracy"
     }
   }
 }

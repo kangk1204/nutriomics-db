@@ -77,7 +77,9 @@ def verify_operational_export(output):
     def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
     expected=read(expected_path);proof=read(path);directory=path.parent
     config=directory/'execution.json'
-    if (proof.get('scope')!='resource_admission_only' or proof.get('configuration_sha256')!=expected['sha256']
+    scope=read(config).get('scope','resource_admission_only')
+    if (scope not in {'resource_admission_only','resource_admission_and_cached_model_resolution'}
+            or proof.get('scope')!=scope or proof.get('configuration_sha256')!=expected['sha256']
             or sha(config)!=expected['sha256'] or read(config)['files']!=expected['files']
             or proof.get('scientific_source_manifest_sha256')!=expected['scientific_source_manifest_sha256']):
         raise ValueError('Operational resource export contract mismatch')
@@ -88,7 +90,7 @@ def verify_operational_export(output):
         if not p.is_relative_to(directory.resolve()) or sha(p)!=digest:
             raise ValueError('Operational resource export file mismatch')
     return {'manifest_sha256':sha(path),'configuration_sha256':expected['sha256'],
-            'scope':'resource_admission_only','scientific_source_manifest_sha256':expected['scientific_source_manifest_sha256']}
+            'scope':scope,'scientific_source_manifest_sha256':expected['scientific_source_manifest_sha256']}
 
 
 def recover(host, output, experiment="nutriomics-evidence-v8"):
@@ -121,7 +123,9 @@ if pointer.exists():
  for name,digest in value['files'].items():
   operational[name]=(cp.parent/name).read_bytes()
   if hashlib.sha256(operational[name]).hexdigest()!=digest:raise ValueError('Resource file hash')
- operational['manifest.json']=json.dumps({'scope':'resource_admission_only','configuration_sha256':execution['sha256'],
+ scope=value.get('scope','resource_admission_only')
+ if scope not in {'resource_admission_only','resource_admission_and_cached_model_resolution'}:raise ValueError('Unknown operational scope')
+ operational['manifest.json']=json.dumps({'scope':scope,'configuration_sha256':execution['sha256'],
   'scientific_source_manifest_sha256':contract['source_manifest_sha256'],
   'files':{**value['files'],'execution.json':execution['sha256']}},sort_keys=True).encode()
 with zipfile.ZipFile(sys.stdout.buffer,'w',zipfile.ZIP_DEFLATED) as z:

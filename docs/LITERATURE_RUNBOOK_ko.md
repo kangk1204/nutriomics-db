@@ -194,3 +194,18 @@ python scripts/repair_v8_desktop_guard.py activate
 이 명령은 지정된 run5의 최초 자원 대기 수정용입니다. 실행 중인 학습에는 다시 적용하지 않습니다. 이후 연결 중단 복구는 기존 `--resume-interrupted` 후속 작업을 사용합니다. 로컬 승인 파일 `resource-execution-expected.json`과 서버 실행 설정·운영 코드의 해시가 모두 일치해야 재개하며, 과학 소스와 운영 변경 이력을 각각 보존합니다.
 
 결과 회수 시에도 운영 계층을 함께 검증합니다. 승인된 운영 계층의 누락·변조는 채점을 중단합니다. 운영 계층은 보고서의 출처에 포함되며, 관계 평가의 원시 ID·유형 일치 기준은 그대로 유지합니다.
+
+## 연결 중단 뒤 고정 모델 캐시에서 재개
+
+2026-10-24에는 연결 복구 뒤에도 `AutoTokenizer.from_pretrained → list_repo_templates → SSL.do_handshake`에서 기존 학습이 멈춘 것을 확인했습니다. 해당 실험의 자식 프로세스에 SIGINT를 전달해 대기 위치를 기록하고, 중단 전후 모델·체크포인트 파일 42개를 SHA-256으로 대조했습니다. 변경된 파일은 없었습니다.
+
+새 운영 정책은 과학 소스·모델 revision·입력·학습 설정을 유지하면서, 라이브러리를 import하기 전에 `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`을 설정합니다. 모델 다운로드와 학습을 분리하며, 캐시 누락은 실패로 기록합니다. 실제 네트워크 연결을 차단한 CPU 검사에서 고정 BERT와 tokenizer 로드를 확인했습니다. 체크포인트 검사와 캐시 검사 receipt가 있는 이번 run5의 재개 명령은 다음과 같습니다.
+
+```bash
+python scripts/repair_v8_desktop_guard.py prepare --cached-models-only
+python scripts/repair_v8_desktop_guard.py activate --cached-models-only
+```
+
+이전 운영 설정은 서버의 버전별 `runtime-control`과 로컬의 `resource-execution-history`에 보존합니다. 새 설정의 해시와 과학 소스의 해시는 따로 검증합니다. 현재 정책과 검사 결과는 [모델 캐시 복구 기록](status/model-cache-repair-2026-10-24.json)에 있습니다.
+
+진행 집계에서는 단순 실행 확인용 `smoke_only` 모델을 제외합니다. 개별 ID 모델 수, 최근 epoch 체크포인트, 외부 fold 완료 수, 100편 평가 완료 여부는 각각 별도로 표시합니다.

@@ -41,6 +41,8 @@ def configuration(path, source, home, expected_sha256=None):
     total = policy.get('maximum_total_desktop_mib')
     if type(total) not in (int, float) or not 0 < total <= 512:
         raise ValueError('Desktop aggregate memory budget must be at most 512MiB')
+    if 'cached_models_only' in policy and type(policy['cached_models_only']) is not bool:
+        raise ValueError('Cached model policy must be an explicit boolean')
     for entry in policy.get('additional_desktops', []):
         name, maximum = entry.get('executable'), entry.get('maximum_mib')
         if (name not in GUI_CAPS or type(maximum) not in (int, float)
@@ -59,6 +61,13 @@ def process_identity(pid):
                     'arguments':p.cmdline()}
     except psutil.Error as error:
         raise OSError('GPU process identity unavailable') from error
+
+
+def configure_model_resolution(policy):
+    """Set library cache mode before importing the frozen pipeline or HF libraries."""
+    if policy.get('cached_models_only') is True:
+        os.environ['HF_HUB_OFFLINE'] = '1'
+        os.environ['TRANSFORMERS_OFFLINE'] = '1'
 
 
 def additional_desktop_allowed(process, selected_uuid, policy, lookup=None, resolve=None):
@@ -154,6 +163,7 @@ def main():
     _, policy = configuration(args.configuration, args.source, args.home, args.configuration_sha256)
     if policy['user_id'] != os.getuid():
         raise ValueError('Resource policy belongs to another user')
+    configure_model_resolution(policy)
     os.environ['EVIDENCE_V8_HOME'] = str(args.home.resolve())
     sys.path.insert(0, str(args.source.resolve()))
     from nutri_literature.evidence_v8 import common

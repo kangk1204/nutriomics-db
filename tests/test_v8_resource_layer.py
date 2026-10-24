@@ -61,6 +61,15 @@ def test_install_changes_only_the_resource_predicate_and_audits_acceptance(tmp_p
     assert 'arguments' not in record and 'user' not in record
 
 
+def test_cache_policy_sets_library_mode_without_loading_or_replacing_a_model(monkeypatch):
+    import os
+    monkeypatch.setenv('HF_HUB_OFFLINE','0');monkeypatch.setenv('TRANSFORMERS_OFFLINE','0')
+    layer.configure_model_resolution({})
+    assert os.environ['HF_HUB_OFFLINE']=='0'
+    layer.configure_model_resolution({'cached_models_only':True})
+    assert os.environ['HF_HUB_OFFLINE']=='1' and os.environ['TRANSFORMERS_OFFLINE']=='1'
+
+
 def test_desktop_aggregate_budget_and_foreign_compute_are_checked():
     original=lambda *a:False
     rows=[{**PROCESS,'pid':str(i),'used_mib':'128'} for i in range(1,5)]

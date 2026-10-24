@@ -6,6 +6,37 @@ import pytest
 from scripts.check_evidence_v8_progress import current_extraction_counts, frozen_search_counts
 
 
+def test_intermediate_fits_and_latest_checkpoint_are_separate_from_fold_completion(tmp_path):
+    import os
+    from scripts.check_evidence_v8_progress import training_artifact_progress
+    files={'fits/id/linear/model.json':{},'fits/id/neural/complete.json':{'task':'id','config':{'smoke_only':False}},
+           'fits/id/smoke/complete.json':{'task':'id','config':{'smoke_only':True}},
+           'fits/id/smoke/progress.json':{'history':[{'epoch':1,'optimizer_updated':True}]},
+           'ner/models/upstream/progress.json':{'history':[{'epoch':3,'optimizer_updated':True}]},
+           'fits/id/neural/progress.json':{'history':[{'epoch':1,'optimizer_updated':True}]}}
+    for name,value in files.items():
+        path=tmp_path/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(value))
+        os.utime(path,(100,100))
+    os.utime(tmp_path/'fits/id/neural/progress.json',(200,200))
+    os.utime(tmp_path/'fits/id/smoke/progress.json',(300,300))
+    before={name:(tmp_path/name).read_bytes() for name in files}
+    result=training_artifact_progress(tmp_path)
+    assert result['completed_id_linear_fits']==1 and result['completed_id_neural_fits']==1
+    assert result['completed_relation_neural_fits']==0
+    assert result['smoke_neural_fits_excluded']==1
+    assert result['latest_training_checkpoint']['task']=='id'
+    assert result['latest_training_checkpoint']['epoch']==1
+    assert not any(k in result for k in ['metrics','precision','completed_id_outer_folds'])
+    assert before=={name:(tmp_path/name).read_bytes() for name in files}
+
+
+def test_invalid_checkpoint_progress_cannot_be_reported_as_training_success(tmp_path):
+    from scripts.check_evidence_v8_progress import training_artifact_progress
+    path=tmp_path/'fits/id/neural/progress.json';path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({'history':[{'epoch':0,'optimizer_updated':True}]}))
+    with pytest.raises(ValueError,match='cannot be verified'):training_artifact_progress(tmp_path)
+
+
 def test_slow_extraction_read_is_cancelled_without_inventing_zero_or_leaving_a_handler():
     from scripts.check_evidence_v8_progress import bounded_extraction_counts
     con=sqlite3.connect(':memory:')

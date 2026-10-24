@@ -284,9 +284,18 @@ def pipeline_states(progress):
             details = []
             if value.get('status') != 'clinical_training_complete':
                 for field, label in [('completed_ner_models','NER 학습 모델'),('completed_ner_profiles','자동 후보 profile'),
-                                     ('completed_id_outer_folds','ID 외부 fold'),('completed_relation_outer_folds','관계 외부 fold')]:
+                                     ('completed_id_outer_folds','ID 외부 fold'),('completed_relation_outer_folds','관계 외부 fold'),
+                                     ('completed_id_linear_fits','ID 선형 모델'),('completed_id_neural_fits','ID 신경망 모델'),
+                                     ('completed_relation_neural_fits','관계 신경망 모델')]:
                     if field in value:
                         details.append(label + ' ' + str(count(value[field])) + '개 완료')
+                checkpoint = value.get('latest_training_checkpoint')
+                if isinstance(checkpoint, dict) and checkpoint.get('task') in {'ner','id','relation'}:
+                    modified = checkpoint.get('modified_at_unix')
+                    if isinstance(modified, (int,float)) and type(checkpoint.get('epoch')) is int:
+                        stamp = datetime.fromtimestamp(modified, timezone(timedelta(hours=9))).isoformat(timespec='seconds')
+                        label = {'ner':'상류 NER','id':'ID','relation':'관계'}[checkpoint['task']]
+                        details.append(f"최근 {label} 체크포인트 epoch {checkpoint['epoch']} · {stamp} · 학습 진행 기록")
                 if 'io_memory_probe_peak_rss_bytes' in value:
                     peak=count(value['io_memory_probe_peak_rss_bytes'])
                     if peak is not None:
@@ -458,7 +467,7 @@ def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_e
     resource = None
     if resource_execution_path is not None:
         resource, _ = load_receipt(resource_execution_path, 'operational_resource_execution', sources)
-        if (resource.get('scope')!='resource_admission_only' or
+        if (resource.get('scope') not in {'resource_admission_only','resource_admission_and_cached_model_resolution'} or
                 set(resource.get('files',{}))!={'execution.json','v8_resource_layer.py','supervisor.py','desktop-policy.json'}):
             raise ValueError('Unsupported operational resource manifest')
         digests=[resource.get('configuration_sha256'),resource.get('scientific_source_manifest_sha256'),*resource['files'].values()]
@@ -550,8 +559,10 @@ def tables(payload):
             [[t['name'], labels[t['status']], validation['observed_at']] for t in validation['tests']]))
     if payload.get('operational_resource_execution'):
         v=payload['operational_resource_execution']
-        result.append(('GPU 자원 검사 변경 이력', ['구분','내용'],[
-            ['변경 범위','자원 진입 검사만 변경; 모델·데이터·평가 기준 유지'],
+        cached= v['scope']=='resource_admission_and_cached_model_resolution'
+        result.append(('GPU 자원·고정 모델 캐시 정책' if cached else 'GPU 자원 검사 변경 이력', ['구분','내용'],[
+            ['변경 범위','자원 진입 검사·고정 모델 캐시 읽기; 모델·데이터·평가 기준 유지' if cached else
+             '자원 진입 검사만 변경; 모델·데이터·평가 기준 유지'],
             ['운영 설정 SHA-256',v['configuration_sha256']],
             ['과학 소스 manifest SHA-256',v['scientific_source_manifest_sha256']]]))
     return result

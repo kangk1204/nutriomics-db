@@ -73,6 +73,42 @@ def frozen_search_counts(connection, manifest_path):
             'search_complete': True, 'source': 'verified immutable manifest plus current read-only DB transaction'}
 
 
+def training_artifact_progress(home):
+    """Read training milestones without inferring accuracy or loading model weights."""
+    import json
+    from pathlib import Path
+    home = Path(home)
+    result = {}
+    excluded = set()
+    for task in ('id', 'relation'):
+        result['completed_' + task + '_linear_fits'] = len(list((home/'fits'/task).glob('*/model.json')))
+        completed = 0
+        for path in (home/'fits'/task).glob('*/complete.json'):
+            value = json.loads(path.read_text(encoding='utf8'))
+            config = value.get('config')
+            if isinstance(config, dict) and config.get('smoke_only') is True:
+                excluded.add(path.parent)
+            elif value.get('task') == task and isinstance(config, dict):
+                completed += 1
+        result['completed_' + task + '_neural_fits'] = completed
+    result['smoke_neural_fits_excluded'] = len(excluded)
+    checkpoints = [p for directory in (home/'ner/models', home/'fits/id', home/'fits/relation')
+                   for p in directory.glob('*/progress.json') if p.parent not in excluded]
+    if checkpoints:
+        latest = max(checkpoints, key=lambda p: (p.stat().st_mtime, str(p)))
+        history = json.loads(latest.read_text(encoding='utf8')).get('history', [])
+        if history:
+            last = history[-1]
+            epoch = last.get('epoch')
+            if type(epoch) is not int or epoch < 1 or type(last.get('optimizer_updated')) is not bool:
+                raise ValueError('Training checkpoint metadata cannot be verified')
+            task = 'ner' if latest.is_relative_to(home/'ner') else latest.relative_to(home).parts[1]
+            result['latest_training_checkpoint'] = {'task':task, 'epoch':epoch,
+                'optimizer_updated':last['optimizer_updated'], 'modified_at_unix':latest.stat().st_mtime,
+                'scope':'Training progress only; not relation accuracy or fold completion'}
+    return result
+
+
 def gpu_progress():
     code = """import json,psutil,subprocess,shutil,hashlib
 from pathlib import Path
@@ -91,6 +127,7 @@ for name in dict.fromkeys([active,'nutriomics-evidence-v8-clinical',*previous]):
  v['completed_ner_models']=len(list((h/'ner/models').glob('*/complete.json')))
  v['completed_id_outer_folds']=len(list((h/'cross-validation/id').glob('outer-*.json')))
  v['completed_relation_outer_folds']=len(list((h/'cross-validation/relation').glob('outer-*.json')))
+ v.update(training_artifact_progress(h))
  v['ner_training_manifest_exists']=(h/'ner/manifest.json').exists()
  v['selected_id_manifest_exists']=(h/'selected/id.json').exists()
  v['selected_relation_manifest_exists']=(h/'selected/relation.json').exists()
@@ -112,7 +149,7 @@ for name in dict.fromkeys([active,'nutriomics-evidence-v8-clinical',*previous]):
 out['resources']={'available_memory_bytes':psutil.virtual_memory().available,'free_disk_bytes':shutil.disk_usage(b).free,'gpu':subprocess.check_output(['nvidia-smi','--query-gpu=uuid,name,memory.used,memory.total','--format=csv,noheader,nounits'],text=True).strip()}
 print(json.dumps(out))
 """
-    return json.loads(remote("100.84.183.6", code, timeout=45))
+    return json.loads(remote("100.84.183.6", inspect.getsource(training_artifact_progress) + '\n' + code, timeout=45))
 
 
 def r2_progress():

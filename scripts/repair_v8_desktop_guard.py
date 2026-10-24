@@ -37,11 +37,25 @@ if sha(a/'asset-manifest.json')!=contract['asset_manifest_sha256']:raise ValueEr
 policy={'user_id':os.getuid(),'maximum_total_desktop_mib':512,'additional_desktops':[
  {'executable':'/usr/bin/nautilus','maximum_mib':64},
  {'executable':'/opt/google/chrome/chrome','maximum_mib':256}]}
+if CACHE_ONLY:policy['cached_models_only']=True
 files={name:base64.b64decode(blob) for name,blob in INPUT.items()}
 files['desktop-policy.json']=encoded(policy)
 predecessors={str(p.relative_to(h)):sha(p) for p in sorted((h/'pipeline-logs').glob('*.complete.json'))}
 config={'schema_version':'v8-resource-admission-v1','scientific_source_manifest_sha256':SOURCE_SHA,
  'files':{name:hashlib.sha256(blob).hexdigest() for name,blob in files.items()},'predecessor_receipts':predecessors}
+if CACHE_ONLY:
+ stopped=read(h/'cache-repair/interruption.json')
+ if not stopped.get('network_wait_trace_confirmed') or stopped.get('changed_protected_files')!=[]:
+  raise ValueError('Cached-model continuation requires a verified, checkpoint-preserving interruption')
+ probe_path=h/'cache-repair/cache-only-probe.json';cached_probe=read(probe_path)
+ if cached_probe.get('returncode')!=0:raise ValueError('Pinned cache load probe failed')
+ cached=json.loads(cached_probe['stdout'])
+ if not all(cached.get(k) is True for k in ['loaded','network_access_disabled','missing_cache_refused']):
+  raise ValueError('Pinned cache load and missing-cache checks are required')
+ config.update(scope='resource_admission_and_cached_model_resolution',
+  predecessor_execution_sha256=stopped['previous_execution_sha256'],
+  interruption_receipt_sha256=sha(h/'cache-repair/interruption.json'),
+  cache_preflight_receipt_sha256=sha(probe_path))
 blob=encoded(config);digest=hashlib.sha256(blob).hexdigest();d=h/'runtime-control'/('desktop-'+digest[:16])
 for name,value in files.items():immutable(d/name,value)
 immutable(d/'execution.json',blob)
@@ -71,10 +85,13 @@ with (h/'resume-owner.lock').open('a') as owner:
  fcntl.flock(owner,fcntl.LOCK_EX)
  state=read(h/'pipeline-state.json')
  if (h/'resource-execution-current.json').exists():
-  if read(h/'resource-execution-current.json')!=execution:raise ValueError('Different continuation already selected')
+  previous=read(h/'resource-execution-current.json')
+  if previous!=execution and (not CACHE_ONLY or previous['sha256']!=config['predecessor_execution_sha256']):
+   raise ValueError('Different continuation already selected')
   if state.get('resource_execution')==execution and psutil.pid_exists(state.get('pid',0)):
    print(json.dumps({'status':'already_running','execution':execution,'pid':state['pid']}));raise SystemExit(0)
- if state.get('status') not in {'waiting','cancelled'} or (state.get('child_pid') and psutil.pid_exists(state['child_pid'])):
+ allowed_states={'waiting','cancelled','failed'} if CACHE_ONLY else {'waiting','cancelled'}
+ if state.get('status') not in allowed_states or (state.get('child_pid') and psutil.pid_exists(state['child_pid'])):
   raise ValueError('Only an idle owned resource wait may be continued')
  oldpid=state['pid']
  immutable(d/'predecessor-pipeline-state.json',(h/'pipeline-state.json').read_bytes())
@@ -93,7 +110,11 @@ with (h/'resume-owner.lock').open('a') as owner:
     'gpu-ledger.json','resource-policy.json'} or p.name.endswith('.complete.json'))}
  immutable(d/'checkpoint-preservation.json',encoded({'files':protected,'observed_at':time.time()}))
  immutable(d/'predecessor-cancel-request.json',cancel.read_bytes());cancel.unlink()
- immutable(h/'resource-execution-current.json',encoded(execution))
+ pointer=h/'resource-execution-current.json'
+ if CACHE_ONLY and pointer.exists() and read(pointer)!=execution:
+  immutable(d/'predecessor-resource-execution.json',pointer.read_bytes())
+  temporary=pointer.with_suffix('.part');temporary.write_bytes(encoded(execution));temporary.replace(pointer)
+ else:immutable(pointer,encoded(execution))
  runners=b/'runtime/runners';runners.mkdir(exist_ok=True)
  immutable(runners/(config['files']['supervisor.py']+'.py'),files['supervisor.py'])
  fcntl.flock(lock,fcntl.LOCK_UN);lock.close()
@@ -109,12 +130,12 @@ with (h/'resume-owner.lock').open('a') as owner:
 '''
 
 
-def deploy(phase):
+def deploy(phase, cached_models_only=False):
     files = {'v8_resource_layer.py': Path(__file__).with_name('v8_resource_layer.py'),
              'supervisor.py': Path(__file__).with_name('run_evidence_v8_pipeline.py')}
     payload = {name:base64.b64encode(path.read_bytes()).decode() for name,path in files.items()}
     prefix = '\n'.join(name+'='+repr(value) for name,value in {
-        'PROJECT':PROJECT,'EXPERIMENT':EXPERIMENT,'SOURCE_SHA':SOURCE_SHA,'PHASE':phase}.items())+'\n'
+        'PROJECT':PROJECT,'EXPERIMENT':EXPERIMENT,'SOURCE_SHA':SOURCE_SHA,'PHASE':phase,'CACHE_ONLY':cached_models_only}.items())+'\n'
     receipt = json.loads(remote('100.84.183.6',prefix+REMOTE,json.dumps(payload).encode(),timeout=180))
     home=ROOT/'literature_service/runtime'/EXPERIMENT
     path=home/('resource-'+phase+'-receipt.json')
@@ -123,12 +144,25 @@ def deploy(phase):
         expected=home/'resource-execution-expected.json'
         value=json.dumps(receipt['execution'],sort_keys=True)
         if expected.exists() and expected.read_text(encoding='utf8')!=value:
-            raise ValueError('Local approved resource execution changed')
-        expected.write_text(value,encoding='utf8')
+            if not cached_models_only:raise ValueError('Local approved resource execution changed')
+            old=json.loads(expected.read_text(encoding='utf8'))
+            history=(home/'resource-execution-history'/old['sha256']).resolve()
+            if not history.is_relative_to(home.resolve()):raise ValueError('Resource history escaped experiment')
+            history.mkdir(parents=True,exist_ok=True)
+            (history/'resource-execution-expected.json').write_bytes(expected.read_bytes())
+            bundle=home/'runtime-control'
+            if bundle.exists():
+                if not bundle.resolve().is_relative_to(home.resolve()):raise ValueError('Resource bundle escaped experiment')
+                target=history/'runtime-control'
+                if not target.resolve().is_relative_to(home.resolve()):raise ValueError('Resource history target escaped experiment')
+                bundle.rename(target)
+        temporary=expected.with_suffix('.part');temporary.write_text(value,encoding='utf8');temporary.replace(expected)
     return receipt
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('phase',choices=['prepare','activate'])
-    print(json.dumps(deploy(parser.parse_args().phase),ensure_ascii=False))
+    parser.add_argument('--cached-models-only',action='store_true')
+    args=parser.parse_args()
+    print(json.dumps(deploy(args.phase,args.cached_models_only),ensure_ascii=False))
