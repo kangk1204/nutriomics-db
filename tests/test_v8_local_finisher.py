@@ -76,6 +76,21 @@ def test_publication_failure_preserves_completed_report_and_metrics(tmp_path):
     assert state["status"] == "development_evaluation_complete_publication_pending"
 
 
+def test_documentation_requires_complete_scoring_and_preserves_results_when_git_is_dirty():
+    calls=[]
+    def updater(directory,**kwargs):
+        calls.append((directory,kwargs))
+        raise ValueError('clean worktree required')
+    with pytest.raises(ValueError,match='completed scoring'):
+        module.document_scored_result({},'feature/test',updater=updater)
+    assert not calls
+    state={'evaluation_complete':True,'metrics':{'tp':65,'fp':63,'fn':89},
+           'submission_report':{'directory':'verified-report'}}
+    module.document_scored_result(state,'feature/test',push=True,updater=updater)
+    assert state['documentation_pending'] is True and state['metrics']['tp']==65
+    assert calls==[('verified-report',{'branch':'feature/test','push':True})]
+
+
 def test_all_native_scorer_dependencies_are_bound_before_evaluation(tmp_path):
     source=tmp_path/'source';output=tmp_path/'experiment';source.mkdir();output.mkdir()
     path=source/'native_scorer.py';path.write_bytes(b'unchanged raw ID and type rules')

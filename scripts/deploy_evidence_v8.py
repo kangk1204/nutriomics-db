@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 import os
+import re
 from pathlib import Path
 import shlex
 import subprocess
@@ -26,11 +27,17 @@ VERIFIED_TAILSCALE_V6 = {"100.84.183.6": "fd7a:115c:a1e0::134:b707"}
 ORIGINAL = "/home/keunsoo/projects/nutriomics-relation-v6-gpu-r2/runtime/relation-repair-v6-gpu-r2"
 
 
-def ssh(host):
+def ssh(host, *, ipv6=False):
     if host not in ALLOWED_HOSTS:
         raise ValueError("GPU host is outside the verified deployment allowlist")
-    endpoint = VERIFIED_TAILSCALE_V6.get(host, host)
-    verified_route = ["-6", "-o", "HostKeyAlias=" + host] if endpoint != host else []
+    if ipv6 and host not in VERIFIED_TAILSCALE_V6:
+        raise ValueError("No verified IPv6 route for this GPU host")
+    # IPv4 is the default verified route. Explicit IPv6 selection keeps the
+    # same host key; an unavailable route never replays a remote mutation.
+    endpoint = VERIFIED_TAILSCALE_V6[host] if ipv6 else host
+    verified_route = ["-6"] if ipv6 else []
+    if host in VERIFIED_TAILSCALE_V6:
+        verified_route += ["-o", "HostKeyAlias=" + host]
     if host in PINNED_HOST_KEYS:
         keyfile, expected = PINNED_HOST_KEYS[host]
         if not keyfile.is_file() or hashlib.sha256(keyfile.read_bytes()).hexdigest() != expected:
@@ -41,11 +48,30 @@ def ssh(host):
             "ServerAliveCountMax=2", "keunsoo@" + endpoint]
 
 
-def remote(host, code, payload=b"", *, timeout=180):
-    p = subprocess.run([*ssh(host), "python3 -c " + shlex.quote(code)], input=payload,
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+def run_remote(host, code, payload=b"", *, timeout=180, stdout=subprocess.PIPE):
+    command = "python3 -c " + shlex.quote(code)
+    try:
+        p = subprocess.run([*ssh(host), command], input=payload,
+                           stdout=stdout, stderr=subprocess.PIPE, timeout=timeout)
+        # These exact OpenSSH errors occur before a TCP connection is made.
+        # Never replay a command after authentication, disconnection, an
+        # unknown timeout, or a remote nonzero exit.
+        connection_error = re.fullmatch(
+            r'ssh: connect to host ' + re.escape(host)
+            + r' port 22: (?:Connection timed out|Connection refused|Network is unreachable|No route to host)',
+            p.stderr.decode(errors='replace').strip())
+        if p.returncode == 255 and connection_error and host in VERIFIED_TAILSCALE_V6:
+            p = subprocess.run([*ssh(host, ipv6=True), command], input=payload,
+                               stdout=stdout, stderr=subprocess.PIPE, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        raise TimeoutError(f"SSH host {host} exceeded {timeout}s; remote completion unconfirmed") from None
     if p.returncode:
         raise RuntimeError("Remote operation failed: " + p.stderr.decode(errors="replace")[-1200:])
+    return p
+
+
+def remote(host, code, payload=b"", *, timeout=180):
+    p = run_remote(host, code, payload, timeout=timeout)
     return p.stdout
 
 

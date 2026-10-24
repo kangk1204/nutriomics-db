@@ -1,13 +1,18 @@
 {
   "as_of": "2026-10-24",
-  "data_observed_at": "2026-10-24T01:15:28.189472+00:00",
-  "v8_observed_at": "2026-10-24T01:17:51.268519+00:00",
+  "data_observed_at": "2026-10-24T01:50:36.426238+00:00",
+  "v8_observed_at": "2026-10-24T01:50:36.426238+00:00",
   "default_engine": "heuristic-v1",
   "collection": {
-    "live_stored_unique_papers": 41882,
-    "live_abstract_papers": 40455,
-    "live_oa_available_papers": 2135,
-    "extraction_success_papers": 27236
+    "live_stored_unique_papers": 42487,
+    "live_abstract_papers": 41053,
+    "live_oa_available_papers": 2176,
+    "extraction_success_papers": null,
+    "extraction_read_status": "deadline_exceeded",
+    "last_verified_extraction": {
+      "value": 27597,
+      "observed_at": "2026-10-24T01:49:54.380071+00:00"
+    }
   },
   "search_expected_papers": 133261,
   "relation_evaluation": {
@@ -91,16 +96,22 @@
   },
   "training": {
     "v8": {
-      "stage": "train-ner",
-      "status": "running",
-      "completed_ner_models": 2,
-      "completed_ner_profiles": 1,
-      "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4"
+      "status": "connection_unavailable",
+      "stage": null,
+      "last_verified": {
+        "observed_at": "2026-10-24T01:44:07.535243+00:00",
+        "stage": "train-ner",
+        "status": "running",
+        "completed_ner_models": 4,
+        "completed_ner_profiles": 4,
+        "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4"
+      }
     },
     "r2": {
       "stage": "train-relation",
       "completed_outer_folds": 2,
-      "evaluation": "pending"
+      "evaluation": "pending",
+      "observed_at": "2026-10-24T01:50:36.426238+00:00"
     },
     "native": {
       "stage": "train-drugprot",
@@ -108,7 +119,9 @@
         "drugprot": 2,
         "cg": 0
       },
-      "evaluation": "pending"
+      "evaluation": "pending",
+      "observed_at": "2026-10-24T01:50:36.426238+00:00",
+      "completed_neural_model_files": 20
     }
   },
   "upstream_ner_training": [
@@ -215,5 +228,11 @@
     "BC8 held-out evaluation",
     "nutrition-domain annotation and reviewer-time measurement",
     "7-day artifact observation and recovery validation"
-  ]
+  ],
+  "nlp_validation": {
+    "status": "passed",
+    "passed": 5,
+    "total": 5,
+    "receipt": "nlp-validation-2026-10-24.json"
+  }
 }

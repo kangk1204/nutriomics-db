@@ -31,6 +31,22 @@ def current_extraction_counts(connection):
                 for stage, status, n in connection.execute("SELECT stage,status,count(*) FROM queue GROUP BY stage,status ORDER BY stage,status")]}
 
 
+def bounded_extraction_counts(connection, seconds=12):
+    """Cancel a slow read before its SSH observer can leave an orphaned query."""
+    import sqlite3
+    import time
+    deadline = time.monotonic() + seconds
+    connection.set_progress_handler(lambda: int(time.monotonic() >= deadline), 1000)
+    try:
+        return current_extraction_counts(connection)
+    except sqlite3.OperationalError as error:
+        if 'interrupted' not in str(error).lower():
+            raise
+        return {'extraction_read_status':'deadline_exceeded', 'extraction_read_budget_seconds':seconds}
+    finally:
+        connection.set_progress_handler(None, 0)
+
+
 def frozen_search_counts(connection, manifest_path):
     """Keep the frozen denominator visible while a collector rewrites live state."""
     import hashlib
@@ -130,11 +146,12 @@ with sqlite3.connect((h/'data/literature.sqlite3').as_uri()+'?mode=ro',uri=True)
  c.execute('BEGIN')
  v['live_stored_unique_papers']=c.execute('SELECT count(*) FROM papers').fetchone()[0]
  v['live_oa_available_papers']=c.execute(\"SELECT count(*) FROM papers WHERE oa_status='available'\").fetchone()[0]
+ v['live_abstract_papers']=c.execute(\"SELECT count(*) FROM papers WHERE trim(abstract)<>''\").fetchone()[0]
  v['oa_state_counts']=dict(c.execute('SELECT oa_status,count(*) FROM papers GROUP BY oa_status'))
- v.update(current_extraction_counts(c))
  manifest=Path(v['manifest']).resolve()
  if not manifest.is_relative_to((h/'v8-expansion').resolve()):raise ValueError('Owned collection manifest path')
  v['frozen_search_inventory']=frozen_search_counts(c,manifest)
+ v.update(bounded_extraction_counts(c))
 ledger=manifest.parent/'ingest.sqlite3'
 if ledger.is_file():
  with sqlite3.connect(ledger.as_uri()+'?mode=ro',uri=True) as c:
@@ -144,7 +161,8 @@ for scope in ['public','internal']:
  if p.exists():v[scope+'_snapshot']=json.loads(p.read_text()).get('counts')
 print(json.dumps(v))
 """
-    code = inspect.getsource(current_extraction_counts) + "\n" + inspect.getsource(frozen_search_counts) + "\n" + code
+    code = (inspect.getsource(current_extraction_counts) + "\n" + inspect.getsource(bounded_extraction_counts)
+            + "\n" + inspect.getsource(frozen_search_counts) + "\n" + code)
     known = "C:/Projects/00_NutriGenomics_auto/outputs/publication/2026-10-22/tailscale-known-hosts"
     command = ["ssh", "-J", "keunsoo@100.93.148.94", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes",
                "-o", "ConnectTimeout=12", "-o", "UserKnownHostsFile=" + known, "keunsoo@100.110.101.17",

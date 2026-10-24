@@ -6,6 +6,26 @@ import pytest
 from scripts.check_evidence_v8_progress import current_extraction_counts, frozen_search_counts
 
 
+def test_slow_extraction_read_is_cancelled_without_inventing_zero_or_leaving_a_handler():
+    from scripts.check_evidence_v8_progress import bounded_extraction_counts
+    con=sqlite3.connect(':memory:')
+    con.executescript('''
+        CREATE TABLE papers(paper_id INTEGER,current_source_id TEXT,abstract TEXT);
+        CREATE TABLE sources(source_id TEXT,text_hash TEXT);
+        CREATE TABLE extractions(paper_id INTEGER,engine_version TEXT,source_id TEXT,source_hash TEXT,active INTEGER);
+        CREATE TABLE queue(stage TEXT,status TEXT);
+        WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM n WHERE x<1000)
+        INSERT INTO papers SELECT x,'s'||x,'abstract' FROM n;
+        INSERT INTO sources SELECT current_source_id,'h' FROM papers;
+        INSERT INTO extractions SELECT paper_id,'v1',current_source_id,'h',1 FROM papers;
+    ''')
+    result=bounded_extraction_counts(con,seconds=0)
+    assert result['extraction_read_status']=='deadline_exceeded'
+    assert 'extraction_success_papers' not in result
+    assert con.execute('SELECT count(*) FROM papers').fetchone()[0]==1000
+    assert bounded_extraction_counts(con)['extraction_success_papers']==1000
+
+
 def test_spare_gpu_observer_has_no_system_python_dependency_or_writes(monkeypatch):
     from scripts import check_evidence_v8_progress as observer
     calls = []

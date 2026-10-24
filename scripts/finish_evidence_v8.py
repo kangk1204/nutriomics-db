@@ -16,7 +16,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "literature_service"))
-from deploy_evidence_v8 import ALLOWED_HOSTS, PROJECT, remote, ssh
+from deploy_evidence_v8 import ALLOWED_HOSTS, PROJECT, remote, run_remote
 
 
 def write_recovered_file(output, name, value):
@@ -94,8 +94,8 @@ with zipfile.ZipFile(sys.stdout.buffer,'w',zipfile.ZIP_DEFLATED) as z:
     archive = output / "server-results.zip"
     temp = archive.with_suffix(".part")
     with temp.open("wb") as stream:
-        result = subprocess.run([*ssh(host), "python3 -c " + shlex.quote("PROJECT=" + repr(PROJECT) + "\nEXPERIMENT=" + repr(experiment) + "\n" + code)],
-                                stdout=stream, stderr=subprocess.PIPE, timeout=1800)
+        result = run_remote(host, "PROJECT=" + repr(PROJECT) + "\nEXPERIMENT=" + repr(experiment) + "\n" + code,
+                            stdout=stream, timeout=1800)
     if result.returncode:
         raise RuntimeError("Authenticated export failed: " + result.stderr.decode(errors="replace")[-600:])
     temp.replace(archive)
@@ -236,8 +236,10 @@ def submission_report(output):
     if result.returncode:
         raise RuntimeError("Scoring completed, but the report progress receipt could not be created")
     clinical = runtime / "v8-clinical-contextual/summary.json"
+    nlp = ROOT / 'docs/status/nlp-validation-2026-10-24.json'
     payload = build_payload(progress, r2_evaluation=r2_evaluation, v8_evaluation=v8_evaluation,
-                            clinical_summary=clinical if clinical.exists() else None)
+                            clinical_summary=clinical if clinical.exists() else None,
+                            nlp_validation_path=nlp if nlp.exists() else None)
     destination = output / "submission-reports" / stamp
     manifest = write_report(payload, destination)
     return {"directory": str(destination), "report_sha256": manifest["files"]["report.json"],
@@ -259,6 +261,20 @@ def deliver_scored_result(output, state, report_builder=submission_report, publi
     return state
 
 
+def document_scored_result(state, branch, push=False, updater=None):
+    if state.get('evaluation_complete') is not True or not state.get('submission_report', {}).get('directory'):
+        raise ValueError('Documentation requires completed scoring and its report')
+    if updater is None:
+        from update_v8_result_docs import update
+        updater = update
+    try:
+        state['documentation'] = updater(state['submission_report']['directory'], branch=branch, push=push)
+        state['documentation_pending'] = False
+    except (ValueError, RuntimeError, OSError, subprocess.CalledProcessError) as error:
+        state.update(documentation_pending=True, documentation_error=type(error).__name__ + ': ' + str(error)[:400])
+    return state
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", choices=ALLOWED_HOSTS, default="100.84.183.6")
@@ -266,7 +282,11 @@ def main():
     parser.add_argument("--remote-experiment", default="nutriomics-evidence-v8")
     parser.add_argument("--max-days", type=int, default=84)
     parser.add_argument("--resume-interrupted", action="store_true")
+    parser.add_argument('--documentation-branch', help='Explicit branch for committing completed evaluation reports')
+    parser.add_argument('--push-documentation', action='store_true')
     args = parser.parse_args()
+    if args.push_documentation and not args.documentation_branch:
+        raise ValueError('Pushing documentation requires an explicit branch')
     import re
     if not re.fullmatch(r"nutriomics-evidence-v8(?:-[a-z0-9]+)*", args.remote_experiment):
         raise ValueError("Remote experiment must be an owned v8 runtime directory")
@@ -284,7 +304,9 @@ def main():
         prior = read(path) if path.exists() else {}
         state = {"pid": os.getpid(), "host": args.host, "running": True,
                  "started_at": prior.get("started_at", time.time()), "max_days": args.max_days,
-                 "additional_generative_model_calls": 0, "gold_stays_local": True}
+                 "additional_generative_model_calls": 0, "gold_stays_local": True,
+                 "documentation_branch":args.documentation_branch,
+                 "push_documentation":args.push_documentation}
         atomic(path, state)
         try:
             while time.time() - state["started_at"] < args.max_days * 86400:
@@ -311,6 +333,8 @@ def main():
                     build_diagnostics(output)
                     state["metrics"] = first["scores"]["nutriomics-evidence-v8"]["metrics"]
                     deliver_scored_result(output, state)
+                    if args.documentation_branch:
+                        document_scored_result(state, args.documentation_branch, push=args.push_documentation)
                     break
                 if args.resume_interrupted:
                     from resume_evidence_v8 import interrupted, resume

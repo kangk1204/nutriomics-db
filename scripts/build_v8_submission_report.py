@@ -386,8 +386,47 @@ def clinical_rows(path, sources):
     return rows, "완료·진단 평가, 조건 연결 성능은 미평가"
 
 
+def nlp_validation(path, sources):
+    if path is None:
+        return None
+    value, digest = load_receipt(path, 'legacy_nlp_validation', sources)
+    if value.get('schema_version') != 'nutriomics-nlp-validation-v1':
+        raise ValueError('NLP 검사 receipt 형식이 다릅니다')
+    tests = value.get('tests')
+    if (not isinstance(tests, list) or len(tests) != 5
+            or any(not isinstance(t, dict) or not isinstance(t.get('name'), str)
+                   or t.get('status') not in {'passed', 'failed', 'error', 'skipped'} for t in tests)
+            or len({t['name'] for t in tests}) != 5):
+        raise ValueError('NLP 검사 5건의 개별 결과가 필요합니다')
+    prefixes = {'test_v5_active_passive_roles_match_direction': 3,
+                'test_v5_planned_event_never_becomes_observed': 1,
+                'test_batch_identity_initializes_lazy_parser_before_registering': 1}
+    if {name:sum(t['name'].split('[', 1)[0] == name for t in tests) for name in prefixes} != prefixes:
+        raise ValueError('대상 NLP 검사 구성이 다릅니다')
+    versions = value.get('versions', {})
+    for name, version in {'spacy':'3.7.5', 'scispacy':'0.6.2', 'en-core-sci-sm':'0.5.4',
+                          'torch':'2.6.0+cpu', 'transformers':'4.49.0'}.items():
+        if versions.get(name) != version:
+            raise ValueError('고정 NLP 의존성이 다릅니다: ' + name)
+    for field in ('source_manifest_sha256', 'test_sha256', 'log_sha256', 'junit_sha256'):
+        if not re.fullmatch('[a-f0-9]{64}', str(value.get(field, ''))):
+            raise ValueError('NLP 검사 출처 해시가 없습니다')
+    passed = sum(t['status'] == 'passed' for t in tests)
+    exit_code = value.get('exit_code')
+    if (type(exit_code) is not int or (passed == 5 and exit_code != 0)
+            or (any(t['status'] in {'failed', 'error'} for t in tests) and exit_code == 0)):
+        raise ValueError('NLP 검사 종료 코드와 결과가 다릅니다')
+    observed = datetime.fromisoformat(value['observed_at'].replace('Z', '+00:00'))
+    if observed.tzinfo is None:
+        raise ValueError('NLP 검사 관측 시각에 시간대가 필요합니다')
+    return {'status':'5건 통과' if passed == 5 else '추가 확인', 'passed':passed, 'total':5,
+            'tests':tests, 'versions':versions, 'observed_at':value['observed_at'],
+            'source_manifest_sha256':value['source_manifest_sha256'], 'test_sha256':value['test_sha256'],
+            'source_sha256':digest, 'scope':'구버전 NLP 회귀 검사'}
+
+
 def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_evaluation=None,
-                  clinical_summary=None, previous_verified_progress=None):
+                  clinical_summary=None, previous_verified_progress=None, nlp_validation_path=None):
     sources = []
     progress, progress_hash = load_receipt(progress_path, "progress", sources)
     if not isinstance(progress.get("observed_at"), str):
@@ -414,6 +453,7 @@ def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_e
                   new_evaluation("v8", v8_evaluation, sources, gold_hash, cohort)]
     counts, collection = collection_rows(progress)
     clinical, clinical_status = clinical_rows(clinical_summary, sources)
+    validation = nlp_validation(nlp_validation_path, sources)
     return {"schema_version": "nutriomics-v8-submission-report-v1", "observed_at": progress["observed_at"],
             "observed_at_kst": observed.astimezone(timezone(timedelta(hours=9))).isoformat(),
             "generated_at": datetime.now(timezone.utc).isoformat(), "progress_sha256": progress_hash,
@@ -422,6 +462,7 @@ def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_e
             "pipelines": pipeline_states(progress), "clinical": clinical, "clinical_status": clinical_status,
             "upstream_ner_training": training_ner_rows(progress),
             "previous_pipeline_observations": previous_observations,
+            "nlp_validation": validation,
             "default_engine": progress.get("default_engine", "미확인"),
             "additional_model_calls": count(progress.get("additional_model_calls")),
             "sealed_test_opened": progress.get("sealed_test_opened"),
@@ -429,6 +470,7 @@ def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_e
                 "historical_development_comparison": "검증 완료",
                 "new_relation_development_evaluations": {r['model']:r['status'] for r in relations[-2:]},
                 "clinical_diagnostic": clinical_status,
+                "legacy_nlp_regressions": validation['status'] if validation else '미포함',
                 "training_internal_selection_gate": "본 보고서 입력으로 독립 검증하지 않음",
                 "sealed_independent_test": "미검증·개발 비교 목표 충족과 별도 판정",
                 "nutrition_domain_validation": "미측정",
@@ -488,6 +530,11 @@ def tables(payload):
         result.append(('이전 접속 확인 기록·현재 상태와 별도', ['확인 시각(KST)','작업','당시 단계','당시 진행'],
             [[r['observed_at_kst'],r['model'],r['stage'],r.get('progress_detail') or r['status']]
              for r in payload['previous_pipeline_observations']]))
+    if payload.get('nlp_validation'):
+        validation = payload['nlp_validation']
+        labels = {'passed':'통과', 'failed':'실패', 'error':'오류', 'skipped':'생략'}
+        result.append(('구버전 NLP 회귀 검사', ['검사', '결과', '관측 시각'],
+            [[t['name'], labels[t['status']], validation['observed_at']] for t in validation['tests']]))
     return result
 
 
@@ -553,6 +600,10 @@ def csv_report(payload):
     for row in payload.get('upstream_ner_training', []):
         writer.writerow(['NER 학습 진단',row['engine']+'/'+row['arm'],'공식 학습 OOF',row['papers'],'편',
             *[row['metrics'][k] for k in ('tp','fp','fn','precision','recall','f1')],row['scope']])
+    if payload.get('nlp_validation'):
+        for row in payload['nlp_validation']['tests']:
+            writer.writerow(['NLP 검사', row['name'], row['status'], 1, '검사', '', '', '', '', '', '',
+                             payload['nlp_validation']['observed_at']])
     return stream.getvalue()
 
 
@@ -581,9 +632,11 @@ def main(argv=None):
     p.add_argument('--v8-evaluation',type=Path)
     p.add_argument('--clinical-summary',type=Path)
     p.add_argument('--previous-verified-progress',type=Path,help='Optional older receipt; never replaces the current connection status')
+    p.add_argument('--nlp-validation',type=Path,help='Hash-bound result of the five pinned legacy NLP checks')
     a = p.parse_args(argv)
     payload = build_payload(a.progress,r2_evaluation=a.r2_evaluation,v8_evaluation=a.v8_evaluation,
-                            clinical_summary=a.clinical_summary,previous_verified_progress=a.previous_verified_progress)
+                            clinical_summary=a.clinical_summary,previous_verified_progress=a.previous_verified_progress,
+                            nlp_validation_path=a.nlp_validation)
     manifest = write_report(payload,a.output_dir)
     print(canonical({'output':str(a.output_dir.resolve()),'observed_at':payload['observed_at'],
                      'report_sha256':manifest['files']['report.json'],

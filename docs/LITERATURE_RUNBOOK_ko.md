@@ -157,3 +157,23 @@ pnpm -C frontend/explorer build
 관계 보고서는 평가 문헌·정답 수, TP/FP/FN, 정밀도·재현율·F1, ID 변경, 후보 손실, 기존 정탐 유지·상실·신규 복원을 포함합니다. 수집 보고서는 검색·저장·초록·본문·추출·검수 건수를 각각 집계합니다. 현재 학습 상태와 미완료 단계는 README와 날짜별 상태 JSON으로 갱신합니다.
 
 이번 커밋의 검사 범위와 실행 환경은 [검증 기록](status/validation-2026-10-24.md)에 정리했습니다.
+
+학습이 진행 중일 때 로컬 후속 작업을 다음과 같이 연결할 수 있습니다. 이 작업은 서버 체크포인트 재개, 100편 예측 회수, 같은 평가기의 두 번 재채점, 보고서 생성, README 갱신과 지정 브랜치의 커밋·푸시를 순서대로 수행합니다.
+
+```bash
+python scripts/finish_evidence_v8.py \
+  --host 100.84.183.6 \
+  --remote-experiment nutriomics-evidence-v8-run5 \
+  --home "$LITERATURE_HOME/nutriomics-evidence-v8-run5" \
+  --resume-interrupted \
+  --documentation-branch feature/20261023-literature-integration \
+  --push-documentation
+```
+
+로컬 후속 작업을 실행하는 PC를 켜 둡니다. 진행은 해당 home의 `local-finisher/state.json`에 기록됩니다. README 게시에는 깨끗한 작업 폴더, 지정 브랜치, 현재 GitHub 원격 주소가 필요합니다. 문서 반영 조건이 맞지 않으면 평가와 보고서를 저장하고 `documentation_pending`으로 기록합니다. 보고서가 이미 저장됐으면 다음 명령으로 문서 반영을 재개합니다.
+
+```bash
+python scripts/update_v8_result_docs.py \
+  --report-directory /absolute/path/to/completed/submission-report \
+  --branch feature/20261023-literature-integration --push
+```

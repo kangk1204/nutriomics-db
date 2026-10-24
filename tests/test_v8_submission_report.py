@@ -60,6 +60,45 @@ def test_missing_new_evaluations_are_unknown_not_zero_and_denominators_stay_sepa
     assert '/private/path' not in json.dumps(data) and 'secret' not in json.dumps(data)
 
 
+def nlp_receipt():
+    names = ['test_v5_active_passive_roles_match_direction[active]',
+             'test_v5_active_passive_roles_match_direction[passive]',
+             'test_v5_active_passive_roles_match_direction[uncertain]',
+             'test_v5_planned_event_never_becomes_observed',
+             'test_batch_identity_initializes_lazy_parser_before_registering']
+    return {'schema_version':'nutriomics-nlp-validation-v1','observed_at':'2026-10-24T01:41:44+00:00',
+            'tests':[{'name':name,'status':'passed','seconds':.1} for name in names],
+            'versions':{'spacy':'3.7.5','scispacy':'0.6.2','en-core-sci-sm':'0.5.4',
+                        'torch':'2.6.0+cpu','transformers':'4.49.0'},'exit_code':0,
+            **{key:'a'*64 for key in ['source_manifest_sha256','test_sha256','log_sha256','junit_sha256']}}
+
+
+def test_nlp_validation_is_bound_in_all_formats_without_changing_model_metrics(inputs,tmp_path):
+    progress,histories=inputs
+    base=report.build_payload(progress,history_paths=histories)
+    path=put(tmp_path/'nlp.json',nlp_receipt())
+    data=report.build_payload(progress,history_paths=histories,nlp_validation_path=path)
+    assert data['nlp_validation']['passed']==5
+    assert data['completion_assessments']['legacy_nlp_regressions']=='5건 통과'
+    assert data['relation_comparison']==base['relation_comparison']
+    source=next(s for s in data['sources'] if s['role']=='legacy_nlp_validation')
+    assert source['sha256']==hashlib.sha256(path.read_bytes()).hexdigest()
+    assert '구버전 NLP 회귀 검사' in report.markdown(data)
+    assert 'test_v5_planned_event_never_becomes_observed' in report.html_report(data)
+    assert 'NLP 검사' in report.csv_report(data)
+
+
+@pytest.mark.parametrize('issue',['duplicate','wrong_version','missing_test','wrong_exit','wrong_hash'])
+def test_incomplete_or_inconsistent_nlp_receipt_does_not_claim_five_passes(tmp_path,issue):
+    data=nlp_receipt()
+    if issue=='duplicate':data['tests'][0]=dict(data['tests'][1])
+    if issue=='wrong_version':data['versions']['spacy']='0.0.0'
+    if issue=='missing_test':data['tests'].pop()
+    if issue=='wrong_exit':data['tests'][0]['status']='failed'
+    if issue=='wrong_hash':data['test_sha256']='not a hash'
+    with pytest.raises(ValueError):report.nlp_validation(put(tmp_path/'nlp.json',data),[])
+
+
 def test_current_extractions_are_union_not_v8_results_and_queue_is_not_failed_papers(inputs):
     progress,histories=inputs
     value=json.loads(progress.read_text());c=value['collection']
