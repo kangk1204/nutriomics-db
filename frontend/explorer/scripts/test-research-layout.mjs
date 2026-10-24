@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict';
+import Module from 'node:module';
+import path from 'node:path';
+import {build} from 'esbuild';
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {JSDOM} from 'jsdom';
+
+globalThis.window={};
+async function load(file){const result=await build({entryPoints:[file],bundle:true,write:false,platform:'node',format:'cjs',loader:{'.css':'empty'},external:['react','react-dom']});const filename=path.resolve('src/__research_layout.cjs'),m=new Module(filename);m.filename=filename;m.paths=Module._nodeModulePaths(path.resolve('.'));m._compile(result.outputFiles[0].text,filename);return m.exports;}
+const {Conditions}=await load('src/ScientificEvidence.tsx');
+const {ClinicalFacts}=await load('src/ClinicalEndpoints.tsx');
+const {ReferenceInputs}=await load('src/WorkbenchSurface.tsx');
+const {clinicalComparison,clinicalDispersion}=await load('src/clinicalPresentation.ts');
+const {focusPositions}=await load('src/networkModel.ts');
+const render=(Component,props)=>new JSDOM(renderToStaticMarkup(React.createElement(Component,props))).window.document;
+const conditions=[{dimension:'dose',input:0,study:800,status:'mismatch',reason:'Different assigned amount'},{dimension:'tissue',input:null,study:'whole blood',status:'unknown',reason:'Not supplied'}];
+const before=JSON.stringify(conditions),doc=render(Conditions,{rows:conditions});
+assert.equal(doc.querySelectorAll('.rr-condition').length,2);
+assert.match(doc.querySelector('[data-condition="dose"]').textContent,/0.*800.*Different assigned amount/s);
+assert.match(doc.querySelector('[data-condition="tissue"]').textContent,/미입력.*whole blood/s);
+assert.equal(doc.querySelectorAll('.condition-status.match').length,0);
+assert.equal(JSON.stringify(conditions),before);
+const record={id:'clinical-native',endpoint:{label_ko:'HDL 콜레스테롤',unit:'source unit'},result_type:'crossover_iAUC_summary',n_people:13,n_people_scope:'RNA subset 7 is not the full clinical cohort',source_location:'S3 Table: HDL row',comparison:{kind:'crossover_order_stratified_reported_iAUC',dose_g:800,response_window_h:[0,6],orders:['A then B','B then A']},observations:[{arm:'A',time_label:'0–6h',reported_value:0,unit:'source unit',summary_statistic:'median_iAUC',dispersion:{kind:'IQR',lower:0,upper:2}}],statistical_tests:[{p_value:null,reported_label:'ns',comparison_scope:'source comparison',multiplicity:'source reported'}]};
+const native=JSON.stringify(record),clinical=render(ClinicalFacts,{records:[record, {...record,id:'second'}]});
+assert.equal(clinical.querySelectorAll('details.clinical-fact').length,2);
+assert.equal(clinical.querySelectorAll('details.clinical-fact[open]').length,1);
+assert.match(clinical.body.textContent,/13.*RNA subset 7.*S3 Table/s);
+assert.match(clinical.querySelector('.rr-observation').textContent,/0source unitIQR 0–2/);
+assert.match(clinical.body.textContent,/ns/);
+assert.equal(JSON.stringify(record),native);
+assert.match(clinicalComparison(record.comparison),/800 g.*0–6시간/);
+assert.equal(clinicalComparison({kind:'unknown',value:0}),'\u007b"kind":"unknown","value":0\u007d');
+assert.equal(clinicalDispersion({kind:'IQR',lower:0,upper:2}),'IQR 0–2');
+const inputs=render(ReferenceInputs,{food:true,offline:false,intake:150,tissue:'',hours:'',days:'',frequency:'',onIntake(){},onTissue(){},onHours(){},onDays(){},onFrequency(){}});
+assert.equal(inputs.querySelector('input[aria-label="섭취량 g"]').value,'150');
+assert.equal(inputs.querySelector('.rr-reference-options').hasAttribute('open'),false);
+assert.equal(inputs.querySelectorAll('.rr-reference-fields input,.rr-reference-fields select').length,4);
+const nodes=[{id:'root',kind:'gene',label:'Root'},...Array.from({length:15},(_,i)=>({id:'r'+i,kind:'regulatory_region',label:'Region '+i}))],edges=nodes.slice(1).map(n=>({subject:'root',object:n.id}));
+const coords=focusPositions(nodes,edges,'root');assert.deepEqual(coords,focusPositions([...nodes].reverse(),[...edges].reverse(),'root'));
+assert.deepEqual(Object.keys(coords).sort(),nodes.map(n=>n.id).sort());
+assert.deepEqual(coords.root,{x:0,y:0});
+for(const [id,a] of Object.entries(coords)){assert.ok(Number.isFinite(a.x)&&Number.isFinite(a.y));for(const [other,b] of Object.entries(coords)){if(id!==other)assert.ok(Math.hypot(a.x-b.x,a.y-b.y)>45)}}
+assert.deepEqual(focusPositions([],[],'missing'),{});
+console.log('Research layout checks passed: no lost condition values, null/zero/ns preserved, raw provenance retained, folded settings reachable, deterministic nonoverlapping geometry with identical source IDs.');

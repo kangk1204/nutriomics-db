@@ -39,9 +39,12 @@ def test_configured_read_budget_keeps_export_budget_and_profiles_status(monkeypa
     app.add_middleware(ExplorerReadMiddleware)
     with TestClient(app) as client:
         response = client.post("/api/v1/explorer/budget-probe")
-        assert response.status_code == 200 and normal - 1 < response.json()["remaining"] <= normal
+        # Float subtraction can round an exactly unchanged monotonic clock a
+        # fraction of a nanosecond above the configured duration on Windows.
+        rounding_tolerance = 1e-9
+        assert response.status_code == 200 and normal - 1 < response.json()["remaining"] <= normal + rounding_tolerance
         response = client.post("/api/v1/explorer/budget-probe/export")
-        assert response.status_code == 200 and 44 < response.json()["remaining"] <= 45
+        assert response.status_code == 200 and 44 < response.json()["remaining"] <= 45 + rounding_tolerance
         assert client.post("/api/v1/explorer/budget-probe/failure").status_code == 503
     rows = [json.loads(line) for line in profile.read_text().splitlines()]
     assert [r["status"] for r in rows] == [200, 200, 503]
