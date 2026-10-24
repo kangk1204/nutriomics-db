@@ -493,7 +493,7 @@
   "tests/test_evidence_paging.py": "820bf62ee8a10cd13451184329f3b847499e1b58b44edef7f747a3bd44323804",
   "tests/test_explorer_api.py": "e121ea44c2388eb5e02a6b7f0fb28d1ccc283e349c5b9f8d098b7587d2303a99",
   "tests/test_explorer_build.py": "a34d8dc605f8ca02a456bcfff73a6b3608eb4c3142058f932bcc615dc7366f0d",
-  "tests/test_explorer_performance.py": "ecf87de3f7a4ece60362c6c83ad31724708d46a3175af997baade4b10b861e48",
+  "tests/test_explorer_performance.py": "1b30e9debb637850eb2505912284f4df2f5668b0151c6c41b3522f31e32bbf99",
   "tests/test_explorer_scientific.py": "9f4bd8f033b8cb87a112123cfc508d31b56228fc12a44c88e973777fc9af6783",
   "tests/test_explorer_scientific_api.py": "734135185bc4f896ea4eef63a0e4641d82ca0a2f5e2504df6c12980cbb1b7011",
   "tests/test_explorer_scientific_build.py": "4b61c79d7ef21e4d8b431a7ed4d511ad4ad6f0eafceeb2b84752b4c431f7ed6d",
