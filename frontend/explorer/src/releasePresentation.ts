@@ -7,9 +7,9 @@ export function releaseIdentity(meta: Meta) {
 }
 export function reviewSummary(meta: Meta): string {
   const summary=meta.review_summary;
-  if(!summary)return '전문가 검수 상태 미확인';
+  if(!summary)return '검수 정보 대기';
   const approved=summary.expert_approved_records;
   const pending=summary.pending_records??summary.pending;
-  if(typeof approved!=='number')return '사람 승인 건수 미감사';
+  if(typeof approved!=='number')return '승인 건수 집계 대기';
   return `사람 승인 ${approved.toLocaleString('ko-KR')}건${typeof pending==='number'?` · 대기 ${pending.toLocaleString('ko-KR')}건`:''}`;
 }

@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .explorer_context import configured_path
+from .food_names import paths as food_name_paths
+from .food_search_aliases import SHA256 as SEARCH_ALIAS_SHA256
 from .settings import DATA_DIR, PROJECT_ROOT
 from .source_replicas import ReplicaUnavailable, physical_read_path
 from .source_replicas import guard as replica_guard
@@ -248,6 +250,9 @@ def source_paths():
     if os.environ.get('NUTRIGENOMICS_PUBLIC_OMICS_INDEX'):
         ordered = Path(os.environ['NUTRIGENOMICS_PUBLIC_OMICS_INDEX'])
         paths.extend((ordered, ordered.with_suffix('.json')))
+    paths.extend(food_name_paths())
+    from .gene_names import paths as gene_name_paths
+    paths.extend(gene_name_paths())
     return paths
 
 
@@ -323,7 +328,7 @@ class ExplorerReadMiddleware:
                 budget.paths[str(p)] = p.resolve()
             identity = tuple(fingerprint(p) for p in paths)
             cacheable = not export and (scope["method"] == "GET" or path.endswith("/match"))
-            key = ("http", identity, scope["method"], path, scope.get("query_string", b""), bytes(body))
+            key = ("http", SEARCH_ALIAS_SHA256, identity, scope["method"], path, scope.get("query_string", b""), bytes(body))
             if cacheable:
                 cached = CACHE.get(key)
                 if cached is not None:

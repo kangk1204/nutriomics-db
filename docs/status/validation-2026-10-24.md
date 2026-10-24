@@ -1,0 +1,33 @@
+# 2026-10-24 소스·웹 통합 검증
+
+브랜치: `feature/20261023-literature-integration`.
+
+## 실행 결과
+
+| 검사 | 결과 |
+|---|---|
+| 프런트엔드 TypeScript 검사 | 통과 |
+| Vite 및 독립 HTML runtime 빌드 | 통과 |
+| 프런트엔드 회귀 스크립트 21종 | 통과. 저장 snapshot을 사용하는 2종은 기존 내보내기 파일로 검사 |
+| 플랫폼·계정·보고서·작업·검색 Python 검사 | 238 통과, 의존성 조건 1건 생략 |
+| v8 계약·사전·native·후보·스트리밍·자료 감사 검사 | 84 통과, PyTorch 조건 5건 생략 |
+| 문헌 서비스 전체 검사 | 최초 856 통과·6 실패·20 생략. 하위 프로세스 import 경로를 설정한 재검사 1건 통과 |
+| 구버전 v5 후속 검사 | 5건: 고정 spaCy·scispaCy·구문 모델·PyTorch 환경에서 확인 예정 |
+| README 상대 링크·관계 성능 산술 | 통과 |
+| 커밋 대상 자격증명 패턴·DB·가중치 검사 | 발견 0건 |
+
+문헌 서비스의 남은 5건은 로컬 검사 환경의 NLP 의존성 부재로 종료됐습니다. 실제 검사 이름은 `test_v5_active_passive_roles_match_direction` 3개 조건, `test_v5_planned_event_never_becomes_observed`, `test_batch_identity_initializes_lazy_parser_before_registering`입니다. 고정 의존성은 `literature_service/requirements-v5.lock`에 있습니다. 위 검사군에는 중복 항목이 있어 통과 수를 합산하지 않습니다.
+
+## 플랫폼 반영
+
+- 공개 문헌 화면과 내부 관리 화면에 새 프런트엔드 빌드를 반영했습니다.
+- 공개 `/healthz` 응답과 배포된 HTML·JS·CSS의 로컬 빌드 해시 일치를 확인했습니다.
+- 브라우저의 모델 비교에서 v2·v3·v4·v5-r1 실측값, v8 평가 대기, 엔진별 처리 상태와 새 문구를 확인했습니다. 콘솔 오류는 0건입니다.
+- 공개 백엔드·문헌 수집·GPU 학습 프로세스는 유지했고, 내부 화면 프로세스만 새 정적 파일 경로로 재시작했습니다.
+- 화면 빌드 묶음 SHA-256: `d2506d79b42e6d8f2b76cfb777a1208609b73f123a9c255547e100c46709008d`.
+
+## 학습 소스 보존
+
+학습·평가 코드의 고정 manifest SHA-256은 `fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4`입니다. 이번 문서·화면 문구 변경 후에도 같은 값임을 확인했습니다. 학습 체크포인트, 기존 예측·평가, 모델 요청 예산은 계속 기존 버전별 저장소를 사용합니다.
+
+현재 성능과 진행 상태는 [기준일별 상태](literature-2026-10-24.json)와 [README](../../README.md)에 기록했습니다.

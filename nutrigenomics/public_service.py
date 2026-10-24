@@ -20,6 +20,10 @@ from .explorer import MatchInput, ReferenceContext, _match, _source, attach_expl
 from .explorer_build import canonical, sha256
 from .explorer_context import ExplorerContextMiddleware
 from .explorer_performance import read_connection
+from .food_names import annotate as annotate_food_name
+from .food_names import verified_matches as food_name_matches
+from .food_search_aliases import context as search_context
+from .food_search_aliases import search_clause
 from .release_contract import metadata_with_contract
 
 
@@ -72,8 +76,19 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
         raise ValueError("public deployment requires a reviewed, validated, hash-bound release gate")
     app = FastAPI(title="NutriOmics public data", version=metadata["release_id"])
     from .public_files import attach_public_files
-    attach_public_files(app, release, manifest, metadata["release_id"],
-        preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
+    if metadata.get("bulk_download_allowed") is False:
+        @app.get("/api/v1/public/files")
+        def local_files():
+            return {"release_id": metadata["release_id"], "items": [],
+                    "availability": "withheld_for_local_source_rights",
+                    "reason": "연구실 조회용 자료를 포함해 전체 파일 재배포를 제한합니다."}
+
+        @app.get("/api/v1/public/files/{name:path}")
+        def withheld_file(name: str):
+            raise HTTPException(403, {"code": "redistribution_unconfirmed"})
+    else:
+        attach_public_files(app, release, manifest, metadata["release_id"],
+            preverified={database.name: manifest["database_sha256"]} if verify_hash else None)
 
     @contextmanager
     def read():
@@ -82,7 +97,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
 
     @app.get("/healthz")
     def health():
-        return {"status": "ok", "release_id": metadata["release_id"], "scope": "public_only"}
+        return {"status": "ok", "release_id": metadata["release_id"], "scope": "local_research" if metadata.get("scope") == "local_research" else "public_only"}
 
     @app.get("/api/v1/public/meta")
     def meta():
@@ -104,8 +119,20 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     @app.get("/api/v1/foods")
     def foods(query: str = "", limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)):
         with read() as db:
-            rows = db.execute("SELECT * FROM node WHERE kind='food' AND (label LIKE ? OR aliases_json LIKE ? OR id=?) ORDER BY label,id LIMIT ? OFFSET ?", ("%" + query + "%", "%" + query + "%", query, limit, offset)).fetchall()
-            return {"items": [dict(r) for r in rows], "release_id": metadata["release_id"]}
+            mapping = search_context(query)
+            if mapping:
+                clause, args = search_clause(query)
+            else:
+                # Retain this older endpoint's English/wildcard behavior.
+                clause = "(n.label LIKE ? OR n.aliases_json LIKE ? OR n.id=?)"
+                args = ["%" + query + "%", "%" + query + "%", query]
+            matches = food_name_matches(db, query)
+            if matches:
+                clause = "(" + clause + " OR n.id IN (" + ','.join('?' for _ in matches) + "))"
+                args.extend(identifier for identifier, _ in matches)
+            rows = db.execute("SELECT n.* FROM node n WHERE n.kind='food' AND " + clause + " ORDER BY n.label,n.id LIMIT ? OFFSET ?", [*args, limit, offset]).fetchall()
+            return {"items": [annotate_food_name(dict(r)) for r in rows], "release_id": metadata["release_id"],
+                    **({"search_context": mapping} if mapping else {})}
 
     @app.get("/api/v1/interventions")
     def interventions():
@@ -281,7 +308,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
     async def release_headers(request, call_next):
         response = await call_next(request)
         response.headers["X-NutriOmics-Release"] = metadata["release_id"]
-        response.headers["X-NutriOmics-Scope"] = "public"
+        response.headers["X-NutriOmics-Scope"] = "local_research" if metadata.get("scope") == "local_research" else "public"
         return response
 
     # Outermost context is inherited by endpoint worker threads and all Explorer routes.
@@ -289,6 +316,7 @@ def create_app(release: Path, *, allow_candidate=False, verify_hash=True):
         "NUTRIGENOMICS_EXPLORER_DATABASE": database,
         "NUTRIGENOMICS_EXPLORER_CORE_DATABASE": database,
         "NUTRIGENOMICS_EXPLORER_RIGHTS": release / "rights-policy.json",
+        "NUTRIGENOMICS_GENE_NAMES_FILE": Path(os.environ.get("NUTRIGENOMICS_GENE_NAMES_FILE", release / "gene-names-unconfigured.sqlite3")),
     })
     return app
 

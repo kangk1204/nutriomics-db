@@ -1,0 +1,63 @@
+{
+  "corpus_id": "nutriomics-v8-20261023",
+  "end_date": "2026-10-23",
+  "partition_limit": 8000,
+  "reference_counts": {
+    "observed_on": "2026-10-23",
+    "nutrigenomics_core": 111603,
+    "nutrition_clinical": 17794,
+    "new_union": 128976,
+    "all_with_legacy": 133253,
+    "meaning": "Read-only query reference counts; not collected papers or hard-coded success criteria"
+  },
+  "topics": [
+    {
+      "id": "nutrigenomics_core",
+      "name": "영양유전체 전반",
+      "start_date": "1800-01-01",
+      "query": "(Nutrigenomics[MeSH Terms] OR nutrigenom*[Title/Abstract] OR nutrigenet*[Title/Abstract] OR ((Diet[MeSH Terms] OR Food[MeSH Terms] OR Nutrients[MeSH Terms] OR dietary[Title/Abstract] OR nutrition*[Title/Abstract]) AND (Gene Expression Regulation[MeSH Terms] OR Epigenomics[MeSH Terms] OR DNA Methylation[MeSH Terms] OR transcriptom*[Title/Abstract] OR metabolom*[Title/Abstract] OR proteom*[Title/Abstract] OR epigen*[Title/Abstract] OR genom*[Title/Abstract])))"
+    },
+    {
+      "id": "nutrition_clinical",
+      "name": "영양 중재 임상·메타분석",
+      "start_date": "1800-01-01",
+      "query": "(Diet[MeSH Terms] OR Nutrients[MeSH Terms] OR dietary[Title/Abstract] OR nutrition*[Title/Abstract]) AND (Randomized Controlled Trial[Publication Type] OR Meta-Analysis[Publication Type]) AND (Cardiovascular Diseases[MeSH Terms] OR Diabetes Mellitus[MeSH Terms] OR Obesity[MeSH Terms] OR Fatty Liver[MeSH Terms] OR Blood Pressure[MeSH Terms])"
+    },
+    {
+      "id": "HTN",
+      "name": "고혈압·후성유전",
+      "start_date": "2010-01-01",
+      "query": "(hypertension[MeSH Terms] OR blood pressure[Title/Abstract]) AND (DNA methylation[Title/Abstract] OR epigenetic[Title/Abstract] OR nutrigenomics[Title/Abstract] OR nutritional genomics[Title/Abstract])"
+    },
+    {
+      "id": "DASH",
+      "name": "DASH",
+      "start_date": "2010-01-01",
+      "query": "(Dietary Approaches to Stop Hypertension[Title/Abstract] OR DASH diet[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "omega3",
+      "name": "오메가3",
+      "start_date": "2010-01-01",
+      "query": "(Fatty Acids, Omega-3[MeSH Terms] OR omega-3[Title/Abstract] OR eicosapentaenoic acid[Title/Abstract] OR docosahexaenoic acid[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "vitD",
+      "name": "비타민D",
+      "start_date": "2010-01-01",
+      "query": "(Vitamin D[MeSH Terms] OR cholecalciferol[Title/Abstract] OR ergocalciferol[Title/Abstract] OR calcitriol[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "caffeine",
+      "name": "카페인",
+      "start_date": "2010-01-01",
+      "query": "(Caffeine[MeSH Terms] OR caffeine[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "cocoa_flavanol",
+      "name": "코코아·플라바놀",
+      "start_date": "2010-01-01",
+      "query": "(cocoa[Title/Abstract] OR cacao[Title/Abstract] OR flavanol*[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    }
+  ]
+}

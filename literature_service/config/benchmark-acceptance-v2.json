@@ -1,0 +1,21 @@
+{
+  "schema_version": "literature-v2-promotion-contract-v1",
+  "decision_reference": "Owner-approved heuristic-v2 implementation plan, 2026-10-03",
+  "engine": "heuristic-v2",
+  "interpretation": "prespecified public point estimates; paper bootstrap uncertainty is reported separately",
+  "gene_precision": 0.90,
+  "gene_recall": 0.70,
+  "relation_oracle_precision": 0.85,
+  "relation_oracle_recall": 0.30,
+  "relation_delta_precision": 0.05,
+  "relation_delta_recall": 0.0,
+  "scope_token_f1": 0.85,
+  "provenance_fraction": 1.0,
+  "bootstrap_iterations": 2000,
+  "operational_days": 7,
+  "maximum_sample_gap_seconds": 900,
+  "required_scope_source_levels": ["abstract", "fulltext"],
+  "required_drills": ["resume", "backup_restore", "switch_rollback"],
+  "nutrition_claim": "candidate_review_beta_until_domain_gold_review",
+  "review_time_claim": "unmeasured_until_reviewer_study"
+}

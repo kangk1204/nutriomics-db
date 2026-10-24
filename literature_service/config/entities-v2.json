@@ -1,0 +1,383 @@
+{
+  "version": "nutri-topics-2026-10-03-v2",
+  "source": "Frozen ChEBI/FoodOn identifiers verified from EMBL-EBI OLS4; unspecified chemistry and processing retain distinct local identifiers. Generic epicatechin does not imply either enantiomer.",
+  "entities": [
+    {
+      "kind": "diet",
+      "id": "local:DASH",
+      "label": "DASH 식단",
+      "terms": [
+        "DASH diet",
+        "Dietary Approaches to Stop Hypertension",
+        "DASH dietary pattern"
+      ]
+    },
+    {
+      "kind": "outcome",
+      "id": "local:blood-pressure",
+      "label": "혈압",
+      "terms": [
+        "blood pressure",
+        "BP"
+      ]
+    },
+    {
+      "kind": "outcome",
+      "id": "local:systolic-bp",
+      "label": "수축기혈압",
+      "terms": [
+        "systolic blood pressure",
+        "systolic pressure",
+        "SBP"
+      ]
+    },
+    {
+      "kind": "outcome",
+      "id": "local:diastolic-bp",
+      "label": "이완기혈압",
+      "terms": [
+        "diastolic blood pressure",
+        "diastolic pressure",
+        "DBP"
+      ]
+    },
+    {
+      "kind": "outcome",
+      "id": "local:hypertension",
+      "label": "고혈압",
+      "terms": [
+        "hypertension",
+        "hypertensive status"
+      ]
+    },
+    {
+      "kind": "outcome",
+      "id": "local:endothelial-function",
+      "label": "내피기능",
+      "terms": [
+        "endothelial function",
+        "flow-mediated dilation",
+        "flow mediated dilation"
+      ]
+    },
+    {
+      "kind": "omics",
+      "id": "local:DNA-methylation",
+      "label": "DNA 메틸화",
+      "terms": [
+        "DNA methylation",
+        "DNA methylation levels",
+        "CpG methylation",
+        "global methylation"
+      ]
+    },
+    {
+      "kind": "omics",
+      "id": "local:epigenetics",
+      "label": "후성유전",
+      "terms": [
+        "epigenetic modification",
+        "epigenetic modifications",
+        "histone acetylation",
+        "histone methylation"
+      ]
+    },
+    {
+      "kind": "omics",
+      "id": "local:gene-expression",
+      "label": "유전자 발현",
+      "terms": [
+        "gene expression",
+        "transcript abundance",
+        "mRNA expression"
+      ]
+    },
+    {
+      "kind": "food",
+      "id": "FOODON:00001215",
+      "label": "코코아 식품",
+      "terms": [
+        "cocoa",
+        "cacao"
+      ]
+    },
+    {
+      "kind": "food",
+      "id": "local:coffee-unspecified",
+      "label": "커피(형태 미확인)",
+      "terms": [
+        "coffee"
+      ],
+      "mapping_candidates": [
+        "FOODON:00001139"
+      ],
+      "identity_status": "processing_unspecified"
+    },
+    {
+      "kind": "food",
+      "id": "FOODON:00001244",
+      "label": "커피 음료",
+      "terms": [
+        "coffee beverage",
+        "coffee drink"
+      ]
+    },
+    {
+      "kind": "food",
+      "id": "FOODON:03315081",
+      "label": "차 식품",
+      "terms": [
+        "tea"
+      ]
+    },
+    {
+      "kind": "food",
+      "id": "FOODON:00001248",
+      "label": "생선 식품",
+      "terms": [
+        "fish intake",
+        "oily fish",
+        "fatty fish"
+      ]
+    },
+    {
+      "kind": "food",
+      "id": "FOODON:03303588",
+      "label": "다크초콜릿",
+      "terms": [
+        "dark chocolate"
+      ]
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:25681",
+      "label": "오메가3 지방산 계열",
+      "terms": [
+        "omega-3",
+        "omega 3",
+        "omega-3 fatty acids",
+        "n-3 fatty acids",
+        "n-3 PUFA"
+      ],
+      "identity_status": "class"
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:36006",
+      "label": "EPA(입체형 미지정)",
+      "terms": [
+        "eicosapentaenoic acid",
+        "EPA"
+      ],
+      "identity_status": "stereochemistry_unspecified"
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:36005",
+      "label": "DHA(입체형 미지정)",
+      "terms": [
+        "docosahexaenoic acid",
+        "DHA"
+      ],
+      "identity_status": "stereochemistry_unspecified"
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:27300",
+      "label": "비타민D 계열",
+      "terms": [
+        "vitamin D"
+      ],
+      "identity_status": "class"
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:28934",
+      "label": "비타민D2",
+      "terms": [
+        "vitamin D2",
+        "ergocalciferol"
+      ]
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:28940",
+      "label": "비타민D3",
+      "terms": [
+        "vitamin D3",
+        "cholecalciferol",
+        "colecalciferol",
+        "calciol"
+      ]
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:17823",
+      "label": "칼시트리올",
+      "terms": [
+        "calcitriol",
+        "1,25-dihydroxyvitamin D3"
+      ]
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:17933",
+      "label": "칼시페디올",
+      "terms": [
+        "calcifediol",
+        "calcidiol",
+        "25-hydroxyvitamin D3"
+      ]
+    },
+    {
+      "kind": "nutrient",
+      "id": "local:25-hydroxyvitamin-D-unspecified",
+      "label": "25-수산화 비타민D(형태 미지정)",
+      "terms": [
+        "25-hydroxyvitamin D",
+        "25(OH)D"
+      ],
+      "identity_status": "form_unspecified",
+      "mapping_candidates": [
+        "CHEBI:17933"
+      ]
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:27732",
+      "label": "카페인",
+      "terms": [
+        "caffeine"
+      ]
+    },
+    {
+      "kind": "nutrient",
+      "id": "local:flavanol-class",
+      "label": "플라바놀 계열",
+      "terms": [
+        "flavanol",
+        "flavanols",
+        "cocoa flavanol",
+        "cocoa flavanols"
+      ],
+      "identity_status": "curated_class"
+    },
+    {
+      "kind": "nutrient",
+      "id": "CHEBI:23053",
+      "label": "카테킨(입체형 미지정)",
+      "terms": [
+        "catechin"
+      ],
+      "identity_status": "class"
+    },
+    {
+      "kind": "nutrient",
+      "id": "local:epicatechin-unspecified",
+      "label": "에피카테킨(입체형 미지정)",
+      "terms": [
+        "epicatechin"
+      ],
+      "identity_status": "stereochemistry_unspecified",
+      "mapping_candidates": [
+        "CHEBI:90",
+        "CHEBI:76125"
+      ]
+    }
+  ],
+  "fallback_genes": [
+    {
+      "symbol": "ACE",
+      "name": "angiotensin I converting enzyme",
+      "aliases": [
+        "angiotensin-converting enzyme"
+      ]
+    },
+    {
+      "symbol": "AGT",
+      "name": "angiotensinogen",
+      "aliases": []
+    },
+    {
+      "symbol": "AGTR1",
+      "name": "angiotensin II receptor type 1",
+      "aliases": [
+        "AT1R"
+      ]
+    },
+    {
+      "symbol": "NOS3",
+      "name": "nitric oxide synthase 3",
+      "aliases": [
+        "eNOS",
+        "endothelial nitric oxide synthase"
+      ]
+    },
+    {
+      "symbol": "VDR",
+      "name": "vitamin D receptor",
+      "aliases": []
+    },
+    {
+      "symbol": "CYP1A2",
+      "name": "cytochrome P450 family 1 subfamily A member 2",
+      "aliases": []
+    },
+    {
+      "symbol": "CYP2R1",
+      "name": "cytochrome P450 family 2 subfamily R member 1",
+      "aliases": []
+    },
+    {
+      "symbol": "DNMT1",
+      "name": "DNA methyltransferase 1",
+      "aliases": []
+    },
+    {
+      "symbol": "DNMT3A",
+      "name": "DNA methyltransferase 3 alpha",
+      "aliases": []
+    },
+    {
+      "symbol": "DNMT3B",
+      "name": "DNA methyltransferase 3 beta",
+      "aliases": []
+    },
+    {
+      "symbol": "TET1",
+      "name": "tet methylcytosine dioxygenase 1",
+      "aliases": []
+    },
+    {
+      "symbol": "TET2",
+      "name": "tet methylcytosine dioxygenase 2",
+      "aliases": []
+    },
+    {
+      "symbol": "CAT",
+      "name": "catalase",
+      "aliases": []
+    },
+    {
+      "symbol": "IL6",
+      "name": "interleukin 6",
+      "aliases": [
+        "IL-6"
+      ]
+    },
+    {
+      "symbol": "TNF",
+      "name": "tumor necrosis factor",
+      "aliases": [
+        "TNF-alpha"
+      ]
+    },
+    {
+      "symbol": "PPARA",
+      "name": "peroxisome proliferator activated receptor alpha",
+      "aliases": [
+        "PPAR-alpha"
+      ]
+    }
+  ]
+}
