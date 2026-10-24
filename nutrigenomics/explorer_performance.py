@@ -287,6 +287,13 @@ class ExplorerReadMiddleware:
         self.app = app
         self.slots = threading.BoundedSemaphore(4)
         self.include_public = include_public
+        configured = os.environ.get("NUTRIGENOMICS_READ_TIMEOUT_SECONDS", "10")
+        try:
+            self.read_timeout_seconds = int(configured)
+        except ValueError as exc:
+            raise ValueError("NUTRIGENOMICS_READ_TIMEOUT_SECONDS must be an integer from 10 to 30") from exc
+        if not 10 <= self.read_timeout_seconds <= 30:
+            raise ValueError("NUTRIGENOMICS_READ_TIMEOUT_SECONDS must be an integer from 10 to 30")
 
     async def __call__(self, scope, receive, send):
         path = scope.get("path", "")
@@ -301,7 +308,18 @@ class ExplorerReadMiddleware:
         if self.include_public and path.startswith("/api/v1/public/files/"):
             return await self.app(scope, receive, send)
         export = path.endswith("/export")
-        budget = Budget(45 if export else 10)
+        seconds = 45 if export else self.read_timeout_seconds
+        budget = Budget(seconds)
+        response_status = None
+        transport_send = send
+
+        async def tracked_send(message):
+            nonlocal response_status
+            if message["type"] == "http.response.start":
+                response_status = message["status"]
+            await transport_send(message)
+
+        send = tracked_send
         token = CURRENT.set(budget)
         timer = threading.Timer(max(0, budget.deadline - time.monotonic()), budget.cancel)
         timer.daemon = True
@@ -425,6 +443,7 @@ class ExplorerReadMiddleware:
             if profile:
                 # Server-local diagnostics, never parameters or scientific payloads.
                 entry = {"unix": time.time(), "path": path, "seconds": time.monotonic()-started,
+                         "status": response_status, "deadline_seconds": seconds,
                          "sql_seconds": budget.sql_execution_seconds, "connections": budget.sql_connections,
                          "statements": budget.statements, "cancelled": budget.cancelled.is_set()}
                 await asyncio.to_thread(append_profile, profile, entry)
