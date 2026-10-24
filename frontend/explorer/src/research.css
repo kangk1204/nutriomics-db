@@ -13,7 +13,9 @@
 .rr-edition .wb-header-sub{font-size:15px;padding-left:22px;border-left:1px solid #527078;color:#dbe7e8}
 .rr-edition .wb-header-sub>span{display:none}
 .rr-edition .wb-header-actions{gap:14px;margin-left:auto}
-.rr-edition .ws-legacy-button{font-size:14px;color:#c6d9db;background:transparent;border-color:transparent}
+.wb-app.rr-edition .wb-header-actions>.ws-legacy-button{font-size:14px;color:#c6d9db;background:transparent;border-color:transparent}
+.wb-app.rr-edition .wb-header-actions>.rr-literature-button{display:inline-flex;align-items:center;gap:7px;color:#ecf6f4;background:transparent;border:1px solid #65858b;padding:5px 10px;font-size:14px}
+.wb-app.rr-edition .wb-header-actions>.rr-literature-button:hover{color:#fff;background:#254f59}
 .rr-edition .ws-legacy-button:hover{color:white;background:#254f59}
 .rr-edition .ws-export{border:1px solid #67858c;background:#244c55;border-radius:4px;padding:0 12px;gap:8px;min-height:36px;color:#eef8f6}
 .rr-edition .ws-export select{color:#fff;background:transparent;border:0;min-height:34px;font-size:15px;padding:4px 20px 4px 0}
@@ -313,3 +315,4 @@
 .rr-edition .clinical-fact .wb-source-link{font-size:13px;color:#396352}
 .rr-edition .ws-workflows small{font-size:14px}
 .rr-edition .ng-selection p,.rr-edition .ng-rail-note{font-size:14px;color:#5c7162}
+@media(max-width:760px){.wb-app.rr-edition .wb-header-actions>.rr-literature-button{display:inline-flex;font-size:12px;padding:4px 7px;min-height:32px}.rr-literature-button svg{display:none}.rr-edition .wb-header-actions{gap:6px}}
