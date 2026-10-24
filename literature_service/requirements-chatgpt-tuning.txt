@@ -1,0 +1,6 @@
+-r requirements-chatgpt.txt
+numpy==1.26.4
+scipy==1.15.3
+scikit-learn==1.6.1
+pyahocorasick==2.2.0
+psutil==7.0.0

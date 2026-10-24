@@ -1,3 +1,8 @@
 # Preserve the exact scientific source bytes referenced by analysis manifests.
 * -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 *.sh text eol=lf
+# Empty terminal TSV fields and frozen imported source bytes are intentional.
+docs/reviewer/source_data/*.tsv whitespace=-blank-at-eol
+literature_service/nutri_literature/repair_v3/__init__.py whitespace=-blank-at-eof
+literature_service/tests/test_v4_interfaces.py whitespace=-blank-at-eof
+literature_service/tests/test_v4_semantics.py whitespace=-blank-at-eof

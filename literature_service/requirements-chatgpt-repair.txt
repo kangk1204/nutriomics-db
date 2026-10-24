@@ -1,0 +1,2 @@
+-r requirements-chatgpt-tuning.txt
+pypdf==6.21.0

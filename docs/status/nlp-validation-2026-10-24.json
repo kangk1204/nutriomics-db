@@ -1,0 +1,51 @@
+{
+  "schema_version": "nutriomics-nlp-validation-v1",
+  "observed_at": "2026-10-24T01:41:44.286586+00:00",
+  "source_revision": "005d98f9ca188039eb66a60a54fc54833ccf3e88",
+  "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
+  "test_sha256": "ec2fe429a7c9f79cea7b586fb315aeab2109f1623db1ff8722d43ff91a4b1278",
+  "tests": [
+    {
+      "name": "test_v5_active_passive_roles_match_direction[Caffeine reduced VDR expression in human cells.-0.99-chemical_to_gene]",
+      "status": "passed",
+      "seconds": 2.708
+    },
+    {
+      "name": "test_v5_active_passive_roles_match_direction[Caffeine was reduced by VDR in human cells.-0.01-gene_to_chemical]",
+      "status": "passed",
+      "seconds": 0.005
+    },
+    {
+      "name": "test_v5_active_passive_roles_match_direction[Caffeine reduced VDR expression in human cells.-0.5-chemical_to_gene]",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_v5_planned_event_never_becomes_observed",
+      "status": "passed",
+      "seconds": 0.004
+    },
+    {
+      "name": "test_batch_identity_initializes_lazy_parser_before_registering",
+      "status": "passed",
+      "seconds": 0.035
+    }
+  ],
+  "versions": {
+    "spacy": "3.7.5",
+    "scispacy": "0.6.2",
+    "en-core-sci-sm": "0.5.4",
+    "torch": "2.6.0+cpu",
+    "transformers": "4.49.0",
+    "scikit-learn": "1.6.1",
+    "numpy": "1.26.4",
+    "sklearn-crfsuite": "0.5.0",
+    "pytest": "9.1.1"
+  },
+  "source_files_verified": 272,
+  "exit_code": 0,
+  "log_sha256": "d85409c8d330e67cc1309fa6fb52adc73eba3b01f7a6cfc61103e43faeff57f4",
+  "junit_sha256": "6dfdd3adc445e745b5fe1a3ccc12b275a6621125569b1d5b8f4a38bcd2a76295",
+  "execution": "Linux CPU, nice 10, single-thread, isolated tmpfs",
+  "scope": "remaining_five_legacy_nlp_regressions"
+}

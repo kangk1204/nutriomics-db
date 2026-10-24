@@ -7,7 +7,7 @@ export const KIND_ICONS = {food:Leaf,component:FlaskConical,gene:Dna,cpg:Dna,reg
 const typeNames:Record<string,string>={food:'음식',diet:'연구 노출',exposure:'연구 노출',nutrient:'영양성분',chemical:'화합물',compound:'화합물',gene:'유전자',cpg:'CpG',methylation_probe:'프로브',regulatory_region:'조절 영역',disease:'질환',outcome:'건강지표',pathway:'경로'};
 export function EntityBadge({entity}:{entity:Entity}) {
   const kind=normalizeKind(entity.kind),Icon=KIND_ICONS[kind];
-  return <span className={`ws-type ws-type-${kind}`}><Icon size={14}/>{typeNames[entity.kind]||entity.kind}</span>;
+  return <span className={`ws-type ws-type-${kind}`}><Icon size={14}/>{typeNames[entity.kind]||entity.kind}{!window.__NUTRIOMICS_SNAPSHOT__&&<a href={`?view=literature&q=${encodeURIComponent(entity.label)}`} title={`${entity.label} 관련 문헌 검색`} aria-label={`${entity.label} 관련 문헌 검색`} style={{marginLeft:6,color:'inherit',display:'inline-flex'}}><BookOpen size={12}/></a>}</span>;
 }
 
 export function WorkspaceWelcome({meta,onSearch}:{meta:Meta|null;onSearch:(kind:SearchKind,q:string)=>void}) {
@@ -59,6 +59,6 @@ export function MatchingBadge({identity}:{identity:MappingIdentity}) {
 
 export function EvidenceSummary({studies,contrasts,external,busy,externalLabel='수록 외부 관계'}:{studies:number|null;contrasts:number|null;external:number|null;busy:boolean;externalLabel?:string}) {
   return <div className="ws-evidence-summary" aria-label="조회 범위" aria-busy={busy}>
-    {[['중재 대응 연구',studies,'음식·성분·노출 대응 · 연구 ID 중복 제거'],['중재 대비',contrasts,'원본 대비 ID 중복 제거'],[externalLabel,external,'현재 필터의 기록 수 · 독립 연구 수 아님']].map(([name,value,note])=><div key={String(name)}><span>{name}</span><strong>{value==null?'—':Number(value).toLocaleString('ko-KR')}</strong><small>{note}</small></div>)}
+    {[['중재 대응 연구',studies,'음식·성분·노출 대응 · 연구 ID 중복 제거'],['중재 대비',contrasts,'원본 대비 ID 중복 제거'],[externalLabel,external,'집계 단위: 현재 필터의 관계 기록']].map(([name,value,note])=><div key={String(name)}><span>{name}</span><strong>{value==null?'—':Number(value).toLocaleString('ko-KR')}</strong><small>{note}</small></div>)}
   </div>;
 }

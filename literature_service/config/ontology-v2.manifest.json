@@ -1,0 +1,875 @@
+{
+  "version": "ontology-v2-2026-10-03",
+  "retrieved_at": "2026-10-03T01:52:24.444711+00:00",
+  "authority": "EMBL-EBI OLS4 ChEBI and FoodOn",
+  "identifiers": [
+    {
+      "id": "CHEBI:17823",
+      "label": "calcitriol",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_17823",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A17823",
+      "response_sha256": "50f0faa5dab2036619b10d1b4a0d39d105ea05cf9c77565231f3b40a65b8426c",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A hydroxycalciol that is calcidiol in which the <em>pro</em>-<i>S</i> hydrogen of calcidiol is replaced by a hydroxy group. It is the active form of vitamin D<small><sub>3</sub></small>, produced fom calciol <em>via</em> hydoxylation in the liver to form calcidiol, which is subsequently oxidised in the kidney to give calcitriol."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "cas:32222-06-3",
+            "drugbank:DB00136",
+            "drugcentral:466",
+            "kegg.compound:C01673",
+            "kegg.drug:D00129",
+            "lipidmaps:LMST03020258",
+            "metacyc.compound:CALCITRIOL",
+            "pdb-ccd:VDX",
+            "pubmed:10217585",
+            "pubmed:15928596",
+            "pubmed:19429426",
+            "pubmed:20599255",
+            "pubmed:22905919",
+            "pubmed:23103122",
+            "pubmed:23144765",
+            "pubmed:6687801",
+            "reaxys:2227647",
+            "wikipedia.en:Calcitriol"
+          ],
+          "generalized_empirical_formula": [
+            "C27H44O3"
+          ],
+          "has_alternative_id": [
+            "CHEBI:13932",
+            "CHEBI:19209",
+            "CHEBI:3307",
+            "CHEBI:46435"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:17823"
+          ],
+          "inchi_key_string": [
+            "GMRQFYUYWCNGIN-NKMMMXOESA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C27H44O3/c1-18(8-6-14-26(3,4)30)23-12-13-24-20(9-7-15-27(23,24)5)10-11-21-16-22(28)17-25(29)19(21)2/h10-11,18,22-25,28-30H,2,6-9,12-17H2,1,3-5H3/b20-10+,21-11-/t18-,22-,23-,24+,25+,27-/m1/s1"
+          ],
+          "mass": [
+            "416.646"
+          ],
+          "monoisotopic_mass": [
+            "416.32905"
+          ],
+          "smiles_string": [
+            "[H][C@@]12CC[C@]([H])([C@H](C)CCCC(C)(C)O)[C@@]1(C)CCC/C2=CC=C1C[C@@H](O)C[C@H](O)C1=C"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:17933",
+      "label": "calcidiol",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_17933",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A17933",
+      "response_sha256": "d577be0d55da7c4cffde5f3ac3fb87d4e19710ee10a33ae87f442f63353c7dd5",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A hydroxycalciol that is calciol in which the hydrogen at position 25 has been replaced by a hydroxy group. A prehormone resulting from the oxidation of calciol in the liver, it is further hydroxylated in the kidney to give calcitriol, the active form of vitamin D<small><sub>3</sub></small>."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "cas:19356-17-3",
+            "drugbank:DB00146",
+            "drugcentral:464",
+            "kegg.compound:C01561",
+            "lipidmaps:LMST03020246",
+            "pdb-ccd:VDY",
+            "pubmed:16549446",
+            "pubmed:18689406",
+            "pubmed:22487892",
+            "pubmed:22536761",
+            "pubmed:23090338",
+            "pubmed:23566108",
+            "pubmed:9080330",
+            "reaxys:4270041",
+            "wikipedia.en:Calcifediol"
+          ],
+          "generalized_empirical_formula": [
+            "C27H44O2"
+          ],
+          "has_alternative_id": [
+            "CHEBI:13931",
+            "CHEBI:19815",
+            "CHEBI:3304",
+            "CHEBI:46387"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:17933"
+          ],
+          "inchi_key_string": [
+            "JWUBBDSIWDLEOM-DTOXIADCSA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C27H44O2/c1-19-10-13-23(28)18-22(19)12-11-21-9-7-17-27(5)24(14-15-25(21)27)20(2)8-6-16-26(3,4)29/h11-12,20,23-25,28-29H,1,6-10,13-18H2,2-5H3/b21-11+,22-12-/t20-,23+,24-,25+,27-/m1/s1"
+          ],
+          "mass": [
+            "400.647"
+          ],
+          "monoisotopic_mass": [
+            "400.33413"
+          ],
+          "smiles_string": [
+            "[H][C@@]12CC[C@]([H])([C@H](C)CCCC(C)(C)O)[C@@]1(C)CCC/C2=CC=C1C[C@@H](O)CCC1=C"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:23053",
+      "label": "catechin",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_23053",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A23053",
+      "response_sha256": "1359469d5844f21fa699f446f0ade7a09c1132619c4eb84368567d9b2f141026",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "Members of the class of hydroxyflavan that have a flavan-3-ol skeleton and its substituted derivatives."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "kegg.compound:C17590",
+            "lincs.smallmolecule:LSM-1682"
+          ],
+          "generalized_empirical_formula": [
+            "C15H14O6"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:23053"
+          ],
+          "inchi_key_string": [
+            "PFTAWBLQPZVEMU-UHFFFAOYSA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C15H14O6/c16-8-4-11(18)9-6-13(20)15(21-14(9)5-8)7-1-2-10(17)12(19)3-7/h1-5,13,15-20H,6H2"
+          ],
+          "mass": [
+            "290.271"
+          ],
+          "monoisotopic_mass": [
+            "290.07904"
+          ],
+          "smiles_string": [
+            "Oc1cc(O)c2c(c1)OC(c1ccc(O)c(O)c1)C(O)C2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:25681",
+      "label": "omega-3 fatty acid",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_25681",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A25681",
+      "response_sha256": "84552cd682ed70dc122d1fd17a294f9bdfc237d864429c9d07a7d27bff1057a1",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A family of polyunsaturated fatty acids that have in common a final carbon-carbon double bond in the ω−3 position, i.e., the third bond from the methyl end of the fatty acid."
+        ],
+        "annotation": {
+          "database_cross_reference": [
+            "pubmed:15129302",
+            "pubmed:15253883",
+            "pubmed:15555528",
+            "pubmed:16741195",
+            "pubmed:19154523",
+            "pubmed:19439966",
+            "pubmed:21975796",
+            "pubmed:23643471",
+            "pubmed:24012777",
+            "pubmed:24122252",
+            "pubmed:24128563",
+            "pubmed:24172034",
+            "pubmed:24211484",
+            "pubmed:24240437",
+            "pubmed:24246761",
+            "pubmed:24281905",
+            "pubmed:24397938",
+            "pubmed:24401220",
+            "pubmed:24418228",
+            "wikipedia.en:Omega-3_fatty_acid"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:25681"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:27300",
+      "label": "vitamin D",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_27300",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A27300",
+      "response_sha256": "9911b4dedc33bcbc8ffd4eaa8c1fafb3c64fc218488f4b38ed8414f2d2aff926",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "Any member of a group of fat-soluble hydroxy seco-steroids that exhibit biological activity against vitamin D deficiency. Vitamin D  can be obtained from sun exposure, food and supplements and is biologically inactive and converted into the biologically active calcitriol via double hydroxylation in the body."
+        ],
+        "annotation": {
+          "database_cross_reference": [
+            "metacyc.compound:Vitamin-D",
+            "wikipedia.en:Vitamin_D"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:27300"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:27732",
+      "label": "caffeine",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_27732",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A27732",
+      "response_sha256": "a2b481ce1079106dc5e325a9ee62302821a5a3aeec4d3ac5ec4d11a9053e6a56",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A trimethylxanthine in which the three methyl groups are located at positions 1, 3, and 7. A purine alkaloid that occurs naturally in tea and coffee."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "cas:58-08-2",
+            "drugbank:DB00201",
+            "drugcentral:463",
+            "gmelin:103040",
+            "hmdb:HMDB0001847",
+            "kegg.compound:C07481",
+            "kegg.drug:D00528",
+            "knapsack:C00001492",
+            "lincs.smallmolecule:LSM-2026",
+            "metacyc.compound:1-3-7-TRIMETHYLXANTHINE",
+            "pdb-ccd:CFF",
+            "pubmed:10510174",
+            "pubmed:10796597",
+            "pubmed:10803761",
+            "pubmed:10822912",
+            "pubmed:10884512",
+            "pubmed:10924888",
+            "pubmed:10983026",
+            "pubmed:11014293",
+            "pubmed:11022879",
+            "pubmed:11209966",
+            "pubmed:11312039",
+            "pubmed:11410911",
+            "pubmed:11431501",
+            "pubmed:11815511",
+            "pubmed:11949272",
+            "pubmed:12397877",
+            "pubmed:12457274",
+            "pubmed:12574990",
+            "pubmed:12915014",
+            "pubmed:12943586",
+            "pubmed:14521986",
+            "pubmed:14607010",
+            "pubmed:15257305",
+            "pubmed:15280431",
+            "pubmed:15681408",
+            "pubmed:15718055",
+            "pubmed:15840517",
+            "pubmed:16143823",
+            "pubmed:16391865",
+            "pubmed:16528931",
+            "pubmed:16644114",
+            "pubmed:16709440",
+            "pubmed:16805851",
+            "pubmed:16856769",
+            "pubmed:17132260",
+            "pubmed:17387608",
+            "pubmed:17508167",
+            "pubmed:17724925",
+            "pubmed:17932622",
+            "pubmed:17957400",
+            "pubmed:18068204",
+            "pubmed:18258404",
+            "pubmed:18421070",
+            "pubmed:18513215",
+            "pubmed:18625110",
+            "pubmed:18647558",
+            "pubmed:19007524",
+            "pubmed:19047957",
+            "pubmed:19084078",
+            "pubmed:19088793",
+            "pubmed:19418355",
+            "pubmed:19879252",
+            "pubmed:20164568",
+            "pubmed:20470411",
+            "pubmed:22114686",
+            "pubmed:22770225",
+            "pubmed:23551936",
+            "pubmed:24039592",
+            "pubmed:7441110",
+            "pubmed:7689104",
+            "pubmed:8332255",
+            "pubmed:8347173",
+            "pubmed:8679661",
+            "pubmed:9063686",
+            "pubmed:9067318",
+            "pubmed:9132918",
+            "pubmed:9218278",
+            "reaxys:17705",
+            "wikipedia.en:Caffeine"
+          ],
+          "generalized_empirical_formula": [
+            "C8H10N4O2"
+          ],
+          "has_alternative_id": [
+            "CHEBI:22982",
+            "CHEBI:3295",
+            "CHEBI:41472"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:27732"
+          ],
+          "inchi_key_string": [
+            "RYYVLZVUVIJVGH-UHFFFAOYSA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C8H10N4O2/c1-10-4-9-6-5(10)7(13)12(3)8(14)11(6)2/h4H,1-3H3"
+          ],
+          "mass": [
+            "194.194"
+          ],
+          "monoisotopic_mass": [
+            "194.08038"
+          ],
+          "smiles_string": [
+            "Cn1c(=O)c2c(ncn2C)n(C)c1=O"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:28934",
+      "label": "vitamin D2",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_28934",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A28934",
+      "response_sha256": "3d8938193c583117f1ffbdfb97da1bfe75e92e256013de6ef8f567d0e88283b7",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A vitamin D supplement and has been isolated from alfalfa."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "agr:IND605848433",
+            "beilstein:1916682",
+            "cas:50-14-6",
+            "chemspider:4444351",
+            "drugbank:DB00153",
+            "drugcentral:2838",
+            "foodb.food:FDB012811",
+            "gmelin:1310395",
+            "hmdb:HMDB0000900",
+            "kegg.compound:C05441",
+            "kegg.drug:D00187",
+            "lipidmaps:LMST03010001",
+            "metacyc.compound:VITAMIN_D2",
+            "patent:US1680818",
+            "patent:US1871136",
+            "patent:US1902785",
+            "patent:US2030792",
+            "pdb-ccd:D2V",
+            "pmc:PMC6578466",
+            "ppdb:107",
+            "pubmed:24362707",
+            "pubmed:24780068",
+            "pubmed:24854739",
+            "pubmed:31199458",
+            "pubmed:31614966",
+            "pubmed:31987498",
+            "pubmed:32784944",
+            "pubmed:34302325",
+            "wikipedia.en:Ergocalciferol"
+          ],
+          "generalized_empirical_formula": [
+            "C28H44O"
+          ],
+          "has_alternative_id": [
+            "CHEBI:10007",
+            "CHEBI:23937"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:28934"
+          ],
+          "inchi_key_string": [
+            "MECHNRXZTMCUDQ-RKHKHRCZSA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C28H44O/c1-19(2)20(3)9-10-22(5)26-15-16-27-23(8-7-17-28(26,27)6)12-13-24-18-25(29)14-11-21(24)4/h9-10,12-13,19-20,22,25-27,29H,4,7-8,11,14-18H2,1-3,5-6H3/b10-9+,23-12+,24-13-/t20-,22+,25-,26+,27-,28+/m0/s1"
+          ],
+          "mass": [
+            "396.659"
+          ],
+          "monoisotopic_mass": [
+            "396.33922"
+          ],
+          "smiles_string": [
+            "[H][C@@]12CC[C@]([H])([C@H](C)/C=C/[C@H](C)C(C)C)[C@@]1(C)CCC/C2=CC=C1C[C@@H](O)CCC1=C"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:28940",
+      "label": "calciol",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_28940",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A28940",
+      "response_sha256": "052d4057acffc75bec366c9ee32984cf4243417bc7ef3ff0814ae80e1dbe64d9",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A hydroxy seco-steroid that is (5<i>Z</i>,7<i>E</i>)-9,10-secocholesta-5,7,10(19)-triene in which the <em>pro</em>-<i>S</i> hydrogen at position 3 has been replaced by a hydroxy group. It is the inactive form of vitamin D<small><sub>3</sub></small>, being hydroxylated in the liver to calcidiol (25-hydroxyvitamin D<small><sub>3</sub></small>), which is then further hydroxylated in the kidney to give calcitriol (1,25-dihydroxyvitamin D<small><sub>3</sub></small>), the active hormone."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "cas:67-97-0",
+            "drugbank:DB00169",
+            "drugcentral:2840",
+            "gmelin:1267613",
+            "hmdb:HMDB0000876",
+            "kegg.compound:C05443",
+            "kegg.drug:D00188",
+            "lipidmaps:LMST03020000",
+            "lipidmaps:LMST03020001",
+            "pdb-ccd:VD3",
+            "ppdb:160",
+            "pubmed:10347174",
+            "pubmed:11493580",
+            "pubmed:12174089",
+            "pubmed:12955389",
+            "pubmed:15214747",
+            "pubmed:15876428",
+            "pubmed:16886665",
+            "pubmed:17156784",
+            "pubmed:184223",
+            "pubmed:19817701",
+            "pubmed:23964472",
+            "pubmed:24304198",
+            "pubmed:2838261",
+            "pubmed:2997282",
+            "pubmed:3494111",
+            "pubmed:6265326",
+            "pubmed:9627702",
+            "reaxys:2339331",
+            "wikipedia.en:Cholecalciferol"
+          ],
+          "generalized_empirical_formula": [
+            "C27H44O"
+          ],
+          "has_alternative_id": [
+            "CHEBI:10008",
+            "CHEBI:23170",
+            "CHEBI:46283"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:28940"
+          ],
+          "inchi_key_string": [
+            "QYSXJUFSXHHAJI-YRZJJWOYSA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C27H44O/c1-19(2)8-6-9-21(4)25-15-16-26-22(10-7-17-27(25,26)5)12-13-23-18-24(28)14-11-20(23)3/h12-13,19,21,24-26,28H,3,6-11,14-18H2,1-2,4-5H3/b22-12+,23-13-/t21-,24+,25-,26+,27-/m1/s1"
+          ],
+          "mass": [
+            "384.648"
+          ],
+          "monoisotopic_mass": [
+            "384.33922"
+          ],
+          "smiles_string": [
+            "[H][C@@]12CC[C@]([H])([C@H](C)CCCC(C)C)[C@@]1(C)CCC/C2=CC=C1C[C@@H](O)CCC1=C"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:36005",
+      "label": "docosahexaenoic acid",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_36005",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A36005",
+      "response_sha256": "cc4129f7ede86b48b6be2d16b06da540c683d724da38f5581abb76be3d890102",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "Any C<small><sub>22</sub></small> polyunsaturated fatty acid containing six double bonds."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "generalized_empirical_formula": [
+            "C22H32O2"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:36005"
+          ],
+          "mass": [
+            "328.489"
+          ],
+          "monoisotopic_mass": [
+            "328.24023"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:36006",
+      "label": "icosapentaenoic acid",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_36006",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A36006",
+      "response_sha256": "61394905a8d397310c5ca55987f98831f513dc47fcc72e55610eaf2bf2689623",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "Any straight-chain, C<small><sub>20</sub></small> polyunsaturated fatty acid having five C=C double bonds."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "generalized_empirical_formula": [
+            "C20H30O2"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:36006"
+          ],
+          "mass": [
+            "302.452"
+          ],
+          "monoisotopic_mass": [
+            "302.22458"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:76125",
+      "label": "(+)-epicatechin",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_76125",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A76125",
+      "response_sha256": "93827bcada30d9cf5e759322adf980de0d1100fb129d12c2feb95784117a956b",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A catechin that is flavan carrying five hydroxy substituents at positions 3, 3', 4', 5 and 7 (the 2<i>S</i>,3<i>S</i>-stereoisomer)."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "cas:35323-91-2",
+            "kegg.compound:C09728",
+            "knapsack:C00000957",
+            "pubmed:15568761",
+            "reaxys:3655328"
+          ],
+          "generalized_empirical_formula": [
+            "C15H14O6"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:76125"
+          ],
+          "inchi_key_string": [
+            "PFTAWBLQPZVEMU-ZFWWWQNUSA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C15H14O6/c16-8-4-11(18)9-6-13(20)15(21-14(9)5-8)7-1-2-10(17)12(19)3-7/h1-5,13,15-20H,6H2/t13-,15-/m0/s1"
+          ],
+          "mass": [
+            "290.271"
+          ],
+          "monoisotopic_mass": [
+            "290.07904"
+          ],
+          "smiles_string": [
+            "Oc1cc(O)c2c(c1)O[C@@H](c1ccc(O)c(O)c1)[C@@H](O)C2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CHEBI:90",
+      "label": "(-)-epicatechin",
+      "iri": "http://purl.obolibrary.org/obo/CHEBI_90",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/chebi/terms?obo_id=CHEBI%3A90",
+      "response_sha256": "ff89367350dd085abeee1fc087df8bfa8c034e472f8dc45e713228c9fbefada2",
+      "metadata": {
+        "ontology_name": "chebi",
+        "is_obsolete": false,
+        "description": [
+          "A catechin with (2<i>R</i>,3<i>R</i>)-configuration."
+        ],
+        "annotation": {
+          "charge": [
+            0.0
+          ],
+          "database_cross_reference": [
+            "cas:490-46-0",
+            "kegg.compound:C09727",
+            "knapsack:C00000956",
+            "lincs.smallmolecule:LSM-20956",
+            "lipidmaps:LMPK12020003",
+            "metacyc.compound:CPD-7630",
+            "pubmed:10427682",
+            "pubmed:7655336",
+            "reaxys:92760"
+          ],
+          "generalized_empirical_formula": [
+            "C15H14O6"
+          ],
+          "has_alternative_id": [
+            "CHEBI:18484"
+          ],
+          "has_obo_namespace": [
+            "chebi_ontology"
+          ],
+          "id": [
+            "CHEBI:90"
+          ],
+          "inchi_key_string": [
+            "PFTAWBLQPZVEMU-UKRRQHHQSA-N"
+          ],
+          "inchi_string": [
+            "InChI=1S/C15H14O6/c16-8-4-11(18)9-6-13(20)15(21-14(9)5-8)7-1-2-10(17)12(19)3-7/h1-5,13,15-20H,6H2/t13-,15-/m1/s1"
+          ],
+          "mass": [
+            "290.271"
+          ],
+          "monoisotopic_mass": [
+            "290.07904"
+          ],
+          "smiles_string": [
+            "[H][C@]1(c2ccc(O)c(O)c2)Oc2cc(O)cc(O)c2C[C@H]1O"
+          ]
+        }
+      }
+    },
+    {
+      "id": "FOODON:00001139",
+      "label": "coffee based beverage product",
+      "iri": "http://purl.obolibrary.org/obo/FOODON_00001139",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/foodon/terms?obo_id=FOODON%3A00001139",
+      "response_sha256": "923d8dcdc6227e9b6d70ab84d978197ec0ff5e07e5f40dbf4924209a95cba1ed",
+      "metadata": {
+        "ontology_name": "foodon",
+        "is_obsolete": false,
+        "description": [],
+        "annotation": {}
+      }
+    },
+    {
+      "id": "FOODON:00001215",
+      "label": "cacao food product",
+      "iri": "http://purl.obolibrary.org/obo/FOODON_00001215",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/foodon/terms?obo_id=FOODON%3A00001215",
+      "response_sha256": "7d75ae12f114a087a52d7b5d887afaa94939d3dbd4ddb14f3ab4599706ecd059",
+      "metadata": {
+        "ontology_name": "foodon",
+        "is_obsolete": false,
+        "description": [
+          "A food product derived from Theobroma cacao."
+        ],
+        "annotation": {}
+      }
+    },
+    {
+      "id": "FOODON:00001244",
+      "label": "coffee beverage",
+      "iri": "http://purl.obolibrary.org/obo/FOODON_00001244",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/foodon/terms?obo_id=FOODON%3A00001244",
+      "response_sha256": "1381109e25df553d46015774a717221bf475a8271179bec2ab050357f00d0e42",
+      "metadata": {
+        "ontology_name": "foodon",
+        "is_obsolete": false,
+        "description": [
+          "A brewed drink prepared from roasted seeds, commonly called coffee beans, of the coffee plant."
+        ],
+        "annotation": {
+          "Contributor": [
+            "https://orcid.org/0000-0002-8844-9165"
+          ],
+          "definition source": [
+            "https://en.wikipedia.org/wiki/Coffee"
+          ],
+          "has curation status": [
+            "http://purl.obolibrary.org/obo/IAO_0000122"
+          ]
+        }
+      }
+    },
+    {
+      "id": "FOODON:00001248",
+      "label": "fish food product",
+      "iri": "http://purl.obolibrary.org/obo/FOODON_00001248",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/foodon/terms?obo_id=FOODON%3A00001248",
+      "response_sha256": "2bb48f203393ef0b2d57d92ed4aea9095890cb72ddf9026fafce512e8006f9d6",
+      "metadata": {
+        "ontology_name": "foodon",
+        "is_obsolete": false,
+        "description": [
+          "A fish food product includes products made from any fish species (aquatic vertebrate with gills and fins)."
+        ],
+        "annotation": {
+          "Contributor": [
+            "https://orcid.org/0000-0002-8844-9165"
+          ],
+          "definition source": [
+            "https://en.wikipedia.org/wiki/Fish"
+          ],
+          "has curation status": [
+            "http://purl.obolibrary.org/obo/IAO_0000122"
+          ]
+        }
+      }
+    },
+    {
+      "id": "FOODON:03303588",
+      "label": "dark chocolate",
+      "iri": "http://purl.obolibrary.org/obo/FOODON_03303588",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/foodon/terms?obo_id=FOODON%3A03303588",
+      "response_sha256": "a392c83c248f17b6285bea8caa2080f6a25d8f26ec8a8a96df4087f57b866abf",
+      "metadata": {
+        "ontology_name": "foodon",
+        "is_obsolete": false,
+        "description": [
+          "SIREN DB annotation:\n* whole, shape achieved by forming FOODON:03430147\n* fully heat-treated FOODON:03440014\n* ingredient: sucrose CHEBI:17992\n* microbial/enzymatic modification process FOODON:03460119\n* curing or aging process FOODON:03460253\n* ingredient: flavoring or spice extract or concentrate added FOODON:03460100\n* ingredient: chocolate or cocoa added FOODON:03460231\n* ingredient: vegetable fat or oil added FOODON:03460263"
+        ],
+        "annotation": {
+          "database_cross_reference": [
+            "https://bioregistry.io/reference/siren:F3588"
+          ],
+          "has curation status": [
+            "http://purl.obolibrary.org/obo/IAO_0000428"
+          ]
+        }
+      }
+    },
+    {
+      "id": "FOODON:03315081",
+      "label": "tea food product",
+      "iri": "http://purl.obolibrary.org/obo/FOODON_03315081",
+      "source_url": "https://www.ebi.ac.uk/ols4/api/ontologies/foodon/terms?obo_id=FOODON%3A03315081",
+      "response_sha256": "aa432bc2d7de4fad909b3562522bfe99ea191eec04348c2d2d4ba7d7cfe570bc",
+      "metadata": {
+        "ontology_name": "foodon",
+        "is_obsolete": false,
+        "description": [
+          "An aromatic beverage commonly prepared by pouring hot or boiling water over cured leaves of the Camellia sinensis, an evergreen shrub (bush) native to East Asia.",
+          "SIREN DB annotation:\n* leaf FOODON:03420200"
+        ],
+        "annotation": {
+          "Contributor": [
+            "https://orcid.org/0000-0002-8844-9165"
+          ],
+          "database_cross_reference": [
+            "https://bioregistry.io/reference/siren:F15081"
+          ],
+          "definition source": [
+            "https://en.wikipedia.org/wiki/Tea"
+          ],
+          "has curation status": [
+            "http://purl.obolibrary.org/obo/IAO_0000428"
+          ]
+        }
+      }
+    }
+  ],
+  "local_identity_policy": "Unspecified subtype/stereochemistry/processing is not equal to a specific official concept",
+  "classification_links": [
+    {
+      "subject": "CHEBI:28934",
+      "predicate": "curated_member_of",
+      "object": "CHEBI:27300"
+    },
+    {
+      "subject": "CHEBI:28940",
+      "predicate": "curated_member_of",
+      "object": "CHEBI:27300"
+    },
+    {
+      "subject": "CHEBI:23053",
+      "predicate": "curated_member_of",
+      "object": "local:flavanol-class"
+    },
+    {
+      "subject": "local:epicatechin-unspecified",
+      "predicate": "curated_member_of",
+      "object": "local:flavanol-class"
+    }
+  ],
+  "classification_notice": "Curated display taxonomy; never an experimentally established effect or sameAs relation"
+}

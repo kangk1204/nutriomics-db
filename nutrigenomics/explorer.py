@@ -1558,6 +1558,9 @@ def attach_explorer(app: FastAPI, *, public=False):
     from .clinical_api import router as clinical_router
 
     app.include_router(clinical_router)
+    from .literature_api import attach_literature
+
+    attach_literature(app, public=public)
 
     @app.get("/explorer", include_in_schema=False)
     def explorer_redirect():

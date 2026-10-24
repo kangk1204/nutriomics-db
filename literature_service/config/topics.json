@@ -1,0 +1,46 @@
+{
+  "topics": [
+    {
+      "id": "HTN",
+      "enabled": true,
+      "name": "고혈압·후성유전",
+      "start_date": "2025-01-01",
+      "query": "(hypertension[MeSH Terms] OR blood pressure[Title/Abstract]) AND (DNA methylation[Title/Abstract] OR epigenetic[Title/Abstract] OR nutrigenomics[Title/Abstract] OR nutritional genomics[Title/Abstract])"
+    },
+    {
+      "id": "DASH",
+      "enabled": true,
+      "name": "DASH",
+      "start_date": "2025-01-01",
+      "query": "(Dietary Approaches to Stop Hypertension[Title/Abstract] OR DASH diet[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "omega3",
+      "enabled": true,
+      "name": "오메가3",
+      "start_date": "2025-01-01",
+      "query": "(Fatty Acids, Omega-3[MeSH Terms] OR omega-3[Title/Abstract] OR eicosapentaenoic acid[Title/Abstract] OR docosahexaenoic acid[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "vitD",
+      "enabled": true,
+      "name": "비타민D",
+      "start_date": "2025-01-01",
+      "query": "(Vitamin D[MeSH Terms] OR cholecalciferol[Title/Abstract] OR ergocalciferol[Title/Abstract] OR calcitriol[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "caffeine",
+      "enabled": true,
+      "name": "카페인",
+      "start_date": "2025-01-01",
+      "query": "(Caffeine[MeSH Terms] OR caffeine[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    },
+    {
+      "id": "cocoa_flavanol",
+      "enabled": true,
+      "name": "코코아·플라바놀",
+      "start_date": "2025-01-01",
+      "query": "(cocoa[Title/Abstract] OR cacao[Title/Abstract] OR flavanol*[Title/Abstract]) AND (hypertension[MeSH Terms] OR blood pressure[Title/Abstract])"
+    }
+  ]
+}

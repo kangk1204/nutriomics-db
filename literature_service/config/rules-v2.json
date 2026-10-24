@@ -1,0 +1,17 @@
+{
+  "version": "event-grammar-2026-10-03-v2",
+  "mmr_lambda": 0.7,
+  "max_sentence_codepoints": 30000,
+  "triggers": {
+    "increase": ["increase", "upregulate", "up-regulate", "elevate", "enhance", "activate", "induce", "raise"],
+    "decrease": ["reduce", "decrease", "downregulate", "down-regulate", "suppress", "inhibit", "lower"],
+    "association": ["associate", "correlate", "link"],
+    "change": ["affect", "alter", "modulate", "change"],
+    "binding": ["bind"]
+  },
+  "argument_role_sources": "Dependency subjects/objects and explicit prepositions; never closest entities",
+  "ambiguity_policy": "abstain; preserve source and candidate endpoints",
+  "species_policy": "No animal-to-human HGNC assignment; cell model is independent of organism",
+  "scopes": "Dependency clause with termination at contrast/coordinated clauses",
+  "review_scope": "Candidates, not validated causal effects"
+}

@@ -1,0 +1,7 @@
+scispacy==0.6.2
+spacy==3.7.5
+weasel==0.3.4
+typer==0.9.0
+click==8.1.7
+numpy==1.26.4
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_sm-0.5.4.tar.gz

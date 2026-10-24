@@ -1,0 +1,284 @@
+{
+  "status": "passed",
+  "scope": "isolated synthetic API examples; not production data or model accuracy",
+  "workers_started": 0,
+  "external_model_calls": 0,
+  "checks": 42,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/docs",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/openapi.json",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/stats",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers?page=1&page_size=5",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers/1?engine=heuristic-v1",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers/2",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers/1?engine=unknown",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/events?pmid=1&engine=heuristic-v1&page_size=200",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/benchmarks",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/reports",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/reports/current?format=html",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/reports/current?format=md",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/reports/current?format=csv",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/reports/current?format=json",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/reports/current?format=csv&table=inventory",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers?page_size=201",
+      "expected_status": 422,
+      "actual_status": 422
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers?year_from=2026&year_to=2020",
+      "expected_status": 422,
+      "actual_status": 422
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers?processing_status=invalid",
+      "expected_status": 422,
+      "actual_status": 422
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/reports/current?format=pdf",
+      "expected_status": 422,
+      "actual_status": 422
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers/999",
+      "expected_status": 404,
+      "actual_status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/jobs",
+      "expected_status": 404,
+      "actual_status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers",
+      "expected_status": 401,
+      "actual_status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/session",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/literature-admin/session",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/jobs",
+      "expected_status": 403,
+      "actual_status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/session",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/literature-admin/session",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/papers/1",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/explorer/literature/events?pmid=1",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/reviews",
+      "expected_status": 422,
+      "actual_status": 422
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/reviews",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/jobs",
+      "expected_status": 403,
+      "actual_status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/jobs",
+      "expected_status": 202,
+      "actual_status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/jobs",
+      "expected_status": 202,
+      "actual_status": 202
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/literature-admin/jobs",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/jobs/d11f7431f3fc44cabb66c6aaeff6b127/cancel",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature-admin/jobs/d11f7431f3fc44cabb66c6aaeff6b127/resume",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/literature-admin/session",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/literature-admin/jobs",
+      "expected_status": 401,
+      "actual_status": 401
+    }
+  ],
+  "unicode_quote_and_hash_match": true,
+  "restricted_text_withheld": true,
+  "search_parameters_documented": [
+    "q",
+    "topic",
+    "year_from",
+    "year_to",
+    "engine",
+    "fulltext",
+    "corpus",
+    "query_version",
+    "processing_status",
+    "gene",
+    "chemical",
+    "species",
+    "page",
+    "page_size"
+  ],
+  "sources": {
+    "docs/LITERATURE_API_ko.md": "741219d975d5c4091424cc4e76d903d4b384179975be8c3573ad08a89ac20c04",
+    "nutrigenomics/literature_api.py": "88dc099880f0eb3ca319f452da352f7ff5d3cd126866cbe67660fc4ebe97d1d1",
+    "nutrigenomics/literature_management.py": "a3f6d3656a18a649ddeacd42f8d2dddadc73150cccccbf2efe5de29a6f4e9bb1"
+  }
+}
