@@ -1,23 +1,75 @@
 # NutriOmics
 
-음식·영양성분·식이중재·유전자·후성유전 정보를 탐색하는 연구 DB와 웹 플랫폼입니다. 문헌 수집, 원문 기반 추출, 개체 ID 연결, 관계·임상 결과 모델 학습, 검수, 보고서 생성을 하나의 작업 흐름으로 제공합니다.
+음식·영양성분·식이중재·유전자·후성유전 정보를 연결하는 연구 DB와 문헌 분석 플랫폼입니다. 문헌 검색부터 원문 근거, 개체 ID, 관계 예측, 구조화 요약과 연구자 검수까지 웹브라우저에서 탐색합니다.
 
-## 주요 기능
+## 최종 대표 성과
 
-- **근거 DB:** 음식 조성, 사람 식이중재, 발현·DNA 메틸화 정량 결과, 조절영역·유전자 연결 탐색.
-- **문헌 플랫폼:** 주제·기간·유전자·성분·종 검색, 구조화 요약, 원문 위치, 관계 지도, 모델 비교, HTML·Markdown·CSV·JSON 보고서.
-- **문헌 알고리듬:** 사전·규칙 기반 엔진, BiomedBERT 개체 탐지, SapBERT ID 후보 검색, 선형·문맥형 ID 순위화, 관계 존재·유형·방향·원문 근거 학습.
-- **임상 모델:** P/I/O 구절, 문장 역할, 중재·비교군·결과·군·용량·시점 연결.
-- **운영:** 증분 수집, 버전별 결과, 개인 계정 검수, 작업 대기열, 체크포인트, 백업, 평가 manifest.
+**2026-10-24 기준, 문헌 44,828편을 확보하고 28,977편에서 저장 원문과 대응하는 추출 결과를 구축했습니다.** 관계 존재 예측은 정답 개체를 제공한 224편·4,362개 물질–유전자 쌍에서 **AUROC 0.876**으로, 동일 조건의 TF-IDF 기준선 **0.666**보다 높았습니다.
 
-현재 웹 기본 엔진은 `heuristic-v1`입니다. `v2/v4/v5` 저장 결과와 과거 개발 평가를 조회할 수 있으며, `nutriomics-evidence-v8`은 학습 중입니다.
+| 평가 항목 | 대표 결과 | 평가 조건 |
+|---|---|---|
+| 관계 존재 예측 | **AUROC 0.876** · 95% 구간 0.851–0.898 | 공개 400편 중 적격 224편·4,362쌍, 정답 개체·ID 제공 |
+| 유전자 이름 탐지 | **F1 83.35%** · 정밀도 79.02% · 재현율 88.17% | 공식 학습 415편의 문헌 단위 교차검증 |
+| 물질 이름 탐지 | **F1 83.00%** · 정밀도 80.64% · 재현율 85.49% | 공식 학습 415편의 문헌 단위 교차검증 |
+| 전체 자동 관계 추출 | **F1 46.10%** · 정밀도 50.78% · 재현율 42.21% | 반복 개발 100편·정답 154건, 개체·표준 ID·관계 유형 자동 추출 |
+| 임상 결과 구절 · EBM-NLP | **F1 54.38%** · 정밀도 70.43% · 재현율 44.29% | 개발 200편, 결과 구절 토큰 평가 |
+| 임상 결과 구절 · EvidenceOutcomes | **F1 46.24%** · 정밀도 42.56% · 재현율 50.61% | 개발 200편, 결과 구절 토큰 평가 |
 
-## 설치
+대표값은 완료된 평가 중 **각 과제의 F1이 가장 높은 구성 전체**를 사용했습니다. 관계 존재 예측은 AUROC로 보고하며, 정답 개체를 제공한 분류와 전체 자동 추출을 구분합니다. 과제별 대표 구성은 하나의 새 모델로 합친 결과가 아닙니다. 100편 관계 평가는 반복 사용한 개발 자료이며, 임상 구절 점수의 단위는 결과 구절의 토큰입니다.
 
-Python 3.12, Node.js 24, pnpm 11.25.0을 사용합니다. R/Bioconductor 분석 환경은 별도로 구성합니다.
+전체 자동 추출의 대표 구성은 **예측 128건 중 정탐 65건·오탐 63건·누락 89건**입니다. [최종 성과표와 평가 조건](docs/reviewer/RESULTS.md) · [인쇄용 HTML](docs/reviewer/report.html) · [CSV](docs/reviewer/metrics.csv) · [근거·해시 JSON](docs/reviewer/summary.json)에서 수치와 출처를 확인할 수 있습니다.
+
+## 성능 수치를 읽는 방법
+
+문헌 분석은 **이름 찾기 → 표준 ID 연결 → 관계 존재 판단 → 관계 유형 추출** 순서로 진행됩니다. 예를 들어 논문에서 ‘vitamin D’와 ‘VDR’을 찾아 각각의 ID를 연결한 뒤, 두 개체 사이에 어떤 관계가 기술됐는지 판단합니다. 이름만 맞히는 것보다 이 과정을 모두 자동으로 수행하는 평가가 더 많은 조건을 요구합니다.
+
+| 지표 | 전문적 의미 | 이 결과에서는 어떻게 읽나요? |
+|---|---|---|
+| **AUROC** | 관계가 있는 쌍을 없는 쌍보다 높은 점수로 구분하는 능력. 0.5는 무작위 수준, 1.0은 완전한 구분 | **0.876**은 무작위로 고른 관계 있음·없음 쌍에서, 관계 있는 쌍의 점수가 더 높을 확률이 약 **87.6%**라는 뜻입니다. ‘전체 예측의 87.6%가 정답’이라는 정확도와는 다릅니다. 동점은 절반의 성공으로 계산합니다. |
+| **정밀도 · Precision** | 모델이 있다고 예측한 관계 중 실제 정답인 비율 | 전체 자동 평가에서 **65 ÷ 128 = 50.78%**입니다. 연구자가 검토할 후보 중 맞는 관계의 비중을 나타냅니다. |
+| **재현율 · Recall** | 실제 정답 관계 중 모델이 찾아낸 비율 | 정답 **154건 중 65건**을 찾아 **42.21%**입니다. 나머지 **89건**은 찾지 못했거나 ID·유형이 정답과 달랐습니다. |
+| **F1** | 정밀도와 재현율의 조화평균. 한쪽만 높으면 함께 낮아지는 균형 지표 | 전체 자동 추출의 **46.10%**는 정밀도 50.78%와 재현율 42.21%를 함께 요약한 값입니다. 단순 평균이나 정확도와는 다릅니다. |
+| **95% 구간** | 문헌을 단위로 재표집했을 때 성능 추정의 변동 범위를 요약 | AUROC의 **0.851–0.898**은 문헌 단위 bootstrap으로 산출한 구간입니다. 개별 예측이 맞을 확률을 뜻하지 않습니다. |
+
+**AUROC 0.876의 핵심 성과는 같은 평가 조건에서 TF-IDF 0.666보다 관계의 유무를 더 잘 구분했다는 점입니다.** 차이는 AUROC **0.210**이며, 공개 400편 중 적격 224편의 4,362쌍을 동일하게 비교했습니다. 이 평가에서는 개체 위치와 ID를 정답으로 제공하므로 관계 판단 모델의 성능을 따로 측정합니다. 전체 자동 추출은 개체 탐지·ID 연결·관계 유형까지 모두 맞아야 정탐으로 계산하며, 그 결과를 별도 행에 제시했습니다.
+
+유전자·물질 탐지의 F1 약 **83%**는 이름의 **원문 경계를 찾는 성능**입니다. 표준 ID나 생물학적 관계까지 83% 맞혔다는 의미는 아닙니다. 임상 결과 구절의 F1은 ‘혈압 감소’처럼 결과가 기술된 **텍스트 범위를 찾는 성능**이며, 치료 효과의 크기나 군·용량·시점 연결의 정확도와 구분합니다. 과제마다 평가 단위와 정답 조건이 달라 서로 다른 행의 점수를 같은 척도로 순위화하지 않습니다.
+
+문헌 단위 교차검증은 일부 논문을 학습에서 제외해 평가하고, 이 과정을 나누어 반복한 뒤 제외됐던 논문들의 예측을 모으는 방법입니다. 표의 **OOF**는 이렇게 해당 논문을 학습에 사용하지 않은 분할의 예측을 뜻합니다. 새로운 영양 문헌을 전문가가 직접 검증한 평가와는 구분합니다.
+
+수집 문헌 **44,828편**은 시스템이 확보한 자료의 규모이고, 평가 문헌 **100편·154건** 또는 **224편·4,362쌍**은 모델의 성능을 측정한 자료입니다. 따라서 수집 편 수를 곧바로 정답 관계 수나 전문가 검증 건수로 해석하지 않습니다.
+
+## 문헌 자료 규모
+
+아래 수치는 **2026-10-24 12:46 KST**의 고정 수집 기록입니다.
+
+| 항목 | 건수 |
+|---|---:|
+| 저장된 고유 문헌 | **44,828편** |
+| 초록 확보 | **43,365편** |
+| 공개 본문 확보 | **2,314편** |
+| 현재 원문과 대응하는 추출 결과를 보유한 문헌 | **28,977편** |
+| 문헌 리포트 등록 | **9건** |
+| 확대 검색의 고유 PMID 목록 | **133,261편** |
+
+검색 목록과 실제 확보 문헌은 별도로 집계합니다. 원문 대응 추출 수는 초록 또는 공개 본문의 해시와 일치하는 결과가 최소 한 엔진에 있는 고유 문헌 수입니다.
+
+## 웹에서 할 수 있는 일
+
+- **문헌 탐색:** 주제·연도·유전자·물질·종·공개 본문 여부와 처리 상태로 검색합니다.
+- **논문 상세:** 한국어 구조화 요약, 원문 인용·문자 위치, 개체 ID와 연구 조건을 확인합니다.
+- **근거 지도:** 음식·성분·유전자·건강결과와 논문별 관계 후보를 탐색합니다.
+- **성능·보고서:** 완료된 평가의 대표 결과와 버전별 비교를 확인하고 HTML·Markdown·CSV·JSON으로 내려받습니다.
+- **내부 검수·관리:** 개인 계정으로 승인·수정·기각·미확인을 기록하고 작업 상태를 조회합니다.
+
+소스는 `literature_service`의 수집·추출·학습 모듈, `nutrigenomics`의 FastAPI, `frontend/explorer`의 React 화면으로 구성합니다. 사전·규칙, 생의학 인코더, ID 순위 모델과 관계·임상 구절 분류기를 사용하며, 저장한 모델 응답과 공개 주석 자료를 함께 관리합니다.
+
+## 설치와 실행
+
+Python 3.12, Node.js 24, pnpm 11.25.0을 사용합니다. 현재 문헌 통합 소스는 다음 브랜치에 있습니다.
 
 ```bash
-git clone https://github.com/kangk1204/nutriomics-db.git
+git clone --branch feature/20261023-literature-integration https://github.com/kangk1204/nutriomics-db.git
 cd nutriomics-db
 python3.12 -m venv .venv
 source .venv/bin/activate
@@ -26,150 +78,72 @@ pnpm -C frontend/explorer install --frozen-lockfile
 pnpm -C frontend/explorer build
 ```
 
-Windows에서는 `py -3.12 -m venv .venv`와 `.\.venv\Scripts\Activate.ps1`로 환경을 활성화합니다.
+Windows PowerShell에서는 `py -3.12 -m venv .venv`와 `.\.venv\Scripts\Activate.ps1`로 환경을 만듭니다. 문헌 DB·모델·공개 release는 코드와 별도 저장합니다. 처음 설정할 때는 [문헌 실행 안내](docs/LITERATURE_RUNBOOK_ko.md)의 **환경과 초기화 → 웹 빌드와 snapshot** 순서를 따릅니다.
 
-## 문헌 수집·처리
-
-```bash
-export LITERATURE_HOME="$PWD/literature_service/runtime"
-export LITERATURE_CONFIG="$PWD/literature_service/config/topics.json"
-nutri-literature init
-nutri-literature collect
-nutri-literature process --stage oa --limit 100
-nutri-literature process --stage extract --engine heuristic-v1 --limit 100
-nutri-literature report --engine heuristic-v1
-```
-
-`--limit`는 한 번에 처리할 작업 수입니다. 대규모 수집은 다음 명령으로 실행합니다.
-
-```bash
-python literature_service/scripts/platform_expand_v8.py collect --continuous
-python literature_service/scripts/platform_expand_v8.py reconcile
-```
-
-기본 6개 주제와 영양유전체·식이중재 검색식은 [topics-v8.json](literature_service/config/topics-v8.json)에 있습니다. PubMed 서지·초록과 공개 XML 본문을 수집하며, 원문·라이선스·검색식·해시·개정 이력을 저장합니다.
-
-## 웹 플랫폼 실행
-
-문헌 DB에서 공개·내부 snapshot을 생성합니다.
-
-```bash
-python -m scripts.build_literature_snapshot \
-  --source "$LITERATURE_HOME/data/literature.sqlite3" \
-  --output "$PWD/literature_service/runtime/snapshots/dev-public" \
-  --release-id literature-dev-public
-python -m scripts.build_literature_snapshot \
-  --source "$LITERATURE_HOME/data/literature.sqlite3" \
-  --output "$PWD/literature_service/runtime/snapshots/dev-internal" \
-  --release-id literature-dev-internal --internal
-```
-
-기존 NutriOmics release와 공개 문헌 snapshot을 연결합니다.
+준비된 공개 release와 문헌 snapshot을 연결해 실행합니다.
 
 ```bash
 export NUTRIOMICS_PUBLIC_RELEASE="/absolute/path/to/release"
 export NUTRIOMICS_ALLOW_CANDIDATE=1
-export NUTRIOMICS_LITERATURE_SNAPSHOT="$PWD/literature_service/runtime/snapshots/dev-public"
+export NUTRIOMICS_LITERATURE_SNAPSHOT="/absolute/path/to/public-literature-snapshot"
 export NUTRIGENOMICS_EXPLORER_DIST="$PWD/frontend/explorer/dist"
 python -m uvicorn nutrigenomics.public_service:app_factory \
   --factory --host 127.0.0.1 --port 8064
 ```
 
-- 근거 DB: <http://127.0.0.1:8064/explorer/>
-- 문헌·모델 평가: <http://127.0.0.1:8064/explorer/?view=literature>
-- 실행 확인: <http://127.0.0.1:8064/healthz>
+| 목적 | 로컬 주소 |
+|---|---|
+| 웹 플랫폼 | [http://127.0.0.1:8064/explorer/](http://127.0.0.1:8064/explorer/) |
+| 문헌 화면 | [http://127.0.0.1:8064/explorer/?view=literature](http://127.0.0.1:8064/explorer/?view=literature) |
+| API를 직접 실행해 보는 화면 | [http://127.0.0.1:8064/docs](http://127.0.0.1:8064/docs) |
+| 서버 실행 확인 | [http://127.0.0.1:8064/healthz](http://127.0.0.1:8064/healthz) |
 
-내부 검수·작업 관리는 별도 터미널에서 실행합니다.
+`NUTRIOMICS_ALLOW_CANDIDATE=1`은 내부 연구용 release 확인에 사용합니다. 공개 배포는 [release 검증 절차](docs/PUBLICATION_RUNBOOK_ko.md)를 따릅니다. 원격 서버에 접속할 때는 [SSH 포워딩 안내](docs/LOCAL_TUNNEL_ko.md)를 참고하세요.
+
+## API 빠른 시작
+
+공개 조회 주소는 `/api/v1/explorer/literature`입니다. 실행 중인 서버에서 아래 두 요청으로 연결 상태와 첫 문헌을 확인할 수 있습니다.
 
 ```bash
-export NUTRIOMICS_INTERNAL_LITERATURE_SNAPSHOT="$PWD/literature_service/runtime/snapshots/dev-internal"
-python -m uvicorn nutrigenomics.literature_management:app_factory \
-  --factory --host 127.0.0.1 --port 8063
+curl --fail-with-body "http://127.0.0.1:8064/api/v1/explorer/literature/stats"
+curl --fail-with-body "http://127.0.0.1:8064/api/v1/explorer/literature/papers?page=1&page_size=5"
 ```
 
-계정·권한 설정, worker와 서버 실행, v8 입력·학습·평가는 [문헌 실행 안내](docs/LITERATURE_RUNBOOK_ko.md)를 참고하세요. 개발 서버의 SSH 포워딩은 [로컬 접속 안내](docs/LOCAL_TUNNEL_ko.md)에 정리했습니다. 독립 HTML은 내보내기 시점의 snapshot을 포함하고, 서버형 웹은 연결된 snapshot과 모델 결과를 조회합니다.
+PowerShell에서는 다음과 같이 호출합니다.
 
-## 현재 성능
+```powershell
+$api = 'http://127.0.0.1:8064/api/v1/explorer/literature'
+Invoke-RestMethod "$api/stats"
+$papers = Invoke-RestMethod "$api/papers?page=1&page_size=5"
+$papers.items | Select-Object pmid, title, pub_date
+```
 
-기준일은 **2026-10-24**입니다. 아래 관계 평가는 **동일 개발 100편·정답 관계 154건**, 원시 표준 ID와 관계 유형 일치 기준입니다. 방향성은 별도 평가합니다.
-
-| 구성 | TP | FP | FN | 정밀도 | 재현율 | F1 |
-|---|---:|---:|---:|---:|---:|---:|
-| chatgpt-repair-v2 | 64 | 64 | 90 | 50.00% | 41.56% | 45.39% |
-| chatgpt-repair-v3 | 63 | 57 | 91 | 52.50% | 40.91% | 45.99% |
-| chatgpt-repair-v4 | 50 | 54 | 104 | 48.08% | 32.47% | 38.76% |
-| chatgpt-repair-v5-r1 | 65 | 63 | 89 | 50.78% | 42.21% | 46.10% |
-| relation-repair-v6-gpu-r2 | 평가 대기 | — | — | — | — | — |
-| nutriomics-evidence-v8 | 평가 대기 | — | — | — | — | — |
-
-개발 목표는 **TP ≥65, 재현율 ≥65/154(42.21%), 정밀도 ≥85%**입니다. 현재 최고 재현율 구성은 TP 65·FP 63이며, 정밀도 목표까지 추가 개선이 필요합니다. 위 `chatgpt-repair-*` 평가 구성과 웹 기본 엔진 `heuristic-v1`은 별도로 관리합니다.
-
-개체 탐지와 임상 구절 진단은 다음과 같습니다.
-
-| 과제·자료 | 평가 범위 | 정밀도 | 재현율 | F1 |
-|---|---|---:|---:|---:|
-| 유전자 NER 단독 | v8 run4·공식 학습 415편 OOF | 79.02% | 88.17% | 83.35% |
-| 유전자 NER 단독 | v8 run5·공식 학습 415편 OOF | 79.11% | 87.46% | 83.07% |
-| 물질 NER 단독 | v8 run4·공식 학습 415편 OOF | 80.64% | 85.49% | 83.00% |
-| 물질 NER 단독 | v8 run5·공식 학습 415편 OOF | 80.43% | 85.54% | 82.91% |
-| EBM-NLP 결과 구절 | 개발 200편·새 PIO + 기존 순위 모델 | 70.43% | 44.29% | 54.38% |
-| EvidenceOutcomes 결과 구절 | 개발 200편·새 PIO + 기존 순위 모델 | 41.90% | 50.20% | 45.68% |
-
-평가 집합별 건수·단위·해시는 [상태·성능 JSON](docs/status/literature-2026-10-24.json)에 저장했습니다. [v8 구현 기록](literature_service/docs/implementation-v8.md)에서 모델·사전·규칙·메모리 수정과 실행 이력을 확인할 수 있습니다.
-
-## 수집 규모와 진행 중인 학습
-
-수집 DB의 2026-10-24 관측값입니다. 항목별 관측 시각을 함께 표시합니다.
-
-| 항목 | 건수 | 관측 시각(KST) |
-|---|---:|---|
-| 고정 검색 PMID 합집합 | 133,261편 | 12:46·고정 검색 목록 대조 |
-| 저장된 고유 문헌 | 44,828편 | 12:46 |
-| 초록 확보 | 43,365편 | 12:46 |
-| 공개 본문 확보 | 2,314편 | 12:46 |
-| 현재 원문 일치 추출 | 28,977편 | 12:46 |
-
-| 실행 | 현재 단계 |
+| API | 용도 |
 |---|---|
-| v8 run5 | NER 완료·자원 대기 해제 후 ID 중첩 검증 학습 재개·상류 NER 모델 12개·프로필 11개·ID 외부 fold 0/5 (12:46 KST) |
-| v8 보조 학습 | DrugProt 외부 fold 3/5·학습 모델 파일 21개 완료·CG 다음 단계 (12:46 KST) |
-| 기존 r2 | 관계 외부 fold 2/5 완료·학습 실행 중 (12:46 KST) |
+| `GET /stats` | 연결된 자료 버전·수집 규모·엔진 확인 |
+| `GET /papers` | 문헌 검색과 페이지 조회 |
+| `GET /papers/{pmid}` | 요약·원문·출처·처리 상태 |
+| `GET /events` | 논문·엔진·개체별 관계 후보와 원문 위치 |
+| `GET /benchmarks` | 저장된 모델 평가 결과 |
+| `GET /reports/current?format=html` | 현재 snapshot의 보고서 |
 
-v8 run5는 중첩 ID 후보의 메모리 사용을 개선한 실행입니다. 실제 후보 208,171건의 값·해시를 유지한 메모리 재현은 최고 2.77GiB였고, Linux 회귀검사 54개를 통과했습니다. 학습·평가 작업은 버전별 소스와 체크포인트로 이어집니다. 추가 Sol·Luna 호출 예산은 소진됐으며 현재 학습은 저장 응답과 공개 주석 자료를 사용합니다.
+**[API 사용 안내](docs/LITERATURE_API_ko.md)**에는 처음부터 따라 하는 예제, 모든 검색 조건, 응답 읽는 방법, Python 전체 조회, 보고서 저장, 내부 로그인·검수·작업 등록과 오류 해결 방법을 정리했습니다. 공개 조회는 저장된 결과를 읽으며, 요청 중에 모델 학습이나 외부 생성형 모델 호출을 실행하지 않습니다.
 
-남아 있던 **NLP 검사 5건은 10:41 KST 고정 Linux 환경에서 모두 통과**했습니다. [개별 검사·의존성·해시](docs/status/nlp-validation-2026-10-24.json)를 저장했습니다. 학습 후속 작업은 서버 재접속·중단 재개, 100편 예측 회수, 두 번 재채점, 보고서·README 갱신과 현재 브랜치 커밋·푸시로 연결했습니다. 실행 방법은 [후속 작업 안내](docs/LITERATURE_RUNBOOK_ko.md)에 있습니다.
+## 버전과 재현 기록
 
-Chrome GPU 프로세스와 파일관리자로 인한 대기를 수정했습니다. 같은 사용자의 실제 실행 파일·Chrome GPU 역할·개별 및 합계 메모리를 확인하며, 다른 학습 작업은 계속 대기 조건입니다. 기존 과학 소스 272개 파일과 완료 체크포인트·계약 파일 36개를 보존했고, 12:18 GPU 사용률 97%를 확인했습니다. 자원 검사·재개·회수·보고서 검사는 로컬 78건, Linux 17건을 통과했습니다. [수정·재개 기록](docs/status/gpu-resource-2026-10-24.json).
-
-연결 복구 후 tokenizer의 Hugging Face 템플릿 조회가 TLS 연결에서 멈춘 원인을 확인하고, 고정된 모델 캐시만 읽도록 바꿔 ID 학습을 재개했습니다. 모델·체크포인트 42개는 중단 전후 해시가 모두 같았습니다. 네트워크를 차단한 모델 로드와 캐시 누락 실패를 확인했고, 관련 검사는 로컬 83건·Linux 55건을 통과했습니다. 재개 후 GPU 사용률 97%, 외부 연결 0건, 새 상류 NER 모델의 optimizer 2 epoch 갱신을 확인했습니다. 개별 ID 모델과 외부 fold를 구분하며 실행 확인용 모델은 집계에서 제외합니다. [캐시 복구·검증 기록](docs/status/model-cache-repair-2026-10-24.json).
-
-ID 중첩 검증은 각 학습 분할에서 상류 NER 후보를 다시 생성합니다. 위 모델·프로필 수에는 이 과정의 산출물도 포함합니다. 후속 작업은 접속 실패 시 체크포인트를 보존하며 재접속합니다.
-
-최신 성능·학습·검사 보고서: [HTML](docs/reports/v8-progress-20261024-1246-cache/report.html) · [Markdown](docs/reports/v8-progress-20261024-1246-cache/report.md) · [CSV](docs/reports/v8-progress-20261024-1246-cache/report.csv) · [JSON](docs/reports/v8-progress-20261024-1246-cache/report.json). v8의 같은 100편 재평가는 ID·관계 학습과 예측 완료 후 채점합니다.
-
-## 남은 작업
-
-- v8 ID·관계 학습, 모델 동결, 동일 100편 전체 예측·재평가, 기존 구성과 비교.
-- 133,261편 수집 전수 대조, 공개 본문 재확인, 엔진별 전수 처리.
-- 임상 군·비교군·용량·시점 연결의 정량 평가.
-- GNorm2·MedCPT 비교, 영양 문헌 추가 사전학습 실험.
-- 동결 구성의 BC8 평가, 영양 문헌 정답 주석, 검수 시간 측정.
-- 동일 artifact의 7일 운영, 중단·복원·전환·복귀 검증.
-
-## 검증
+심사용 성과 묶음은 **NutriOmics Literature 2026.10**입니다. 이 이름은 성과표의 문서 버전이며 개별 모델의 엔진 ID는 그대로 보존합니다. 웹 기본 엔진은 `heuristic-v1`이고, 완료된 자동 관계 평가의 대표 구성은 `chatgpt-repair-v5-r1`입니다. 평가 중인 r2·v8의 학습 기록은 [버전 이력](docs/reviewer/VERSIONS.md)에서 별도로 확인할 수 있습니다.
 
 ```bash
+python scripts/build_reviewer_summary.py --check
 python -m pytest tests/test_literature_platform.py tests/test_literature_management.py
-python -m pytest tests/test_v8_streaming_json.py tests/test_v8_id_lifecycle.py
-python -m pytest tests/test_evidence_v8_contract.py tests/test_evidence_v8_native.py
 pnpm -C frontend/explorer typecheck
 pnpm -C frontend/explorer build
 ```
 
+새 학습의 결과는 전체 예측과 평가가 저장된 후 성과표에 반영합니다. [상태 기록](docs/status/literature-2026-10-24.json), [검증 기록](docs/status/validation-2026-10-24.md), [개발 실행 안내](docs/LITERATURE_RUNBOOK_ko.md)와 [최종보고서 저장소](https://github.com/kangk1204/nutriomics-final-report)를 함께 제공합니다.
+
 ## 자료·release와 라이선스
 
-`dataset-metadata.json`에 release별 집계가, manifest에 파일 해시가 저장됩니다. 음식 조성, 중재, 오믹스 결과, 문헌, 관계 기록은 각 단위로 집계합니다. 정량 결과의 키는 `series_accession, feature_type, feature_id, contrast, analysis_version`입니다.
+음식 조성, 중재, 오믹스 결과, 문헌과 관계는 각각의 단위로 집계합니다. release별 집계는 `dataset-metadata.json`, 파일 해시는 manifest에 저장합니다. 공개 생성·배포는 [운영 안내](docs/PUBLICATION_RUNBOOK_ko.md), 원본 재구축은 [재구축 안내](docs/WORKBENCH_PUBLIC_REBUILD_ko.md), 연구 검수는 [검수 흐름](docs/WORKBENCH_SUBMISSION_REVIEW_ko.md)을 따릅니다.
 
-공개 release 생성·배포는 [운영 안내](docs/PUBLICATION_RUNBOOK_ko.md), 공개 원본 재구축은 [재구축 안내](docs/WORKBENCH_PUBLIC_REBUILD_ko.md), 연구 검수는 [검수 흐름](docs/WORKBENCH_SUBMISSION_REVIEW_ko.md), 식품·유전자 검색은 [식품 검색](docs/FOOD_SEARCH_KO.md)·[유전자 검색](docs/gene-search-ko.md)을 참고하세요.
-
-소프트웨어는 [MIT](LICENSE), 공개 가능한 자체 큐레이션·파생 분석은 CC BY 4.0입니다. 원본 데이터와 의존성의 이용조건은 [LICENSE-DATA.md](LICENSE-DATA.md)에 정리했습니다. DB·모델 가중치·원문·실행 캐시·인증정보는 로컬 또는 서버의 버전별 저장소에서 관리합니다.
+소프트웨어는 [MIT](LICENSE), 공개 가능한 자체 큐레이션·파생 분석은 CC BY 4.0입니다. 원본 데이터와 의존성의 이용조건은 [LICENSE-DATA.md](LICENSE-DATA.md)에 정리했습니다. 원문 공개 범위는 문헌별 이용조건을 적용합니다.

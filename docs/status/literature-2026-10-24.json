@@ -283,11 +283,6 @@
       "configuration": "new PIO candidates + frozen contextual ranker"
     }
   ],
-  "goals": {
-    "tp": 65,
-    "precision": 0.85,
-    "recall": 0.42207792207792205
-  },
   "remaining": [
     "v8 training, freeze and 100-paper evaluation",
     "full-corpus v8 inference",

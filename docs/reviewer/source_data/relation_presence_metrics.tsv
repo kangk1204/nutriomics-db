@@ -1,0 +1,3 @@
+model	auroc	average_precision	brier	precision	recall	f1	threshold	pairs	positive_pairs	corpus_documents	eligible_documents	evaluation	ci95_low	ci95_high
+BiomedBERT	0.8760460794545022	0.6765796923136009	0.1413876563310623	0.681	0.6113105924596051	0.6442762535477767	0.75	4362	1114	400	224	native public canonical pairs, gold entities supplied	0.851404020392281	0.8975481849431776
+TF-IDF + logistic regression	0.6660164023047466	0.4095569770896927	0.2310931479628407	0.3218390804597701	0.829443447037702	0.4637390213299874	0.4499999999999999	4362	1114	400	224	native public canonical pairs, gold entities supplied		

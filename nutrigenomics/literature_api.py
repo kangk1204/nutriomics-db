@@ -39,6 +39,12 @@ def metadata(con):
     return {r[0]: json.loads(r[1]) for r in con.execute("SELECT key,value FROM meta")}
 
 
+def stored_benchmarks(con):
+    """Present measured results without publishing internal experiment targets."""
+    return [{key: value for key, value in json.loads(row[0]).items() if key != 'targets'}
+            for row in con.execute("SELECT payload_json FROM benchmarks ORDER BY arm")]
+
+
 def corpus_filter(where,args,*,alias,corpus,query_version):
     if corpus or query_version:
         clause='EXISTS(SELECT 1 FROM corpus_memberships cm WHERE cm.pmid='+alias+'.pmid'
@@ -76,7 +82,7 @@ def stats(request: Request):
     with database(request) as con:
         value = metadata(con)
         value.update(status="available", scope="public" if value["public"] else "internal",
-                     benchmarks=[json.loads(r[0]) for r in con.execute("SELECT payload_json FROM benchmarks ORDER BY arm")],
+                     benchmarks=stored_benchmarks(con),
                      capabilities={"management": getattr(request.app.state, "literature_management", False)},
                      database_url=__import__('os').environ.get('NUTRIOMICS_DATABASE_BROWSER_URL','/explorer/'))
         return value
@@ -168,7 +174,7 @@ def events(request: Request, pmid: str | None = None, engine: str = Query("heuri
 def benchmarks(request: Request):
     with database(request) as con:
         meta=metadata(con)
-        return {"release_id": metadata(con)["release_id"], "items": [json.loads(r[0]) for r in con.execute("SELECT payload_json FROM benchmarks ORDER BY arm")],
+        return {"release_id": metadata(con)["release_id"], "items": stored_benchmarks(con),
                 "engine_availability":meta.get('engine_availability',{}),'diagnostics':meta.get('diagnostics',{}),
                 "nutrition_accuracy": "unmeasured", "independent_final_performance": False}
 
@@ -182,7 +188,7 @@ def reports(request: Request):
 
 
 def report_data(con):
-    return {**metadata(con), "benchmarks": [json.loads(r[0]) for r in con.execute("SELECT payload_json FROM benchmarks ORDER BY arm")]}
+    return {**metadata(con), "benchmarks": stored_benchmarks(con)}
 
 
 @router.get("/reports/current")

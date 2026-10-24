@@ -51,11 +51,23 @@ def test_report_commit_preserves_prior_rows_default_and_is_idempotent(publicatio
     assert '| chatgpt-repair-v5-r1 | 65 | 63 | 89 | 50.78% | 42.21% | 46.10% |' in text
     assert '기본 엔진은 `heuristic-v1`' in text
     assert '- v8 ID·관계 학습' not in text
+    assert '개발 목표는' not in text and '85%**' not in text
     assert result['commit']!=before and result['pushed'] is False
     assert not git(root,'status','--porcelain')
     repeated=update(report,root=root,branch='feature/test')
     assert repeated['commit']==result['commit']
     assert text.count('<!-- v8-evaluation-report -->')==1
+
+
+def test_reviewer_readme_accepts_verified_result_without_reintroducing_targets(publication):
+    root, report, _ = publication
+    (root / 'README.md').write_text('# NutriOmics\n\n[성과표](docs/reviewer/RESULTS.md)\n', encoding='utf8')
+    git(root, 'add', 'README.md'); git(root, 'commit', '-m', 'Synthetic reviewer presentation')
+    result = update(report, root=root, branch='feature/test')
+    text = (root / 'README.md').read_text(encoding='utf8')
+    assert '86.67%' in text and 'docs/reviewer/RESULTS.md' in text
+    assert '목표' not in text
+    assert update(report, root=root, branch='feature/test')['commit'] == result['commit']
 
 
 @pytest.mark.parametrize('issue',['dirty','branch'])

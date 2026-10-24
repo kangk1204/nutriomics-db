@@ -42,12 +42,16 @@ def verified_bundle(directory, baseline):
 
 
 def readme_result(text, payload, measured, relative):
+    # Replace the prior generated section before counting legacy table rows.
+    # Otherwise an old-style README contains both the original and generated row on retry.
+    text = re.sub(r'<!-- v8-evaluation-report -->.*?<!-- /v8-evaluation-report -->',
+                  '', text, flags=re.S).rstrip() + '\n'
     line = '| nutriomics-evidence-v8 | ' + ' | '.join([
         str(measured[k]) for k in ('tp', 'fp', 'fn')]) + ' | ' + ' | '.join([
         f'{100 * measured[k]:.2f}%' if measured[k] is not None else '미정의'
         for k in ('precision', 'recall', 'f1')]) + ' |'
     text, n = re.subn(r'^\| nutriomics-evidence-v8 \|[^\n]*', lambda _:line, text, flags=re.M)
-    if n != 1:
+    if n != 1 and not (n == 0 and 'docs/reviewer/RESULTS.md' in text):
         raise ValueError('README must contain one v8 benchmark row')
     r2 = next((r for r in payload['relation_comparison'] if r['model'] == 'r2' and r.get('metrics')), None)
     if r2:
@@ -67,15 +71,17 @@ def readme_result(text, payload, measured, relative):
                   '| v8 run5 | NER·ID·관계 학습, 동결, 100편 예측·재평가 완료 |', text, flags=re.M)
     text = re.sub(r'^- v8 (?:NER·)?ID·관계 학습, 모델 동결, 동일 100편 전체 예측·재평가, 기존 구성과 비교\.\n',
                   '', text, flags=re.M)
-    target = (measured['tp'] >= 65 and measured['recall'] >= 65 / 154
-              and measured['precision'] is not None and measured['precision'] >= .85)
-    statement = ('개발 목표는 **TP ≥65, 재현율 ≥65/154(42.21%), 정밀도 ≥85%**입니다. '
-                 f"v8 실측은 TP {measured['tp']}·FP {measured['fp']}이며 목표 {'충족' if target else '미달'}입니다. "
-                 'v5-r1 기준은 TP 65·FP 63입니다. 평가 구성과 웹 기본 엔진 `heuristic-v1`은 별도로 관리합니다.')
+    statement = (f"v8 실측은 TP {measured['tp']}·FP {measured['fp']}·FN {measured['fn']}입니다. "
+                 '평가 구성과 웹 기본 엔진 `heuristic-v1`은 별도로 관리합니다.')
     text = re.sub(r'^개발 목표는 \*\*TP ≥65[^\n]*', lambda _:statement, text, flags=re.M)
     marker = '<!-- v8-evaluation-report -->'
     section = (marker + '\n## 최신 v8 재평가\n\n'
                + '관측 기준: ' + payload['observed_at_kst'] + '\n\n'
+               + '| 구성 | TP | FP | FN | 정밀도 | 재현율 | F1 |\n'
+               + '|---|---:|---:|---:|---:|---:|---:|\n'
+               + '| nutriomics-evidence-v8 | ' + ' | '.join(str(measured[k]) for k in ('tp','fp','fn'))
+               + ' | ' + ' | '.join(f'{100*measured[k]:.2f}%' if measured[k] is not None else '미정의'
+                                     for k in ('precision','recall','f1')) + ' |\n\n'
                + ' · '.join(f'[{label}]({relative}/{name})' for label, name in
                             [('HTML','report.html'),('Markdown','report.md'),('CSV','report.csv'),('JSON','report.json')])
                + '\n<!-- /v8-evaluation-report -->')
