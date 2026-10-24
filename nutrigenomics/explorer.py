@@ -265,6 +265,10 @@ def meta():
                 )
         if "by_kind" not in counts:
             counts["by_kind"] = dict(db.execute("SELECT kind,count(*) FROM node GROUP BY kind").fetchall())
+        from .pathway_correction_api import correction_metadata
+        correction = correction_metadata()
+        if correction is not None:
+            result['pathway_method_correction'] = correction
         return _public(result)
 
 

@@ -111,8 +111,8 @@ export async function getLoci(seedId: string): Promise<{items:Locus[];truncated?
   return request(`/loci?${new URLSearchParams({seed_id:seedId})}`);
 }
 export async function getOmicsResults(c: {series_accession?:string;contrast?:string;analysis_version?:string;feature_id?:string}, featureType:string,page:number) {
-  if (snapshot) return {items:[],total:null,status:'not_embedded',feature_type:undefined,available_feature_types:[] as string[]};
-  return request<{items:Record<string,unknown>[];total:number|null;status:string;feature_type?:string;available_feature_types?:string[]}>(`/omics/results?${new URLSearchParams({series:c.series_accession||'',feature_type:featureType,contrast:c.contrast||'',analysis_version:c.analysis_version||'',page:String(page),page_size:'25',...(c.feature_id?{feature_id:c.feature_id}:{})})}`);
+  if (snapshot) return {items:[],total:null,status:'not_embedded',feature_type:undefined,available_feature_types:[] as string[],method_correction:undefined};
+  return request<{items:Record<string,unknown>[];total:number|null;status:string;feature_type?:string;available_feature_types?:string[];method_correction?:{expert_review_status:string;primary_q_family:string;selected:{analysis_version:string}}}>(`/omics/results?${new URLSearchParams({series:c.series_accession||'',feature_type:featureType,contrast:c.contrast||'',analysis_version:c.analysis_version||'',page:String(page),page_size:'25',...(c.feature_id?{feature_id:c.feature_id}:{}),...(featureType==='pathway'&&c.series_accession==='GSE56960'?{pathway_selection:'corrected_if_available'}:{})})}`);
 }
 export async function getMeta(): Promise<Meta> {
   if (snapshot) return {
