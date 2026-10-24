@@ -179,3 +179,18 @@ python scripts/update_v8_result_docs.py \
   --report-directory /absolute/path/to/completed/submission-report \
   --branch feature/20261023-literature-integration --push
 ```
+
+## 데스크톱 GPU 프로세스와 학습 재개
+
+run5의 과학 소스는 그대로 두고, `runtime-control`의 해시가 고정된 자원 검사 계층으로 실행합니다. Nautilus는 64MiB, Chrome의 `--type=gpu-process`는 256MiB까지 허용합니다. 실제 실행 파일과 실제·유효 사용자 ID를 확인하며, 데스크톱 프로세스 합계는 512MiB까지입니다. 알려지지 않은 연산 프로세스, 다른 사용자의 프로세스, 확인할 수 없는 메모리 정보는 대기로 처리합니다. 기존 RAM·디스크·GPU 종류·GPU 13GiB·RSS 8GiB 제한은 유지합니다.
+
+이번 run5에 사용한 명령은 다음과 같습니다. `prepare`는 별도 검증 home에서 실제 GPU 사전 점검을 수행합니다. `activate`는 자원 대기 중인 해당 실험만 협조적으로 정지하고, 체크포인트 해시를 기록한 뒤 같은 소스·입력·home에서 이어갑니다.
+
+```bash
+python scripts/repair_v8_desktop_guard.py prepare
+python scripts/repair_v8_desktop_guard.py activate
+```
+
+이 명령은 지정된 run5의 최초 자원 대기 수정용입니다. 실행 중인 학습에는 다시 적용하지 않습니다. 이후 연결 중단 복구는 기존 `--resume-interrupted` 후속 작업을 사용합니다. 로컬 승인 파일 `resource-execution-expected.json`과 서버 실행 설정·운영 코드의 해시가 모두 일치해야 재개하며, 과학 소스와 운영 변경 이력을 각각 보존합니다.
+
+결과 회수 시에도 운영 계층을 함께 검증합니다. 승인된 운영 계층의 누락·변조는 채점을 중단합니다. 운영 계층은 보고서의 출처에 포함되며, 관계 평가의 원시 ID·유형 일치 기준은 그대로 유지합니다.

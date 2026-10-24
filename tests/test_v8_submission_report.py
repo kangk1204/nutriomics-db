@@ -88,6 +88,22 @@ def test_nlp_validation_is_bound_in_all_formats_without_changing_model_metrics(i
     assert 'NLP 검사' in report.csv_report(data)
 
 
+def test_operational_guard_provenance_never_changes_scientific_scores(inputs,tmp_path):
+    progress,histories=inputs
+    base=report.build_payload(progress,history_paths=histories)
+    v={'scope':'resource_admission_only','configuration_sha256':'a'*64,'scientific_source_manifest_sha256':'b'*64,
+       'files':{n:'a'*64 for n in ['execution.json','v8_resource_layer.py','supervisor.py','desktop-policy.json']}}
+    path=put(tmp_path/'resource.json',v)
+    data=report.build_payload(progress,history_paths=histories,resource_execution_path=path)
+    assert data['relation_comparison']==base['relation_comparison']
+    assert any(s['role']=='operational_resource_execution' for s in data['sources'])
+    assert 'GPU 자원 검사 변경 이력' in report.markdown(data)
+    assert '자원 진입 검사만 변경' in report.html_report(data)
+    assert 'a'*64 in report.csv_report(data)
+    v['configuration_sha256']='/private/path';put(path,v)
+    with pytest.raises(ValueError,match='hashes'):report.build_payload(progress,history_paths=histories,resource_execution_path=path)
+
+
 @pytest.mark.parametrize('issue',['duplicate','wrong_version','missing_test','wrong_exit','wrong_hash'])
 def test_incomplete_or_inconsistent_nlp_receipt_does_not_claim_five_passes(tmp_path,issue):
     data=nlp_receipt()

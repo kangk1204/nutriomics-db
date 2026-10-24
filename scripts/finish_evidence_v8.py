@@ -65,6 +65,32 @@ def verify_local_source_manifest(output, source_root=ROOT / "literature_service"
     return {'source_manifest_sha256': expected['source_manifest_sha256'], 'verified_files': len(files)}
 
 
+def verify_operational_export(output):
+    """Verify resource-only continuation against approval saved before resumption."""
+    expected_path=output/'resource-execution-expected.json'
+    path=output/'runtime-control/manifest.json'
+    if not expected_path.exists():
+        if path.exists():raise ValueError('Unapproved operational resource layer')
+        return None
+    if not path.exists():raise ValueError('Approved operational resource layer missing from export')
+    def read(p):return json.loads(p.read_text(encoding='utf8'))
+    def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+    expected=read(expected_path);proof=read(path);directory=path.parent
+    config=directory/'execution.json'
+    if (proof.get('scope')!='resource_admission_only' or proof.get('configuration_sha256')!=expected['sha256']
+            or sha(config)!=expected['sha256'] or read(config)['files']!=expected['files']
+            or proof.get('scientific_source_manifest_sha256')!=expected['scientific_source_manifest_sha256']):
+        raise ValueError('Operational resource export contract mismatch')
+    files={**expected['files'],'execution.json':expected['sha256']}
+    if proof.get('files')!=files:raise ValueError('Operational resource export file list mismatch')
+    for name,digest in files.items():
+        p=(directory/name).resolve()
+        if not p.is_relative_to(directory.resolve()) or sha(p)!=digest:
+            raise ValueError('Operational resource export file mismatch')
+    return {'manifest_sha256':sha(path),'configuration_sha256':expected['sha256'],
+            'scope':'resource_admission_only','scientific_source_manifest_sha256':expected['scientific_source_manifest_sha256']}
+
+
 def recover(host, output, experiment="nutriomics-evidence-v8"):
     from nutri_literature.evidence_v8.common import atomic, filehash, read
     code = """import json,os,sys,subprocess,zipfile,hashlib
@@ -82,6 +108,22 @@ frozen=json.loads((h/'freeze.json').read_text())
 extra={n:frozen['files'][n] for n in ['selected/id.json','selected/relation.json','ner/manifest.json','retrieval/manifest.json','policy.json','models.json']}
 for n,digest in extra.items():
  if hashlib.sha256((h/n).read_bytes()).hexdigest()!=digest:raise ValueError('Module diagnostics hash')
+operational={};pointer=h/'resource-execution-current.json'
+if pointer.exists():
+ execution=json.loads(pointer.read_text());state=json.loads((h/'pipeline-state.json').read_text())
+ if state.get('resource_execution')!=execution:raise ValueError('Execution state and resource pointer differ')
+ cp=Path(execution['configuration']).resolve()
+ if not cp.is_relative_to(h/'runtime-control'):raise ValueError('Resource path escape')
+ operational['execution.json']=cp.read_bytes();value=json.loads(operational['execution.json'])
+ if hashlib.sha256(operational['execution.json']).hexdigest()!=execution['sha256']:raise ValueError('Resource configuration hash')
+ if value['files']!=execution['files'] or value['scientific_source_manifest_sha256']!=contract['source_manifest_sha256']:raise ValueError('Resource source contract')
+ if set(value['files'])!={'v8_resource_layer.py','supervisor.py','desktop-policy.json'}:raise ValueError('Resource file list')
+ for name,digest in value['files'].items():
+  operational[name]=(cp.parent/name).read_bytes()
+  if hashlib.sha256(operational[name]).hexdigest()!=digest:raise ValueError('Resource file hash')
+ operational['manifest.json']=json.dumps({'scope':'resource_admission_only','configuration_sha256':execution['sha256'],
+  'scientific_source_manifest_sha256':contract['source_manifest_sha256'],
+  'files':{**value['files'],'execution.json':execution['sha256']}},sort_keys=True).encode()
 with zipfile.ZipFile(sys.stdout.buffer,'w',zipfile.ZIP_DEFLATED) as z:
  for name in [*receipt['export_files'],'export-verification.json',*extra]:
   p=(h/name).resolve()
@@ -90,6 +132,7 @@ with zipfile.ZipFile(sys.stdout.buffer,'w',zipfile.ZIP_DEFLATED) as z:
  z.writestr('module-diagnostics-verification.json',json.dumps(extra,sort_keys=True))
  z.writestr('training-source-manifest.json',source_manifest)
  z.writestr('training-source-verification.json',json.dumps({'source_manifest_sha256':contract['source_manifest_sha256']}))
+ for name,blob in operational.items():z.writestr('runtime-control/'+name,blob)
 """
     archive = output / "server-results.zip"
     temp = archive.with_suffix(".part")
@@ -111,11 +154,13 @@ with zipfile.ZipFile(sys.stdout.buffer,'w',zipfile.ZIP_DEFLATED) as z:
         if frozen["files"].get(relative) != digest or filehash(output / relative) != digest:
             raise ValueError("Frozen module diagnostics verification failed")
     source_verification = verify_local_source_manifest(output)
+    operational_verification = verify_operational_export(output)
     receipt = {"host": host, "transport": "strict-host-key authenticated SSH",
                "archive_sha256": filehash(archive), "freeze_sha256": proof["freeze_sha256"],
                "verification_sha256": filehash(output / "export-verification.json"),
                "gold_exported": False, "model_weights_downloaded": False,
-               "full_scientific_source_verification": source_verification}
+               "full_scientific_source_verification": source_verification,
+               "operational_resource_verification": operational_verification}
     atomic(output / "transport-verification.json", receipt, True)
     return receipt
 
@@ -252,7 +297,9 @@ def submission_report(output):
     nlp = ROOT / 'docs/status/nlp-validation-2026-10-24.json'
     payload = build_payload(progress, r2_evaluation=r2_evaluation, v8_evaluation=v8_evaluation,
                             clinical_summary=clinical if clinical.exists() else None,
-                            nlp_validation_path=nlp if nlp.exists() else None)
+                            nlp_validation_path=nlp if nlp.exists() else None,
+                            resource_execution_path=output/'runtime-control/manifest.json'
+                            if verify_operational_export(output) else None)
     destination = output / "submission-reports" / stamp
     manifest = write_report(payload, destination)
     return {"directory": str(destination), "report_sha256": manifest["files"]["report.json"],

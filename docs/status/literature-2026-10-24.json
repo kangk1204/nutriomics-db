@@ -1,18 +1,13 @@
 {
   "as_of": "2026-10-24",
-  "data_observed_at": "2026-10-24T02:22:27.481468+00:00",
-  "v8_observed_at": "2026-10-24T02:22:27.481468+00:00",
+  "data_observed_at": "2026-10-24T03:18:05.860590+00:00",
+  "v8_observed_at": "2026-10-24T03:18:05.860590+00:00",
   "default_engine": "heuristic-v1",
   "collection": {
-    "live_stored_unique_papers": 42967,
-    "live_abstract_papers": 41526,
-    "live_oa_available_papers": 2203,
-    "extraction_success_papers": null,
-    "extraction_read_status": "deadline_exceeded",
-    "last_verified_extraction": {
-      "value": 27597,
-      "observed_at": "2026-10-24T01:49:54.380071+00:00"
-    }
+    "live_stored_unique_papers": 44235,
+    "live_abstract_papers": 42781,
+    "live_oa_available_papers": 2269,
+    "extraction_success_papers": 28682
   },
   "search_expected_papers": 133261,
   "relation_evaluation": {
@@ -98,20 +93,21 @@
     "v8": {
       "stage": "train-id",
       "status": "running",
-      "completed_ner_models": 9,
-      "completed_ner_profiles": 7,
+      "completed_ner_models": 11,
+      "completed_ner_profiles": 10,
       "completed_id_outer_folds": 0,
       "completed_relation_outer_folds": 0,
       "ner_training_manifest_exists": true,
       "source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
-      "observed_at": "2026-10-24T02:22:27.481468+00:00",
-      "progress_scope": "NER model and profile counts include nested upstream fits used by ID validation"
+      "observed_at": "2026-10-24T03:18:05.860590+00:00",
+      "progress_scope": "NER model and profile counts include nested upstream fits used by ID validation",
+      "operational_resource_configuration_sha256": "07106631b98cdf961e01c0112700a30c633eaa2d4f07d3e81e9f201add4097f8"
     },
     "r2": {
       "stage": "train-relation",
       "completed_outer_folds": 2,
       "evaluation": "pending",
-      "observed_at": "2026-10-24T02:22:27.481468+00:00"
+      "observed_at": "2026-10-24T03:18:05.860590+00:00"
     },
     "native": {
       "stage": "train-drugprot",
@@ -120,7 +116,7 @@
         "cg": 0
       },
       "evaluation": "pending",
-      "observed_at": "2026-10-24T02:22:27.481468+00:00",
+      "observed_at": "2026-10-24T03:18:05.860590+00:00",
       "completed_neural_model_files": 21
     }
   },
@@ -294,5 +290,59 @@
     "passed": 5,
     "total": 5,
     "receipt": "nlp-validation-2026-10-24.json"
+  },
+  "operational_resource_execution": {
+    "observed_at": "2026-10-24T03:18:38.586683+00:00",
+    "scope": "resource_admission_only",
+    "cause": "Small Chrome GPU and Nautilus desktop processes were classified as foreign compute",
+    "scientific_source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
+    "configuration_sha256": "07106631b98cdf961e01c0112700a30c633eaa2d4f07d3e81e9f201add4097f8",
+    "operational_files": {
+      "desktop-policy.json": "a08bf8c7e003a11f448292842d93b8f4e16b46064e135afdaa4b80ee91a35707",
+      "supervisor.py": "b8c229611a9258d288d767a552a29a8f648bf61d22b6abfc1fb638248f095d8c",
+      "v8_resource_layer.py": "d0d4042fcc3d9f11377676482ba762b1396dd0bbd909301af7398da468fc4749"
+    },
+    "policy": {
+      "same_real_and_effective_uid": true,
+      "nautilus_maximum_mib": 64,
+      "chrome_gpu_role_maximum_mib": 256,
+      "maximum_total_desktop_mib": 512,
+      "unknown_compute_allowed": false,
+      "gpu_gib": 13,
+      "rss_gib": 8
+    },
+    "validation": {
+      "scientific_source_files_verified": 272,
+      "protected_file_count": 36,
+      "changed_protected_files": [],
+      "checkpoint_manifest_sha256": "655f683ebf4037a0fb65f6efc283c3323475160be3292b159cfe5c4cb2196f73",
+      "local_tests_passed": 78,
+      "linux_tests_passed": 17,
+      "real_gpu_probe_passed": true
+    },
+    "resumption": {
+      "stage": "train-id",
+      "status": "running",
+      "gpu": "2897 MiB, 97 %",
+      "peak_child_rss_bytes": 3223056384,
+      "accepted_desktop_mib": [
+        38.0,
+        62.0
+      ],
+      "additional_model_calls": 0,
+      "other_jobs_modified": false,
+      "same_100_paper_evaluation": "pending"
+    },
+    "training_update_confirmed": {
+      "observed_at": "2026-10-24T03:21:14.687788+00:00",
+      "task": "Nested upstream NER inside the ID validation stage",
+      "epochs_with_optimizer_update": 2,
+      "training_loss": [
+        0.2083230826764302,
+        0.04256002714703308
+      ],
+      "validation_is_training_loss": true,
+      "relationship_accuracy_measured": false
+    }
   }
 }

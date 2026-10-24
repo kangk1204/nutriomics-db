@@ -426,7 +426,8 @@ def nlp_validation(path, sources):
 
 
 def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_evaluation=None,
-                  clinical_summary=None, previous_verified_progress=None, nlp_validation_path=None):
+                  clinical_summary=None, previous_verified_progress=None, nlp_validation_path=None,
+                  resource_execution_path=None):
     sources = []
     progress, progress_hash = load_receipt(progress_path, "progress", sources)
     if not isinstance(progress.get("observed_at"), str):
@@ -454,6 +455,17 @@ def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_e
     counts, collection = collection_rows(progress)
     clinical, clinical_status = clinical_rows(clinical_summary, sources)
     validation = nlp_validation(nlp_validation_path, sources)
+    resource = None
+    if resource_execution_path is not None:
+        resource, _ = load_receipt(resource_execution_path, 'operational_resource_execution', sources)
+        if (resource.get('scope')!='resource_admission_only' or
+                set(resource.get('files',{}))!={'execution.json','v8_resource_layer.py','supervisor.py','desktop-policy.json'}):
+            raise ValueError('Unsupported operational resource manifest')
+        digests=[resource.get('configuration_sha256'),resource.get('scientific_source_manifest_sha256'),*resource['files'].values()]
+        if (any(not isinstance(v,str) or len(v)!=64 or any(c not in '0123456789abcdef' for c in v) for v in digests)
+                or resource['files']['execution.json']!=resource['configuration_sha256']):
+            raise ValueError('Invalid operational resource manifest hashes')
+        resource={k:resource[k] for k in ['scope','configuration_sha256','scientific_source_manifest_sha256','files']}
     return {"schema_version": "nutriomics-v8-submission-report-v1", "observed_at": progress["observed_at"],
             "observed_at_kst": observed.astimezone(timezone(timedelta(hours=9))).isoformat(),
             "generated_at": datetime.now(timezone.utc).isoformat(), "progress_sha256": progress_hash,
@@ -463,6 +475,7 @@ def build_payload(progress_path, *, history_paths=None, r2_evaluation=None, v8_e
             "upstream_ner_training": training_ner_rows(progress),
             "previous_pipeline_observations": previous_observations,
             "nlp_validation": validation,
+            "operational_resource_execution": resource,
             "default_engine": progress.get("default_engine", "미확인"),
             "additional_model_calls": count(progress.get("additional_model_calls")),
             "sealed_test_opened": progress.get("sealed_test_opened"),
@@ -535,6 +548,12 @@ def tables(payload):
         labels = {'passed':'통과', 'failed':'실패', 'error':'오류', 'skipped':'생략'}
         result.append(('구버전 NLP 회귀 검사', ['검사', '결과', '관측 시각'],
             [[t['name'], labels[t['status']], validation['observed_at']] for t in validation['tests']]))
+    if payload.get('operational_resource_execution'):
+        v=payload['operational_resource_execution']
+        result.append(('GPU 자원 검사 변경 이력', ['구분','내용'],[
+            ['변경 범위','자원 진입 검사만 변경; 모델·데이터·평가 기준 유지'],
+            ['운영 설정 SHA-256',v['configuration_sha256']],
+            ['과학 소스 manifest SHA-256',v['scientific_source_manifest_sha256']]]))
     return result
 
 
@@ -604,6 +623,9 @@ def csv_report(payload):
         for row in payload['nlp_validation']['tests']:
             writer.writerow(['NLP 검사', row['name'], row['status'], 1, '검사', '', '', '', '', '', '',
                              payload['nlp_validation']['observed_at']])
+    if payload.get('operational_resource_execution'):
+        v=payload['operational_resource_execution']
+        writer.writerow(['운영 이력','GPU 자원 검사','적용',v['configuration_sha256'],'SHA-256','','','','','','',v['scope']])
     return stream.getvalue()
 
 
@@ -633,10 +655,11 @@ def main(argv=None):
     p.add_argument('--clinical-summary',type=Path)
     p.add_argument('--previous-verified-progress',type=Path,help='Optional older receipt; never replaces the current connection status')
     p.add_argument('--nlp-validation',type=Path,help='Hash-bound result of the five pinned legacy NLP checks')
+    p.add_argument('--resource-execution',type=Path,help='Verified operational resource-only manifest')
     a = p.parse_args(argv)
     payload = build_payload(a.progress,r2_evaluation=a.r2_evaluation,v8_evaluation=a.v8_evaluation,
                             clinical_summary=a.clinical_summary,previous_verified_progress=a.previous_verified_progress,
-                            nlp_validation_path=a.nlp_validation)
+                            nlp_validation_path=a.nlp_validation,resource_execution_path=a.resource_execution)
     manifest = write_report(payload,a.output_dir)
     print(canonical({'output':str(a.output_dir.resolve()),'observed_at':payload['observed_at'],
                      'report_sha256':manifest['files']['report.json'],

@@ -123,25 +123,27 @@ python -m uvicorn nutrigenomics.literature_management:app_factory \
 
 | 항목 | 건수 | 관측 시각(KST) |
 |---|---:|---|
-| 고정 검색 PMID 합집합 | 133,261편 | 11:22·고정 검색 목록 대조 |
-| 저장된 고유 문헌 | 42,967편 | 11:22 |
-| 초록 확보 | 41,526편 | 11:22 |
-| 공개 본문 확보 | 2,203편 | 11:22 |
-| 현재 원문 일치 추출·마지막 집계 | 27,597편 | 10:49 |
+| 고정 검색 PMID 합집합 | 133,261편 | 12:18·고정 검색 목록 대조 |
+| 저장된 고유 문헌 | 44,235편 | 12:18 |
+| 초록 확보 | 42,781편 | 12:18 |
+| 공개 본문 확보 | 2,269편 | 12:18 |
+| 현재 원문 일치 추출 | 28,682편 | 12:18 |
 
 | 실행 | 현재 단계 |
 |---|---|
-| v8 run5 | NER 완료·ID 중첩 검증 학습 중·상류 NER 모델 9개·프로필 7개·ID 외부 fold 0/5 (11:22 KST) |
-| v8 보조 학습 | DrugProt 외부 fold 3/5·학습 모델 파일 21개 완료·CG 다음 단계 (11:22 KST) |
-| 기존 r2 | 관계 외부 fold 2/5 완료·학습 실행 중 (11:22 KST) |
+| v8 run5 | NER 완료·자원 대기 해제 후 ID 중첩 검증 학습 재개·상류 NER 모델 11개·프로필 10개·ID 외부 fold 0/5 (12:18 KST) |
+| v8 보조 학습 | DrugProt 외부 fold 3/5·학습 모델 파일 21개 완료·CG 다음 단계 (12:18 KST) |
+| 기존 r2 | 관계 외부 fold 2/5 완료·학습 실행 중 (12:18 KST) |
 
 v8 run5는 중첩 ID 후보의 메모리 사용을 개선한 실행입니다. 실제 후보 208,171건의 값·해시를 유지한 메모리 재현은 최고 2.77GiB였고, Linux 회귀검사 54개를 통과했습니다. 학습·평가 작업은 버전별 소스와 체크포인트로 이어집니다. 추가 Sol·Luna 호출 예산은 소진됐으며 현재 학습은 저장 응답과 공개 주석 자료를 사용합니다.
 
 남아 있던 **NLP 검사 5건은 10:41 KST 고정 Linux 환경에서 모두 통과**했습니다. [개별 검사·의존성·해시](docs/status/nlp-validation-2026-10-24.json)를 저장했습니다. 학습 후속 작업은 서버 재접속·중단 재개, 100편 예측 회수, 두 번 재채점, 보고서·README 갱신과 현재 브랜치 커밋·푸시로 연결했습니다. 실행 방법은 [후속 작업 안내](docs/LITERATURE_RUNBOOK_ko.md)에 있습니다.
 
+Chrome GPU 프로세스와 파일관리자로 인한 대기를 수정했습니다. 같은 사용자의 실제 실행 파일·Chrome GPU 역할·개별 및 합계 메모리를 확인하며, 다른 학습 작업은 계속 대기 조건입니다. 기존 과학 소스 272개 파일과 완료 체크포인트·계약 파일 36개를 보존했고, 12:18 GPU 사용률 97%를 확인했습니다. 자원 검사·재개·회수·보고서 검사는 로컬 78건, Linux 17건을 통과했습니다. [수정·재개 기록](docs/status/gpu-resource-2026-10-24.json).
+
 ID 중첩 검증은 각 학습 분할에서 상류 NER 후보를 다시 생성합니다. 위 모델·프로필 수에는 이 과정의 산출물도 포함합니다. 후속 작업은 접속 실패 시 체크포인트를 보존하며 재접속합니다.
 
-최신 성능·학습·검사 보고서: [HTML](docs/reports/v8-progress-20261024-1122/report.html) · [Markdown](docs/reports/v8-progress-20261024-1122/report.md) · [CSV](docs/reports/v8-progress-20261024-1122/report.csv) · [JSON](docs/reports/v8-progress-20261024-1122/report.json). v8의 같은 100편 재평가는 ID·관계 학습과 예측 완료 후 채점합니다.
+최신 성능·학습·검사 보고서: [HTML](docs/reports/v8-progress-20261024-1218-desktop/report.html) · [Markdown](docs/reports/v8-progress-20261024-1218-desktop/report.md) · [CSV](docs/reports/v8-progress-20261024-1218-desktop/report.csv) · [JSON](docs/reports/v8-progress-20261024-1218-desktop/report.json). v8의 같은 100편 재평가는 ID·관계 학습과 예측 완료 후 채점합니다.
 
 ## 남은 작업
 

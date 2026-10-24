@@ -23,6 +23,8 @@ def resume(host, experiment):
         raise ValueError("Only an owned v8 core experiment can be resumed")
     runner = Path(__file__).with_name("run_evidence_v8_pipeline.py")
     runner_sha = hashlib.sha256(runner.read_bytes()).hexdigest()
+    expected_path = Path(__file__).resolve().parents[1] / 'literature_service/runtime' / experiment / 'resource-execution-expected.json'
+    expected_execution = json.loads(expected_path.read_text(encoding='utf8')) if expected_path.exists() else None
     code = r'''import fcntl,hashlib,json,os,psutil,subprocess,time
 from pathlib import Path
 b=Path(PROJECT);h=b/'runtime'/EXPERIMENT
@@ -58,18 +60,35 @@ with (h/'resume-owner.lock').open('a') as owner:
   p=(source/name).resolve()
   if not p.is_relative_to(source) or sha(p)!=digest:raise ValueError('Pinned source changed')
  if sha(assets/'asset-manifest.json')!=contract['asset_manifest_sha256']:raise ValueError('Asset contract changed')
- runners=[p for p in (b/'runtime/runners').glob('*.py') if sha(p)==RUNNER_SHA]
- if not runners:raise ValueError('Exact pinned supervisor unavailable')
+ pointer=h/'resource-execution-current.json';extra=[]
+ if EXPECTED_EXECUTION is not None:
+  if not pointer.exists() or read(pointer)!=EXPECTED_EXECUTION:raise ValueError('Approved operational resource execution changed')
+  execution=read(pointer);config=Path(execution['configuration']).resolve()
+  if not config.is_relative_to(h/'runtime-control') or sha(config)!=execution['sha256']:raise ValueError('Resource configuration changed')
+  value=read(config)
+  if value['files']!=execution['files'] or value['scientific_source_manifest_sha256']!=contract['source_manifest_sha256']:
+   raise ValueError('Operational resource contract mismatch')
+  for name,digest in execution['files'].items():
+   p=(config.parent/name).resolve()
+   if not p.is_relative_to(config.parent) or sha(p)!=digest:raise ValueError('Operational resource file changed')
+  runners=[config.parent/'supervisor.py']
+  extra=['--resource-execution',str(config),'--resource-execution-sha256',execution['sha256']]
+ else:
+  if pointer.exists():raise ValueError('Unknown operational resource continuation')
+  runners=[p for p in (b/'runtime/runners').glob('*.py') if sha(p)==RUNNER_SHA]
+  if not runners:raise ValueError('Exact pinned supervisor unavailable')
  fcntl.flock(lock,fcntl.LOCK_UN);lock.close()
  path=h/('resume-'+str(time.time_ns())+'.log')
  with path.open('xb') as output:
-  process=subprocess.Popen([str(b/'.venv/bin/python'),'-u','-B',str(sorted(runners)[0]),'--source',str(source),'--home',str(h),'--assets',str(assets)],
+  process=subprocess.Popen([str(b/'.venv/bin/python'),'-u','-B',str(sorted(runners)[0]),'--source',str(source),'--home',str(h),'--assets',str(assets),*extra],
    cwd=b,stdout=output,stderr=subprocess.STDOUT,start_new_session=True,env={**os.environ,'PYTHONUNBUFFERED':'1'})
- receipt={'pid':process.pid,'started_at':time.time(),'source_manifest_sha256':contract['source_manifest_sha256'],'runner_sha256':RUNNER_SHA,'log':str(path),'other_experiments_modified':False}
+ receipt={'pid':process.pid,'started_at':time.time(),'source_manifest_sha256':contract['source_manifest_sha256'],
+  'runner_sha256':sha(sorted(runners)[0]),'resource_execution_sha256':EXPECTED_EXECUTION['sha256'] if EXPECTED_EXECUTION else None,
+  'log':str(path),'other_experiments_modified':False}
  stamp=h/('resume-'+str(time.time_ns())+'.json');stamp.write_text(json.dumps(receipt,sort_keys=True))
  result('resumed',**receipt)
 '''
-    prefix = "PROJECT=" + repr(PROJECT) + "\nEXPERIMENT=" + repr(experiment) + "\nRUNNER_SHA=" + repr(runner_sha) + "\n"
+    prefix = "PROJECT=" + repr(PROJECT) + "\nEXPERIMENT=" + repr(experiment) + "\nRUNNER_SHA=" + repr(runner_sha) + "\nEXPECTED_EXECUTION=" + repr(expected_execution) + "\n"
     try:
         return json.loads(remote(host, prefix + code, timeout=60))
     except RuntimeError as error:

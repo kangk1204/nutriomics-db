@@ -49,7 +49,27 @@ def verify_source(source):
     return sha(source / "source-manifest.json")
 
 
-def command(stage, source, home, assets, python, native=False):
+def resource_execution(path, source, home, expected_sha256):
+    import importlib.util
+    path = Path(path).resolve()
+    if not path.is_relative_to(home / 'runtime-control'):
+        raise ValueError('Resource execution escaped its experiment')
+    if sha(path) != expected_sha256:
+        raise ValueError('Approved resource configuration changed')
+    value = read(path)
+    adapter = path.parent / 'v8_resource_layer.py'
+    if sha(adapter) != value.get('files', {}).get('v8_resource_layer.py'):
+        raise ValueError('Unverified resource adapter')
+    spec = importlib.util.spec_from_file_location('verified_v8_resource_layer', adapter)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.configuration(path, source, home, expected_sha256)
+    return {'configuration':str(path), 'sha256':sha(path),
+            'scientific_source_manifest_sha256':value['scientific_source_manifest_sha256'],
+            'files':value['files']}
+
+
+def command(stage, source, home, assets, python, native=False, execution=None):
     if native:
         if stage not in NATIVE_STAGES:
             raise ValueError("Unsupported native training stage")
@@ -60,6 +80,11 @@ def command(stage, source, home, assets, python, native=False):
                 "--source-root", str(assets), "--output", str(home), "--resolve-models"]
     if stage not in (*STAGES[1:], *CLINICAL_STAGES):
         raise ValueError("Stage is outside the approved training/prediction pipeline")
+    if execution:
+        config = Path(execution['configuration'])
+        return [python, '-u', '-B', str(config.parent / 'v8_resource_layer.py'),
+                '--configuration', str(config), '--configuration-sha256', execution['sha256'],
+                '--source', str(source), '--home', str(home), '--stage', stage]
     return [python, "-u", "-B", str(source / "scripts/evidence_v8.py"), stage,
             "--home", str(home)]
 
@@ -77,6 +102,11 @@ def run(args):
         except BlockingIOError:
             return {"status": "already_running", "other_jobs_unchanged": True}
         source_sha = verify_source(source)
+        layer_path = getattr(args, 'resource_execution', None)
+        layer_sha = getattr(args, 'resource_execution_sha256', None)
+        execution = resource_execution(layer_path, source, home, layer_sha) if layer_path else None
+        if execution and (args.native_only or args.clinical_only):
+            raise ValueError('This resource continuation is scoped to the main v8 experiment')
         stages = NATIVE_STAGES if args.native_only else CLINICAL_STAGES if args.clinical_only else STAGES
         contract = {"source_directory": str(source), "source_manifest_sha256": source_sha,
                     "assets": str(assets), "home": str(home), "stages": list(stages),
@@ -95,6 +125,8 @@ def run(args):
         state_path = home / "pipeline-state.json"
         state = {"pid": os.getpid(), "started_at": time.time(), "completed_stages": [],
                  "status": "running", **contract}
+        if execution:
+            state['resource_execution'] = execution
         while args.wait_r2:
             r2 = Path("/home/keunsoo/projects/nutriomics-relation-v6-gpu-r2/runtime/relation-repair-v6-gpu-r2")
             job = read(r2 / "job-state.json")
@@ -119,11 +151,17 @@ def run(args):
             if receipt.exists():
                 if read(receipt).get("source_manifest_sha256") != source_sha:
                     raise ValueError("Completed stage has a different source contract")
+                if execution and read(receipt).get('resource_execution_sha256') != execution['sha256']:
+                    predecessor = read(layer_path).get('predecessor_receipts', {})
+                    if predecessor.get(str(receipt.relative_to(home))) != sha(receipt):
+                        raise ValueError('Unverified predecessor stage receipt')
                 state["completed_stages"].append(stage)
                 continue
             attempt = 0
             while True:
                 verify_source(source)
+                if execution and resource_execution(layer_path, source, home, layer_sha) != execution:
+                    raise ValueError('Resource execution changed during the batch')
                 if (home / "cancel-request.json").exists():
                     atomic(state_path, {**state, "stage": stage, "status": "cancelled",
                                         "updated_at": time.time()})
@@ -132,7 +170,7 @@ def run(args):
                 stamp = str(time.time_ns())
                 output = logs / (stage + "-" + stamp + ".log")
                 with output.open("ab", buffering=0) as stream:
-                    process = subprocess.Popen(command(stage, source, home, assets, sys.executable, args.native_only),
+                    process = subprocess.Popen(command(stage, source, home, assets, sys.executable, args.native_only, execution),
                                                stdout=stream, stderr=subprocess.STDOUT, env=env)
                     state.update(stage=stage, child_pid=process.pid, attempt=attempt,
                                  status="running", log=str(output), updated_at=time.time())
@@ -159,6 +197,7 @@ def run(args):
                 if code == 0:
                     atomic(receipt, {"stage": stage, "returncode": code,
                                      "source_manifest_sha256": source_sha,
+                                     **({'resource_execution_sha256':execution['sha256']} if execution else {}),
                                      "completed_at": time.time(), "log_sha256": sha(output)})
                     state["completed_stages"].append(stage)
                     break
@@ -199,6 +238,8 @@ def main():
     parser.add_argument("--clinical-only", action="store_true")
     parser.add_argument("--native-only", action="store_true")
     parser.add_argument("--wait-r2", action="store_true")
+    parser.add_argument('--resource-execution', type=Path)
+    parser.add_argument('--resource-execution-sha256')
     args = parser.parse_args()
     if args.clinical_only and args.native_only:
         raise ValueError("Clinical and native tasks must have separate experiment directories")
