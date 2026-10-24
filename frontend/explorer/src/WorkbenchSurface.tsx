@@ -1,4 +1,4 @@
-import { BookOpen, Dna, FlaskConical, GitBranch, HeartPulse, Leaf, MapPin, Network, Search, Table2 } from 'lucide-react';
+import { BookOpen, Dna, FlaskConical, GitBranch, HeartPulse, Leaf, MapPin, Network, Search, Table2, SlidersHorizontal } from 'lucide-react';
 import { normalizeKind } from './api';
 import type { Entity, Meta, MappingIdentity } from './types';
 import type { SearchKind } from './catalogSearch';
@@ -15,8 +15,8 @@ export function WorkspaceWelcome({meta,onSearch}:{meta:Meta|null;onSearch:(kind:
   const nodes=count('nodes')||count('node'),edges=count('edges')||count('edge');
   return <section className="ws-welcome" aria-label="탐색 시작">
     <div className="ws-start-label"><Search size={17}/><span>탐색 시작</span></div>
-    <h2>하나의 항목에서 연구 근거까지</h2>
-    <p>음식·성분·유전자·건강지표를 검색하고, 수록된 관계와 실제 실험 조건을 함께 확인하세요.</p>
+    <h2>식품·유전자·중재 탐색</h2>
+    <p>항목을 선택하면 성분량, 관련 사람 연구, 실험 조건과 원문을 확인할 수 있습니다.</p>
     <div className="ws-start-grid">
       {[{kind:'inputs' as SearchKind,q:'Yogurt',name:'요구르트',description:'식품 조성과 관련 중재',Icon:Leaf},{kind:'exposure' as SearchKind,q:'포도씨 추출물',name:'포도씨 추출물',description:'배정 용량·기간으로 연구 탐색',Icon:BookOpen},{kind:'gene' as SearchKind,q:'APOE',name:'APOE',description:'발현·조절·질환 관련 근거',Icon:Dna},{kind:'health' as SearchKind,q:'blood pressure',name:'혈압',description:'원문에 보고된 건강지표',Icon:HeartPulse}].map(({kind,q,name,description,Icon})=><button key={kind} onClick={()=>onSearch(kind,q)}><Icon size={22}/><strong>{name}</strong><span>{description}</span><small>수록 항목 검색</small></button>)}
     </div>
@@ -29,6 +29,23 @@ export function WorkspaceWelcome({meta,onSearch}:{meta:Meta|null;onSearch:(kind:
     </div>
     {(nodes||edges)&&<div className="ws-release-summary"><BookOpen size={17}/><span>현재 자료 범위</span>{nodes&&<b>{nodes}개 항목</b>}{edges&&<b>{edges}개 관계 기록</b>}<small>관계 수는 독립 연구·대상자 수와 다릅니다.</small></div>}
   </section>;
+}
+
+interface ReferenceInputProps {
+  food:boolean; offline:boolean; intake:number; tissue:string; hours:string; days:string; frequency:string;
+  onIntake:(value:number)=>void; onTissue:(value:string)=>void; onHours:(value:string)=>void; onDays:(value:string)=>void; onFrequency:(value:''|'single'|'daily')=>void;
+}
+export function ReferenceInputs({food,offline,intake,tissue,hours,days,frequency,onIntake,onTissue,onHours,onDays,onFrequency}:ReferenceInputProps) {
+  const configured=[tissue,hours,days,frequency].filter(value=>value!=='').length;
+  return <div className="wb-inputs rr-inputs">
+    {food&&<label className="rr-intake">섭취량 <span className="ws-input-unit"><input aria-label="섭취량 g" disabled={offline} type="number" min="0.1" step="1" value={intake} onChange={e=>onIntake(Number(e.target.value)||100)}/><span>g</span></span></label>}
+    <details className="rr-reference-options"><summary><SlidersHorizontal size={15}/><span>조건 설정</span><small>{configured?`${configured}개 조건 입력`:'조직·시간·기간'}</small></summary><div className="rr-reference-fields">
+      <label>조직 <select aria-label="조직" disabled={offline} value={tissue} onChange={e=>onTissue(e.target.value)}><option value="">미지정</option><option>whole blood</option><option>PBMC</option><option>primary monocytes</option><option>K562</option><option>THP-1</option><option>Jurkat</option></select></label>
+      <label>반응 시점 <select aria-label="반응 시점" disabled={offline} value={hours} onChange={e=>onHours(e.target.value)}><option value="">미지정</option><option value="2">2시간</option><option value="4">4시간</option><option value="6">6시간</option></select></label>
+      <label>섭취 기간 <span className="ws-input-unit"><input aria-label="섭취 기간 일" disabled={offline} type="number" min="0" step="any" value={days} onChange={e=>onDays(e.target.value)} placeholder="미지정"/><span>일</span></span></label>
+      <label>빈도 <select aria-label="섭취 빈도" disabled={offline} value={frequency} onChange={e=>onFrequency(e.target.value as ''|'single'|'daily')}><option value="">미지정</option><option value="single">한 번 섭취</option><option value="daily">매일 섭취</option></select></label>
+    </div></details><span className="ws-unknown-note">미지정 조건은 미확인으로 유지</span>
+  </div>;
 }
 
 export function LoadingRows({label}:{label:string}) {

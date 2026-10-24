@@ -2,6 +2,8 @@
 
 로그인 없는 한국어 연구 워크벤치. React/TypeScript, Cytoscape.js+Dagre, TanStack Table v8을 사용합니다.
 
+[기본 화면 사용 안내](../../docs/EXPLORER_DESIGN_ko.md): 검색·섭취량·조건 비교·연결망·임상지표의 표시와 해석 범위를 설명합니다.
+
 ```powershell
 pnpm install --frozen-lockfile
 pnpm run build

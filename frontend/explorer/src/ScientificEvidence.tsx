@@ -39,7 +39,10 @@ function SourceDetails({ records }: { records: Record<string, unknown>[] }) {
   </div>;
 }
 export function Conditions({ rows }: { rows: ApplicabilityCondition[] }) {
-  return <div className="conditions-section"><h5><SlidersHorizontal size={13} />입력 조건과 연구 조건</h5>{!rows.length ? <p className="scientific-gap">비교 가능한 조건 정보가 없습니다.</p> : <div className="conditions-scroll" tabIndex={0} role="region" aria-label="조건 비교 표, 가로로 이동 가능"><table className="conditions-table"><thead><tr><th>조건</th><th>현재 입력</th><th>실제 연구</th><th>대응</th></tr></thead><tbody>{rows.map((condition, index) => <tr key={`${condition.dimension}-${index}`}><th scope="row">{dimensionLabels[condition.dimension] || condition.dimension.replaceAll('_', ' ')}</th><td>{text(condition.input, '미입력')}</td><td>{text(condition.study)}</td><td><span className={`condition-status ${condition.status || 'unknown'}`}>{statusLabels[condition.status] || '미확인'}</span><details className="condition-reason"><summary>판정 근거</summary><p>{condition.reason || '대응 이유 미확인'}</p></details></td></tr>)}</tbody></table></div>}</div>;
+  return <section className="conditions-section" aria-label="입력 조건과 연구 조건"><h5><SlidersHorizontal size={14} />입력 조건과 연구 조건</h5>{!rows.length ? <p className="scientific-gap">비교 가능한 조건 정보가 없습니다.</p> : <dl className="rr-conditions">{rows.map((condition, index) => <div className="rr-condition" key={`${condition.dimension}-${index}`} data-condition={condition.dimension}>
+    <dt><span>{dimensionLabels[condition.dimension] || condition.dimension.replaceAll('_', ' ')}</span><span className={`condition-status ${condition.status || 'unknown'}`}>{statusLabels[condition.status] || '미확인'}</span></dt>
+    <dd><div className="rr-condition-values"><div><span>현재 입력</span><p>{text(condition.input, '미입력')}</p></div><div><span>실제 연구</span><p>{text(condition.study)}</p></div></div><details className="condition-reason"><summary>판정 근거</summary><p>{condition.reason || '대응 이유 미확인'}</p></details></dd>
+  </div>)}</dl>}</section>;
 }
 export function ScientificEdgeContext({ scientific }: { scientific: EvidenceEdge['scientific'] }) {
   if (!scientific) return <p className="muted-note">이 release에서 해당 관계의 과학적 맥락 비교는 미제공입니다.</p>;

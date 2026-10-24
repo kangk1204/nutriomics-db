@@ -6,7 +6,7 @@ import { normalizeKind } from './api';
 import { graphTiming } from './renderMetrics';
 import type { Entity, EvidenceEdge, GraphData, GraphPath } from './types';
 import { weakestLinkLabel } from './graphFocus';
-import { bundleEdges, projectNetwork, semanticPositions, restorePinned, entityType, tierClass, tierLabel, laneOf, LANE_LABELS, edgeContext, topologyKey, type NetworkMode } from './networkModel';
+import { bundleEdges, projectNetwork, semanticPositions, focusPositions, restorePinned, entityType, tierClass, tierLabel, laneOf, LANE_LABELS, edgeContext, topologyKey, type NetworkMode } from './networkModel';
 import './network.css';
 
 cytoscape.use(dagre);
@@ -24,7 +24,7 @@ export const relationLabel = (value: string) => ({
   increases:'증가',decreases:'감소',associated_with:'연관',affects:'영향 관계',
 }[value] || value.replaceAll('_', ' '));
 const STYLES:StylesheetJson=[
-  {selector:'node',style:{width:36,height:36,shape:'ellipse','background-color':'#edf1f7','border-width':1.6,'border-color':'#62758c',label:'data(label)',color:'#263b51','font-family':'Segoe UI, Malgun Gothic, sans-serif','font-size':14,'font-weight':500,'text-valign':'bottom','text-margin-y':10,'text-wrap':'wrap','text-max-width':'172px','text-background-color':'#fff','text-background-opacity':0.85,'text-background-padding':'2px','overlay-opacity':0}},
+  {selector:'node',style:{width:34,height:34,shape:'ellipse','background-color':'#edf1f7','border-width':1.6,'border-color':'#62758c',label:'data(label)',color:'#263b51','font-family':'Segoe UI, Malgun Gothic, sans-serif','font-size':16,'font-weight':550,'text-valign':'bottom','text-margin-y':9,'text-wrap':'wrap','text-max-width':'130px','text-background-color':'#fbfcf9','text-background-opacity':0.96,'text-background-padding':'3px','overlay-opacity':0}},
   {selector:'node[kind="food"]',style:{shape:'round-rectangle','background-color':'#fbecdb','border-color':'#a66d26'}},
   {selector:'node[kind="component"]',style:{'background-color':'#dceee9','border-color':'#377e70'}},
   {selector:'node[kind="gene"]',style:{shape:'round-rectangle',width:42,height:30,'background-color':'#e9e2f2','border-color':'#796195'}},
@@ -32,7 +32,7 @@ const STYLES:StylesheetJson=[
   {selector:'node[kind="pathway"]',style:{shape:'hexagon','background-color':'#e6eaf0','border-color':'#708096'}},
   {selector:'node[kind="cpg"]',style:{shape:'diamond','background-color':'#eee3f2','border-color':'#8c7297'}},
   {selector:'node[kind="regulatory_region"]',style:{shape:'hexagon','background-color':'#deebee','border-color':'#647d8b'}},
-  {selector:'node.anchor',style:{'border-width':3,width:44,height:44}},
+  {selector:'node.anchor',style:{'border-width':2.5,width:58,height:44,'font-size':20,'font-weight':700,'text-margin-y':13}},
   {selector:'edge',style:{width:1.35,'line-color':'#b2becb','curve-style':'bezier','control-point-step-size':38,'target-arrow-shape':'none',label:'data(displayLabel)','font-family':'Segoe UI, Malgun Gothic, sans-serif','font-size':11,color:'#53677b','text-wrap':'wrap','text-max-width':'95px','text-background-color':'#fff','text-background-opacity':0.96,'text-background-padding':'3px','overlay-opacity':0}},
   {selector:'edge[stroke="indirect"]',style:{'line-style':'dashed','line-dash-pattern':[5,4],'line-color':'#aa9fba'}},
   {selector:'edge[stroke="extracted"]',style:{'line-style':'dotted','line-color':'#a899b8'}},
@@ -58,7 +58,7 @@ export default function GraphView({graph,loading,error,seedId,selectedId,selecte
   const pinned=useRef(new Set<string>()),geometryKey=useRef(''),[pinActive,setPinActive]=useState(false);
   const graphIds=useRef<string[]>([]);graphIds.current=graph?.nodes.map(n=>n.id)||[];
   const publishPositions=()=>{window.__NUTRIOMICS_POSITIONS__=Object.fromEntries(graphIds.current.filter(id=>positions.current[id]).map(id=>[id,positions.current[id]]))};
-  const [mode,setMode]=useState<NetworkMode>(window.__NUTRIOMICS_SNAPSHOT__?'all':'path'),[layout,setLayout]=useState('semantic'),[pathId,setPathId]=useState('');
+  const [mode,setMode]=useState<NetworkMode>(window.__NUTRIOMICS_SNAPSHOT__?'all':'path'),[layout,setLayout]=useState('focus'),[pathId,setPathId]=useState('');
   const [localSelected,setLocalSelected]=useState(selectedId||seedId),[expanded,setExpanded]=useState(false),[query,setQuery]=useState(''),[labels,setLabels]=useState(false),[hidden,setHidden]=useState<Set<string>>(new Set());
   const [listOpen,setListOpen]=useState(false),[hovered,setHovered]=useState<{label:string;type:string}|null>(null);
   const [expanding,setExpanding]=useState(false),expandSequence=useRef(0);
@@ -99,9 +99,9 @@ export default function GraphView({graph,loading,error,seedId,selectedId,selecte
     const key=`${seedId}:${mode}:${layout}:${visiblePath?.id||''}:${topologyKey(graph)}`;
     const keepGeometry=geometryKey.current===key;geometryKey.current=key;
     cy.startBatch();cy.elements().remove();
-    cy.add(shown.nodes.map(n=>({group:'nodes' as const,data:{id:n.id,label:['nutrient','chemical','compound'].includes(n.kind)?`${n.label}\n${entityType(n.kind)}`:n.label,kind:normalizeKind(n.kind),subtype:n.kind,entity:n},classes:n.id===seedId?'anchor':''})));
+    cy.add(shown.nodes.map(n=>({group:'nodes' as const,data:{id:n.id,label:n.display_name_ko||n.label,kind:normalizeKind(n.kind),subtype:n.kind,entity:n},classes:n.id===seedId?'anchor':''})));
     cy.add(bundles.map(b=>({group:'edges' as const,data:{id:b.id,source:b.edge.subject,target:b.edge.object,relation:b.edge.relation,stroke:tierClass(b.edge.tier),detailLabel:`${relationLabel(b.edge.relation)}${b.ids.length>1?` · ${b.ids.length} 기록`:''}`,displayLabel:'',evidence:b.edge,groupedIds:b.ids}})));
-    const defaults=semanticPositions(shown.nodes,visiblePath);
+    const defaults=layout==='focus'&&!visiblePath?focusPositions(shown.nodes,shown.edges,seedId):semanticPositions(shown.nodes,visiblePath);
     const resolved=restorePinned(defaults,positions.current,pinned.current);
     cy.nodes().forEach(n=>{const saved=positions.current[n.id()];n.position(keepGeometry&&saved?saved:resolved[n.id()]);if(pinned.current.has(n.id()))n.lock().addClass('pinned')});
     cy.endBatch();
@@ -121,6 +121,7 @@ export default function GraphView({graph,loading,error,seedId,selectedId,selecte
     cy.nodes().forEach(n=>{if(visiblePath)n.addClass(pnodes.has(n.id())?'path-member':'muted')});
     cy.edges().forEach(e=>{const active=(e.data('groupedIds') as string[]).some(id=>pedges.has(id));if(visiblePath)e.addClass(active?'path-member':'muted');e.data('displayLabel',labels||active?e.data('detailLabel'):'')});
     if(localSelected){cy.getElementById(localSelected).select();cy.edges().forEach(e=>{if((e.data('groupedIds') as string[]).includes(localSelected))e.select()})}
+    if(!visiblePath&&localSelected&&localSelected!==seedId){const chosen=cy.getElementById(localSelected);if(chosen.isNode())cy.elements().difference(chosen.closedNeighborhood()).addClass('muted')}
     setPinActive(pinned.current.has(localSelected));
   },[shown,bundles,visiblePath,localSelected,labels,layout]);
   const chooseNode=(node:Entity)=>{setLocalSelected(node.id);callbacks.current.onNode(node);const cy=cyRef.current;if(cy){cy.center(cy.getElementById(node.id))}};
@@ -130,8 +131,8 @@ export default function GraphView({graph,loading,error,seedId,selectedId,selecte
   const toggleTier=(tier:string)=>setHidden(old=>{const next=new Set(old);next.has(tier)?next.delete(tier):next.add(tier);return next});
   const expand=async()=>{if(expanding||atLimit)return;const sequence=++expandSequence.current;setExpanding(true);setMode('all');try{await onExpand()}finally{if(sequence===expandSequence.current)setExpanding(false)}};
   return <section className={`ng-workspace ${expanded?'ng-expanded':''}`} aria-label="연결망 시각화">
-    <header className="ng-toolbar"><div className="ng-view-switch" role="group" aria-label="네트워크 표시 범위"><button aria-pressed={mode==='path'} onClick={()=>setMode('path')}><GitBranch size={15}/>경로 탐색</button><button aria-pressed={mode==='neighbors'} onClick={()=>setMode('neighbors')}><Focus size={15}/>인접 관계</button><button aria-pressed={mode==='all'} onClick={()=>setMode('all')}><Network size={15}/>전체 연결</button></div><div className="ng-toolbar-right"><select aria-label="연결망 배치" value={layout} onChange={e=>setLayout(e.target.value)}><option value="semantic">유형별 배치</option><option value="cose">자유 배치</option></select><button title={atLimit?'수신 상한 · 250 노드 또는 750 관계':'주변 확장 · 최대 250 노드'} disabled={!canExpand||loading||expanding||atLimit} onClick={()=>{void expand()}}>{expanding?<LoaderCircle className="spin" size={16}/>:<Expand size={16}/>}<span>{expanding?'수신 중':atLimit?'상한':'확장'}</span></button><button aria-label={expanded?'확대 작업공간 닫기':'네트워크 작업공간 확대'} onClick={()=>setExpanded(!expanded)}>{expanded?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
-    <div className="ng-context"><span className="ng-context-title">EVIDENCE NETWORK</span><b>{shown?.nodes.length||0}</b><span>노드</span><b>{shown?.edges.length||0}</b><span>관계 기록</span><span className="ng-context-end">{graph?.release_id}</span></div>
+    <header className="ng-toolbar"><div className="ng-view-switch" role="group" aria-label="네트워크 표시 범위"><button aria-pressed={mode==='path'} onClick={()=>setMode('path')}><GitBranch size={15}/>경로 탐색</button><button aria-pressed={mode==='neighbors'} onClick={()=>setMode('neighbors')}><Focus size={15}/>인접 관계</button><button aria-pressed={mode==='all'} onClick={()=>setMode('all')}><Network size={15}/>전체 연결</button></div><div className="ng-toolbar-right"><select aria-label="연결망 배치" value={layout} onChange={e=>setLayout(e.target.value)}><option value="focus">중심 배치</option><option value="semantic">유형별 배치</option><option value="cose">자유 배치</option></select><button title={atLimit?'수신 상한 · 250 노드 또는 750 관계':'주변 확장 · 최대 250 노드'} disabled={!canExpand||loading||expanding||atLimit} onClick={()=>{void expand()}}>{expanding?<LoaderCircle className="spin" size={16}/>:<Expand size={16}/>}<span>{expanding?'수신 중':atLimit?'상한':'확장'}</span></button><button aria-label={expanded?'확대 작업공간 닫기':'네트워크 작업공간 확대'} onClick={()=>setExpanded(!expanded)}>{expanded?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
+    <div className="ng-context"><span className="ng-context-title">관계 탐색</span><b>{shown?.nodes.length||0}</b><span>노드</span><b>{shown?.edges.length||0}</b><span>관계 기록</span><span className="ng-context-end">{graph?.release_id}</span></div>
     {graph?.edges.some(e=>e.tier==='restricted')&&<div className="ng-boundary">이용조건에 따라 {graph.edges.filter(e=>e.tier==='restricted').length}개 관계의 상세를 출처 링크로 대체했습니다.</div>}
     <div className="ng-body">
       <div className="ng-canvas-wrap"><div className="ng-type-legend">{[...new Set(shown?.nodes.map(laneOf)||[])].sort((a,b)=>a-b).map(lane=><span key={lane}><i className={`ng-glyph ng-lane-${lane}`}/>{LANE_LABELS[lane]}</span>)}</div>

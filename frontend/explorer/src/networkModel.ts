@@ -72,6 +72,29 @@ export function semanticPositions(nodes:Entity[],path?:GraphPath):Record<string,
   }
   return result;
 }
+/** Geometric distance from the selected item; this is not a causal ordering. */
+export function focusPositions(nodes:Entity[],edges:EvidenceEdge[],seed:string):Record<string,Position>{
+  const ids=new Set(nodes.map(node=>node.id));
+  if(!ids.has(seed))return semanticPositions(nodes);
+  const distances=new Map<string,number>([[seed,0]]),queue=[seed];
+  const adjacent=new Map<string,Set<string>>();
+  for(const edge of edges){
+    if(!ids.has(edge.subject)||!ids.has(edge.object))continue;
+    for(const [from,to] of [[edge.subject,edge.object],[edge.object,edge.subject]]){
+      if(!adjacent.has(from))adjacent.set(from,new Set());adjacent.get(from)!.add(to);
+    }
+  }
+  for(let i=0;i<queue.length;i++)for(const target of adjacent.get(queue[i])||[]){
+    if(!distances.has(target)){distances.set(target,distances.get(queue[i])!+1);queue.push(target)}
+  }
+  const result:Record<string,Position>={[seed]:{x:0,y:0}};
+  const peers=nodes.filter(node=>node.id!==seed).sort((a,b)=>(distances.get(a.id)??100)-(distances.get(b.id)??100)||laneOf(a)-laneOf(b)||a.label.localeCompare(b.label)||a.id.localeCompare(b.id));
+  for(let start=0;start<peers.length;start+=20){
+    const ring=peers.slice(start,start+20),level=Math.floor(start/20),rx=ring.length<=5?160+level*140:270+level*140,ry=ring.length<=5?120+level*100:180+level*100;
+    ring.forEach((node,i)=>{const angle=-Math.PI/2+2*Math.PI*i/ring.length;result[node.id]={x:rx*Math.cos(angle),y:ry*Math.sin(angle)}});
+  }
+  return result;
+}
 export function restorePinned(defaults:Record<string,Position>,saved:Record<string,Position>,pinned:Set<string>):Record<string,Position>{
   return Object.fromEntries(Object.entries(defaults).map(([id,pos])=>[id,pinned.has(id)&&saved[id]?saved[id]:pos]));
 }
