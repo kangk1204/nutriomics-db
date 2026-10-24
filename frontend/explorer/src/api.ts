@@ -8,7 +8,7 @@ const snapshot = window.__NUTRIOMICS_SNAPSHOT__;
 export const frozenScientificContext = snapshot?.filters?.scientific_context;
 export const scientificSnapshotSeed = frozenScientificContext ? snapshot?.nodes.find(node => node.id === frozenScientificContext.seed_id) : undefined;
 const ROOT = '/api/v1/explorer';
-export const REQUEST_TIMEOUT_MS = 30_000;
+export const REQUEST_TIMEOUT_MS = 45_000;
 export const EXPORT_TIMEOUT_MS = 60_000;
 
 export class RequestTimeoutError extends Error {
@@ -266,7 +266,7 @@ export function saveBlob(blob: Blob, filename: string) {
 export async function analyzeFood(foodId: string, amount: number) {
   if (offline) throw new Error('독립 HTML에는 식사 계산 서버가 연결되지 않습니다. 저장된 함량 기준을 확인해주세요.');
   return fetchWithTimeout('/api/v1/meals/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [{ food_id: foodId, amount_g: amount }] }) }, async response => {
-    if (!response.ok) throw new Error('이 식품의 섭취량 계산에 필요한 기준을 확인할 수 없습니다.');
+    if (!response.ok) throw await serverError(response);
     return response.json() as Promise<Record<string, unknown>>;
   });
 }
