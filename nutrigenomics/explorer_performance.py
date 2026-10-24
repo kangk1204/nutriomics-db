@@ -128,11 +128,14 @@ def read_connection(path):
     try:
         physical = physical_read_path(path).resolve()
         immutable = '&immutable=1' if physical != path else ''
-        db = sqlite3.connect(physical.as_uri() + "?mode=ro" + immutable, uri=True, timeout=2, factory=ProfileConnection)
+        from .sqlite_read_cache import connection_settings
+        shared = connection_settings(path, physical)
+        uri = shared[0] if shared else physical.as_uri() + "?mode=ro" + immutable
+        db = sqlite3.connect(uri, uri=True, timeout=2, factory=ProfileConnection)
         db.logical_source_path = str(path)
         db.row_factory = sqlite3.Row
         db.execute("PRAGMA query_only=ON")
-        db.execute("PRAGMA cache_size=-65536")
+        db.execute("PRAGMA cache_size=-" + str(shared[1] if shared else 65536))
         if budget:
             db.set_progress_handler(lambda: int(budget.expired()), 1000)
             with budget.lock:
