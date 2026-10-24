@@ -7,21 +7,40 @@ metadata and raw assay files have separate, explicit budgets.
 from __future__ import annotations
 
 import argparse
-import csv
 import concurrent.futures
+import csv
 import gzip
 import hashlib
-import io
 import json
 import os
-import re
 import shutil
-import time
 import threading
+import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+
+try:
+    from scripts.direct_plus_source import (
+        API,
+        STUDY,
+        SUCCESS,
+        load_sdrf,
+        mapping_identity,
+        resolve_files,
+        validate_raw_mapping,
+    )
+except ModuleNotFoundError:  # Direct script execution.
+    from direct_plus_source import (
+        API,
+        STUDY,
+        SUCCESS,
+        load_sdrf,
+        mapping_identity,
+        resolve_files,
+        validate_raw_mapping,
+    )
 
 SOURCES = {
     "GSE13466": {"series_matrix": "GSE13466_series_matrix.txt.gz", "raw": "GSE13466_RAW.tar"},
@@ -31,6 +50,15 @@ SOURCES = {
 BASE = "https://ftp.ncbi.nlm.nih.gov/geo/series"
 EBI = "https://www.ebi.ac.uk/biostudies"
 record_lock = threading.Lock()
+
+
+class IncompleteDirectPlusAcquisition(RuntimeError):
+    """Carries the complete failed-attempt accounting across the CLI boundary."""
+
+    def __init__(self, result: dict):
+        self.result = result
+        super().__init__(f"DIRECT PLUS acquisition incomplete: {result['failed_count']} failed, "
+                         f"{result['success_count']} verified of {result['expected_raw_files']}")
 
 
 def digest(path: Path) -> str:
@@ -47,11 +75,25 @@ def atomic_json(path: Path, payload: object) -> None:
     temporary.replace(path)
 
 
-def fetch(url: str, destination: Path, limit: int, retries: int = 4) -> dict:
+def fetch(url: str, destination: Path, limit: int, retries: int = 4, *,
+          expected_size: int | None = None, source_identity: str | None = None,
+          refresh: bool = False, expected_sha256: str | None = None) -> dict:
     destination.parent.mkdir(parents=True, exist_ok=True)
     partial = destination.with_suffix(destination.suffix + ".part")
-    if destination.is_file():
+    partial_receipt = partial.with_suffix(partial.suffix + ".json")
+    identity = {"url": url, "expected_size": expected_size, "source_identity": source_identity}
+    if expected_size is not None and (expected_size <= 0 or expected_size > limit):
+        raise ValueError("Invalid expected file size/budget")
+    if partial.exists() and source_identity is not None:
+        prior = json.loads(partial_receipt.read_text()) if partial_receipt.exists() else {}
+        if any(prior.get(k) != v for k, v in identity.items()):
+            # Preserve unbound partial bytes instead of appending a different source.
+            orphan = partial.with_name(partial.name + f".unbound.{time.time_ns()}")
+            partial.replace(orphan)
+    if destination.is_file() and not refresh:
         try:
+            if expected_size is not None and destination.stat().st_size != expected_size:
+                raise ValueError("Cached file size differs from official listing")
             if destination.stat().st_size > limit:
                 raise ValueError("Cached file exceeds source budget")
             if destination.suffix == ".gz":
@@ -61,21 +103,38 @@ def fetch(url: str, destination: Path, limit: int, retries: int = 4) -> dict:
         except (OSError, ValueError, EOFError) as error:
             return {"url": url, "path": str(destination), "status": "failed",
                     "reason": "Cached source validation failed: " + str(error)}
+        cached_sha = digest(destination)
+        if expected_sha256 is not None and cached_sha != expected_sha256:
+            return {"url": url, "path": str(destination), "status": "failed",
+                    "reason": "Cached SHA256 differs from prior successful source-bound receipt"}
         return {"url": url, "path": str(destination), "bytes": destination.stat().st_size,
-                "sha256": digest(destination), "status": "cached_verified"}
+                "sha256": cached_sha, "status": "cached_verified",
+                "expected_bytes": expected_size, "source_identity": source_identity,
+                "integrity_scope": "Official byte size and local SHA256; no remote checksum asserted"}
     for attempt in range(retries):
         offset = partial.stat().st_size if partial.exists() else 0
-        request = urllib.request.Request(url, headers={"User-Agent": "NutrigenomicsResearchDB/0.1", **({"Range": f"bytes={offset}-"} if offset else {})})
+        prior = json.loads(partial_receipt.read_text()) if partial_receipt.exists() else {}
+        headers = {"User-Agent": "NutrigenomicsResearchDB/0.1"}
+        if offset:
+            headers["Range"] = f"bytes={offset}-"
+            if prior.get("etag"):
+                headers["If-Range"] = prior["etag"]
+        request = urllib.request.Request(url, headers=headers)
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
                 resumed = offset > 0 and response.status == 206
                 if resumed:
                     content_range = response.headers.get("Content-Range", "")
-                    if not content_range.startswith(f"bytes {offset}-"):
+                    if (not content_range.startswith(f"bytes {offset}-")
+                            or (expected_size is not None and not content_range.endswith(f"/{expected_size}"))
+                            or (prior.get("etag") and response.headers.get("ETag") != prior["etag"])):
                         raise ValueError("Server returned a mismatched range")
                 else:
                     offset = 0
                 length = int(response.headers.get("Content-Length", "0"))
+                if expected_size is not None and length and offset + length != expected_size:
+                    raise ValueError(f"Response byte count {offset + length} differs from official file listing {expected_size}")
+                atomic_json(partial_receipt, {**identity, "etag": response.headers.get("ETag")})
                 if length and offset + length > limit:
                     raise ValueError(f"Declared size {offset + length} exceeds source budget {limit}")
                 if shutil.disk_usage(destination.parent).free < max(length, 1024 ** 3) + 2 * 1024 ** 3:
@@ -90,15 +149,25 @@ def fetch(url: str, destination: Path, limit: int, retries: int = 4) -> dict:
                     output.flush()
                     os.fsync(output.fileno())
                 if length and size != offset + length:
-                    raise IOError("Truncated download")
+                    raise OSError("Truncated download")
+                if expected_size is not None and size != expected_size:
+                    raise OSError("Completed stream differs from expected size")
                 if destination.suffix == ".gz":
                     with gzip.open(partial, "rb") as check:
                         while check.read(4 * 1024 * 1024):
                             pass
+                if destination.exists() and refresh:
+                    previous_sha = digest(destination)
+                    if previous_sha != digest(partial):
+                        archive = destination.with_name(destination.name + f".source-{previous_sha}")
+                        if not archive.exists():
+                            shutil.copy2(destination, archive)
                 partial.replace(destination)
                 return {"url": url, "path": str(destination), "bytes": size,
                         "sha256": digest(destination), "etag": response.headers.get("ETag"),
-                        "last_modified": response.headers.get("Last-Modified"), "status": "downloaded"}
+                        "last_modified": response.headers.get("Last-Modified"), "status": "downloaded",
+                        "expected_bytes": expected_size, "source_identity": source_identity,
+                        "integrity_scope": "Official byte size and local SHA256; no remote checksum asserted"}
         except (OSError, ValueError, EOFError, urllib.error.URLError) as error:
             if isinstance(error, urllib.error.HTTPError) and error.code in (401, 403, 404):
                 return {"url": url, "status": "unavailable", "reason": str(error)}
@@ -160,38 +229,133 @@ def all_files(value: object) -> list[dict]:
 
 
 def direct_plus_audit(directory: Path) -> dict:
-    with (directory / "E-MTAB-12527.sdrf.txt").open(encoding="utf-8-sig", newline="") as handle:
-        rows = list(csv.DictReader(handle, delimiter="\t"))
-    columns = list(rows[0])
-    individual = next(c for c in columns if c.lower() == "characteristics[individual]")
-    time_col = next(c for c in columns if "time" in c.lower() and c.startswith("Factor Value"))
-    arm_col = next(c for c in columns if "diet" in c.lower() and c.startswith("Factor Value"))
-    groups, seen, people = {}, set(), {}
-    raw_records = []
-    raw_col = next(c for c in columns if c.lower() == "array data file")
+    rows, result = load_sdrf(directory / f"{STUDY}.sdrf.txt")
+    atomic_json(directory / "sample_audit.json", result)
     with (directory / "sample_design.tsv").open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle, delimiter="\t")
         writer.writerow(["sample_id", "subject_id", "arm", "time_months", "raw_file", "inclusion_status", "reason"])
         for row in rows:
-            person, arm, t = row[individual], row[arm_col], row[time_col]
-            time_match = re.search(r"\d+", t)
-            if not time_match:
-                raise ValueError(f"Unrecognized timepoint {t!r}")
-            month = int(time_match.group())
-            sample = row["Source Name"]
-            key = (person, month)
-            people.setdefault(person, {})[month] = arm
-            writer.writerow([sample, person, arm, month, row[raw_col], "included_metadata", "SDRF explicit individual, diet, time; raw QC pending"])
-            raw_records.append(row[raw_col])
-            if key not in seen:
-                groups[arm] = groups.get(arm, 0) + 1
-                seen.add(key)
-    incomplete = {p: v for p, v in people.items() if set(v) != {0, 18} or len(set(v.values())) != 1}
-    result = {"accession": "E-MTAB-12527", "independent_people": len(people), "biological_samples": len(seen),
-              "sdrf_rows": len(rows), "raw_channel_files": len(set(raw_records)), "arm_samples": groups,
-              "incomplete_pairs": incomplete, "status": "metadata_audited_raw_qc_pending",
-              "interpretation": "IDAT red/green channels are not independent biological samples; RNA availability not established"}
-    atomic_json(directory / "sample_audit.json", result)
+            writer.writerow([row["Source Name"], row["Characteristics[individual]"],
+                             row["Factor Value[diet]"], row["Factor Value[time]"],
+                             row["Array Data File"], "included_metadata",
+                             "Explicit SDRF pair/channel mapping; raw QC pending"])
+    return result
+
+
+def acquire_direct_plus(directory: Path, record, *, raw: bool, raw_budget: int,
+                        workers: int = 8) -> dict:
+    """A metadata-only run is explicit; --raw succeeds only with every source file."""
+    def required(url, path, budget, **kwargs):
+        result = record(url, path, budget, **kwargs)
+        if result["status"] not in SUCCESS:
+            raise RuntimeError(f"Required DIRECT PLUS source unavailable: {url}; {result.get('reason')}")
+        return result
+
+    required(f"https://www.ebi.ac.uk/biostudies/api/v1/studies/{STUDY}",
+             directory / "study_metadata.json", 16 * 1024 ** 2, refresh=True)
+    required(API + "/info", directory / "study_info.json", 1024 ** 2, refresh=True)
+    info = json.loads((directory / "study_info.json").read_text(encoding="utf-8"))
+
+    def get_page(offset, size):
+        path = directory / "file_pages" / f"files_{offset:05d}.json"
+        required(API + f"/files?offset={offset}&limit={size}", path, 8 * 1024 ** 2, refresh=True)
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    files = resolve_files(info, get_page)
+    required(API + "/info", directory / "study_info_after_listing.json", 1024 ** 2,
+             refresh=True)
+    after = json.loads((directory / "study_info_after_listing.json").read_text(encoding="utf-8"))
+    if any(info.get(k) != after.get(k) for k in ("httpLink", "modified", "files", "sectionFileCounts")):
+        raise RuntimeError("Study changed while resolving file pages; restart metadata acquisition")
+    identity = mapping_identity(info, files)
+    for entry in files:
+        if entry["section"] != "raw-data":
+            required(entry["url"], directory / entry["name"], entry["size"],
+                     expected_size=entry["size"], source_identity=identity, refresh=True)
+    audit = direct_plus_audit(directory)
+    mapping = validate_raw_mapping(files, audit)
+    resolved = {"accession": STUDY, "source_identity": identity,
+                "source_info_sha256": digest(directory / "study_info.json"),
+                "sdrf_sha256": digest(directory / f"{STUDY}.sdrf.txt"),
+                "files": files, "counts": mapping,
+                "terms_status": "Original study metadata and pre-existing rights retained; public access is not redistribution permission"}
+    prior_path = directory / "resolved_files.json"
+    if prior_path.exists():
+        old_sha = digest(prior_path)
+        archive = directory / f"resolved_files.{old_sha}.json"
+        if not archive.exists():
+            shutil.copy2(prior_path, archive)
+    atomic_json(prior_path, resolved)
+    if mapping["raw_bytes"] > raw_budget:
+        raise ValueError("DIRECT PLUS aggregate IDAT bytes exceed raw budget")
+    if not raw:
+        result = {**mapping, "status": "metadata_only_raw_not_requested", "source_identity": identity}
+    else:
+        if shutil.disk_usage(directory).free < mapping["raw_bytes"] + 2 * 1024 ** 3:
+            # Existing verified files do not need additional disk space.
+            remaining = sum(f["size"] for f in files if f["section"] == "raw-data"
+                            and not (directory / "idat" / f["name"]).is_file())
+            if shutil.disk_usage(directory).free < remaining + 2 * 1024 ** 3:
+                raise ValueError("Insufficient disk for planned raw files and reserve")
+        def download(entry):
+            path = directory / "idat" / entry["name"]
+            try:
+                result = record(entry["url"], path, entry["size"],
+                                expected_size=entry["size"], source_identity=identity)
+            except Exception as error:  # noqa: BLE001 -- Isolate and record each failed source; collect every queued file.
+                result = {"url": entry["url"], "path": str(path), "status": "failed",
+                          "reason": f"record_exception:{type(error).__name__}: {error}"}
+            result = {**result, "name": entry["name"], "path": str(path),
+                      "expected_bytes": entry["size"], "source_identity": identity}
+            if result["status"] in SUCCESS and result.get("bytes") != entry["size"]:
+                result = {**result, "status": "failed", "reason": "Receipt byte count differs from official listing"}
+            return result
+        raw_files = [f for f in files if f["section"] == "raw-data"]
+        attempt_id = str(time.time_ns())
+        attempt_dir = directory / "raw_attempts"
+        attempt_dir.mkdir(exist_ok=True)
+        checkpoint_path = attempt_dir / f"in_progress.{attempt_id}.json"
+        receipts = [{"name": f["name"], "url": f["url"], "expected_bytes": f["size"],
+                     "status": "not_attempted"} for f in raw_files]
+
+        def attempt_snapshot():
+            success = sum(r["status"] in SUCCESS for r in receipts)
+            pending = sum(r["status"] == "not_attempted" for r in receipts)
+            return {"attempt_id": attempt_id, "source_identity": identity,
+                    "expected_raw_files": len(raw_files), "attempted_count": len(raw_files)-pending,
+                    "success_count": success, "failed_count": len(raw_files)-pending-success,
+                    "not_attempted_count": pending,
+                    "failed_names": [r["name"] for r in receipts if r["status"] not in SUCCESS | {"not_attempted"}],
+                    "complete": success == len(raw_files), "records": receipts}
+
+        atomic_json(checkpoint_path, attempt_snapshot())
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, min(workers, 8))) as executor:
+            # Every worker returns its own failure. A bad source object must not
+            # close map's iterator and cancel the remaining queued source files.
+            for index, receipt in enumerate(executor.map(download, raw_files)):
+                receipts[index] = receipt
+                if (index+1) % 16 == 0:
+                    atomic_json(checkpoint_path, attempt_snapshot())
+        attempt = attempt_snapshot()
+        attempt_hash = hashlib.sha256(json.dumps(attempt, sort_keys=True).encode()).hexdigest()
+        attempt_path = attempt_dir / f"attempt.{attempt_id}.{attempt_hash}.json"
+        atomic_json(attempt_path, attempt)
+        atomic_json(directory / "raw_attempt_receipts.json", attempt)
+        atomic_json(checkpoint_path, {**attempt, "final_receipt_path": str(attempt_path)})
+        accounting = {k: attempt[k] for k in ("attempt_id", "expected_raw_files", "attempted_count",
+            "success_count", "failed_count", "not_attempted_count", "failed_names", "complete")}
+        accounting.update({"attempt_receipt_path": str(attempt_path),
+                           "attempt_receipt_sha256": digest(attempt_path)})
+        if not attempt["complete"]:
+            result = {**mapping, **accounting, "status": "failed_incomplete", "source_identity": identity,
+                      "reason": "All raw files attempted; at least one source failed strict validation"}
+            atomic_json(directory / "acquisition_status.json", result)
+            raise IncompleteDirectPlusAcquisition(result)
+        # Completion is a hash-bound receipt, never inferred from an absent legacy file list.
+        atomic_json(directory / "raw_receipts.json", receipts)
+        result = {**mapping, **accounting, "status": "raw_complete_local_sha256_verified",
+                  "source_identity": identity, "raw_receipts_sha256": digest(directory / "raw_receipts.json")}
+    atomic_json(directory / "acquisition_status.json", result)
     return result
 
 
@@ -207,18 +371,38 @@ def main() -> None:
     root.mkdir(parents=True, exist_ok=True)
     manifest_path = root / "download_manifest.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {"files": []}
-    manifest.update({"updated_utc": datetime.now(timezone.utc).isoformat(), "raw_budget_bytes": options.raw_budget_gib * 1024 ** 3,
-                     "usage": "Noncommercial research; archive-specific conditions retained; no article full-text redistribution"})
+    manifest.setdefault("usage", "Noncommercial research; archive-specific conditions retained; no article full-text redistribution")
+    manifest.update({"updated_utc": datetime.now(UTC).isoformat(), "raw_budget_bytes": options.raw_budget_gib * 1024 ** 3})
 
-    def record(url: str, path: Path, budget: int) -> dict:
-        result = fetch(url, path, budget)
-        # Per-URL durable records avoid losing provenance when independent source
-        # downloads run concurrently. The aggregate is a derived index.
+    def record(url: str, path: Path, budget: int, **kwargs) -> dict:
         records_dir = root / "download_records"
         records_dir.mkdir(exist_ok=True)
-        atomic_json(records_dir / (hashlib.sha256(url.encode()).hexdigest() + ".json"), result)
+        record_path = records_dir / (hashlib.sha256(url.encode()).hexdigest() + ".json")
+        old_receipt = json.loads(record_path.read_text(encoding="utf-8")) if record_path.exists() else {}
+        if kwargs.get("source_identity") is not None and path.exists() and not kwargs.get("refresh"):
+            known = [old_receipt] + list(reversed(old_receipt.get("attempt_history", [])))
+            prior = next((r for r in known if r.get("source_identity") == kwargs["source_identity"]
+                          and r.get("status") in SUCCESS and r.get("sha256")), None)
+            if prior is None:
+                # A same-size file from another or unknown release cannot be rebound by name.
+                kwargs["refresh"] = True
+            else:
+                kwargs["expected_sha256"] = prior["sha256"]
+        result = fetch(url, path, budget, **kwargs)
+        # Per-URL durable records avoid losing provenance when independent source
+        # downloads run concurrently. The aggregate is a derived index.
         with record_lock:
-            manifest["files"] = [json.loads(p.read_text()) for p in records_dir.glob("*.json")]
+            old = json.loads(record_path.read_text(encoding="utf-8")) if record_path.exists() else {}
+            history = old.get("attempt_history", [])
+            if old:
+                history = history + [{k: v for k, v in old.items() if k != "attempt_history"}]
+            merged = {**old, **result, "attempt_history": history}
+            atomic_json(record_path, merged)
+            existing = {r["url"]: r for r in manifest.get("files", []) if "url" in r}
+            for p in records_dir.glob("*.json"):
+                row = json.loads(p.read_text(encoding="utf-8"))
+                existing[row["url"]] = {**existing.get(row["url"], {}), **row}
+            manifest["files"] = list(existing.values())
             atomic_json(manifest_path, manifest)
         print(json.dumps({k: v for k, v in result.items() if k in {"url", "status", "bytes", "reason"}}), flush=True)
         return result
@@ -237,33 +421,19 @@ def main() -> None:
                 segment = "matrix" if kind == "series_matrix" else "suppl"
                 record(f"{base}/{segment}/{filename}", directory / filename,
                        options.raw_budget_gib * 1024 ** 3 if kind == "raw" else 2 * 1024 ** 3)
-        elif study == "E-MTAB-12527":
-            record(f"{EBI}/api/v1/studies/{study}", directory / "study_metadata.json", 16 * 1024 ** 2)
-            record(f"{EBI}/files/{study}/{study}.sdrf.txt", directory / f"{study}.sdrf.txt", 16 * 1024 ** 2)
-            record(f"{EBI}/files/{study}/{study}.idf.txt", directory / f"{study}.idf.txt", 16 * 1024 ** 2)
-            if (directory / f"{study}.sdrf.txt").exists():
-                print(json.dumps(direct_plus_audit(directory)), flush=True)
-            metadata = json.loads((directory / "study_metadata.json").read_text())
-            filelist_path = next((f["path"] for f in all_files(metadata) if f["path"].endswith("raw-data_filelist.json")), None)
-            if not filelist_path and '"value": "raw-data_filelist.json"' in json.dumps(metadata):
-                filelist_path = "raw-data_filelist.json"
-            if filelist_path:
-                result = record(f"{EBI}/files/{study}/{filelist_path}", directory / "raw-data_filelist.json", 16 * 1024 ** 2)
-                if options.raw and result["status"] in {"downloaded", "cached_verified"}:
-                    listing = json.loads((directory / "raw-data_filelist.json").read_text())
-                    files = {f["path"]: f for f in all_files(listing) if f["path"].lower().endswith(".idat")}
-                    planned_size = sum(int(f.get("size", 0)) for f in files.values())
-                    if planned_size > options.raw_budget_gib * 1024 ** 3:
-                        raise ValueError("DIRECT PLUS total IDAT size exceeds aggregate source budget")
-                    def download_idat(item: tuple[str, dict]) -> None:
-                        path, info = item
-                        safe_name = Path(path).name
-                        result = record(f"{EBI}/files/{study}/{path}", directory / "idat" / safe_name,
-                                        max(int(info.get("size", 0)) * 2, 256 * 1024 ** 2))
-                        if result["status"] not in {"downloaded", "cached_verified"}:
-                            raise RuntimeError("IDAT request failed; resumable manifest retained")
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, min(options.download_workers, 8))) as executor:
-                        list(executor.map(download_idat, files.items()))
+        elif study == STUDY:
+            try:
+                result = acquire_direct_plus(directory, record, raw=options.raw,
+                                             raw_budget=options.raw_budget_gib * 1024 ** 3,
+                                             workers=options.download_workers)
+            except Exception as error:
+                directory.mkdir(parents=True, exist_ok=True)
+                details = error.result if isinstance(error, IncompleteDirectPlusAcquisition) else {}
+                atomic_json(directory / "acquisition_status.json", {**details,
+                    "status": "failed_incomplete", "reason": str(error), "complete": False,
+                    "raw_requested": options.raw, "updated_utc": datetime.now(UTC).isoformat()})
+                raise
+            print(json.dumps(result), flush=True)
         else:
             raise ValueError(f"Unregistered source {study}")
 

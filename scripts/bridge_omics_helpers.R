@@ -37,6 +37,19 @@ freeze_reactome <- function(output) {
   jsonlite::write_json(annotation,file.path(output,"reactome_snapshot.json"),auto_unbox=TRUE,pretty=TRUE)
   list(sets=split(members$entrez_id,members$pathway_id),names=names_map,annotation=annotation)
 }
+archive_expression_state <- function(expression, sample_info, design, contrasts, fitted, fit, voom_object, path) {
+  if(!is.null(voom_object) && (!identical(dim(voom_object$weights),dim(expression)) ||
+     any(!is.finite(voom_object$weights)) || any(voom_object$weights<=0))) stop("Invalid voom precision weights for model archive")
+  value<-list(schema_version="nutriomics-expression-model-archive-v2",expression=expression,
+    sample_info=sample_info,design=design,contrasts=contrasts,voom_object=voom_object,
+    voom_weights=if(is.null(voom_object))NULL else voom_object$weights,
+    unmoderated_fit=fitted,moderated_contrast_fit=fit,
+    moderation_scope="All retained features in each fitted analysis; no independent blockwise eBayes",
+    limma_version=as.character(packageVersion("limma")))
+  temporary<-paste0(path,".writing");saveRDS(value,temporary,compress=FALSE)
+  if(!file.rename(temporary,path))stop("Model archive atomic completion failed")
+  invisible(path)
+}
 export_expression <- function(expression, sample_info, design, contrasts, accession, version, output,
                               entrez_ids, labels, context, input_files, qc_limit, voom_object=NULL) {
   version <- arg_value("--analysis-version", version)
@@ -117,6 +130,8 @@ export_expression <- function(expression, sample_info, design, contrasts, access
   quantile_qc<-as.data.frame(t(apply(expression,2,quantile,c(.01,.25,.5,.75,.99))))
   quantile_qc$sample_accession<-colnames(expression)
   write.table(quantile_qc,file.path(output,"sample_qc.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
+  model_path<-file.path(output,"reanalysis_inputs.rds")
+  archive_expression_state(expression,sample_info,design,contrasts,fitted,fit,voom_object,model_path)
   metadata<-list(accession=accession,analysis_version=version,run_utc=format(Sys.time(),tz="UTC",usetz=TRUE),
     script_path=normalizePath(script),script_sha256=file_sha(script),helper_path=normalizePath(file.path(dirname(script),"bridge_omics_helpers.R")),
     helper_sha256=file_sha(file.path(dirname(script),"bridge_omics_helpers.R")),
@@ -125,12 +140,13 @@ export_expression <- function(expression, sample_info, design, contrasts, access
     multiple_testing="BH within contrast retained; primary q_value BH across all gene-by-primary-contrast tests in this study; pathway family separate",
     input_manifest=lapply(input_files,function(p) list(path=normalizePath(p),sha256=file_sha(p),bytes=file.info(p)$size)),
     result_files=c("gene_effects.tsv.gz","pathway_effects.tsv.gz"),
-    auxiliary_files=c("sample_metadata.tsv","sample_qc.tsv","camera_sensitivity.tsv.gz","reactome_membership.tsv","reactome_snapshot.json"),
+    auxiliary_files=c("sample_metadata.tsv","sample_qc.tsv","camera_sensitivity.tsv.gz","reactome_membership.tsv","reactome_snapshot.json","reanalysis_inputs.rds"),
+    model_archive=list(file="reanalysis_inputs.rds",sha256=file_sha(model_path),schema_version="nutriomics-expression-model-archive-v2",
+      voom_precision_weights_preserved=!is.null(voom_object),unmoderated_and_moderated_fits_preserved=TRUE),
     normalization=context$normalization,qc_limit=qc_limit,interpretation_limit=context$interpretation,
     pathway_analysis="fgsea moderated-t rankings; CAMERA on one paired contrast per independent person at inter.gene.cor=0.01; varying period differences included as covariates with their model degrees of freedom",
     package_versions=as.list(vapply(intersect(c("limma","edgeR","affy","makecdfenv","hgu133plus2cdf","fgsea","org.Hs.eg.db","reactome.db","jsonlite"),loadedNamespaces()),function(p)as.character(packageVersion(p)),character(1))))
   jsonlite::write_json(metadata,file.path(output,"analysis_metadata.json"),auto_unbox=TRUE,pretty=TRUE)
-  saveRDS(list(expression=expression,sample_info=sample_info,design=design,contrasts=contrasts),file.path(output,"reanalysis_inputs.rds"),compress=FALSE)
   cat(toJSON(list(status="completed",accession=accession,genes=nrow(expression),people=metadata$independent_people,
     samples=nrow(sample_info),contrasts=ncol(contrasts),output=output),auto_unbox=TRUE),"\n")
 }

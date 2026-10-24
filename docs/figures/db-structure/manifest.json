@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "profile": "publication",
+  "figure_id": "schema-ko",
+  "generated_at": "2026-10-24T03:17:14.954883+00:00",
+  "base_dir": ".",
+  "script": {
+    "path": "make_korean_structure.py",
+    "bytes": 7721,
+    "sha256": "f33769c82ad47f2bc8d710ef62c11c77b465dbd0b926b01882fc011b1797a21c",
+    "media_type": "text/x-python"
+  },
+  "inputs": [
+    {
+      "path": "structure-source.json",
+      "bytes": 995,
+      "sha256": "35532e20ec8a62c1b261134b249b6a154fdc7857db72f0fd21969080a6bf47cb",
+      "media_type": "application/json"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "보고서용_DB_구조도.png",
+      "bytes": 379298,
+      "sha256": "1ed132c143b3d0ce19142cc4edd3709055e3cf70bd2faf7a37147ce1154b7922",
+      "media_type": "image/png",
+      "png_width": 3600,
+      "png_height": 2070
+    },
+    {
+      "path": "보고서용_DB_구조도.pdf",
+      "bytes": 55992,
+      "sha256": "96665fbff3602f057f31a19e9a467f034abb0b8cc258ca016b085a218adfe3a7",
+      "media_type": "application/pdf",
+      "pdf_check": "header_and_eof"
+    },
+    {
+      "path": "보고서용_DB_구조도.svg",
+      "bytes": 13330,
+      "sha256": "00a02904706b6da9cd063b53c7b55c320148b65598b7b3c1869789a84c887b6a",
+      "media_type": "image/svg+xml",
+      "svg_check": "parsed_no_active_content"
+    }
+  ],
+  "source_data": [
+    {
+      "path": "nodes.csv",
+      "bytes": 473,
+      "sha256": "1bad50d2c26ac9407fbf2497cdd6f2d86b050af8eb501970faccd43d240e8aab",
+      "media_type": "text/csv",
+      "table": {
+        "rows": 6,
+        "columns": 3,
+        "header": [
+          "id",
+          "label",
+          "storage"
+        ]
+      }
+    },
+    {
+      "path": "edges.csv",
+      "bytes": 705,
+      "sha256": "c94583f37d19b6bb88b7a466eb4e7b207c15ea9fa15b549a8254d37afb982119",
+      "media_type": "text/csv",
+      "table": {
+        "rows": 7,
+        "columns": 4,
+        "header": [
+          "source",
+          "target",
+          "meaning",
+          "scope"
+        ]
+      }
+    }
+  ],
+  "panel_claims": [],
+  "transformations": [],
+  "known_limitations": [],
+  "validation": {
+    "status": "structural_pass",
+    "scientific_validation": "not_assessed",
+    "commands": [
+      "python3 validate_figure_package.py --manifest docs/figures/db-structure/manifest.json --base docs/figures/db-structure --profile publication --figure-id schema-ko --script make_korean_structure.py --input structure-source.json --source-data nodes.csv --source-data edges.csv --figure '보고서용_DB_구조도.png' --figure '보고서용_DB_구조도.pdf' --figure '보고서용_DB_구조도.svg' --write-manifest"
+    ]
+  }
+}

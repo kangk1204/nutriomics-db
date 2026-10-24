@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { build } from 'esbuild';
+import Module from 'node:module';
+import path from 'node:path';
+
+const compiled=await build({entryPoints:['src/researchPresentation.ts'],bundle:true,write:false,platform:'node',format:'cjs'});
+const filename=path.resolve('src/__research_presentation.cjs'),instance=new Module(filename);
+instance.filename=filename;instance._compile(compiled.outputFiles[0].text,filename);
+const {exposurePanelPresentation,sourceClassificationPresentation}=instance.exports;
+const seed={id:'Exposure:source',kind:'diet',label:'Source',metadata:{}};
+assert.equal(exposurePanelPresentation(seed,null,false).state,'loading','normal pending network detail remains loading');
+assert.equal(exposurePanelPresentation(seed,seed,false).state,'unavailable');
+assert.equal(exposurePanelPresentation(seed,null,true).state,'not_embedded');
+const record={id:'source',study_id:'S03',amount:200};
+const permitted={...seed,metadata:{original_exposure:record}};
+assert.equal(exposurePanelPresentation(permitted,null,true).state,'available');
+for(const reason of ['exposure_source_redistribution_not_permitted','exposure_source_permission_unavailable','canonical_exposure_identifier_mismatch']){
+  const denied={...seed,metadata:{exposure_export_status:'withheld',exposure_withheld_reason:reason}};
+  const presentation=exposurePanelPresentation(permitted,denied,true);
+  assert.equal(presentation.state,'withheld','withheld detail wins over a seed record');
+  assert.ok(presentation.reason.length>0);
+  assert.equal(presentation.message.includes('조회 중'),false);
+}
+const fixture=JSON.parse(await readFile('scripts/fixtures/research-classification-shapes.json','utf8'));
+assert.equal(fixture.items.length,2);
+const before=JSON.stringify(fixture);
+const s05=fixture.items.find(item=>item.study_id==='S05'),s01=fixture.items.find(item=>item.study_id==='S01');
+const p05=sourceClassificationPresentation(s05),p01=sourceClassificationPresentation(s01);
+assert.equal(p05.title,'탐색 관찰 · 추출법–시점 교란');
+assert.equal(p05.primaryLabel,'식이 주근거 제외');
+assert.ok(p05.flags.includes('추출 방법과 방문 시점이 함께 변경됨'));
+assert.equal(p05.reason,s05.source_classification.reason);
+assert.equal(p01.attributionLabel,'보충제별 귀속 미확인');
+assert.ok(p01.flags.includes('RNA 분석과 임상 대상자 분모가 다름'));
+assert.ok(p01.boundary.includes('전문가 승인 상태와 별개'));
+assert.deepEqual(p05.references,s05.source_classification.source_references);
+assert.equal(sourceClassificationPresentation({study_id:'S05'}),null,'never infer a classification from study name');
+const excluded=sourceClassificationPresentation({...s05,primary_dietary_evidence_eligible:true},{primary_dietary_evidence_eligible:false});
+assert.equal(excluded.primaryLabel,'식이 주근거 제외','an explicit false is never promoted by another true');
+assert.equal(sourceClassificationPresentation(undefined,{study_source_classification:s05.source_classification}).title,p05.title);
+assert.equal(JSON.stringify(fixture),before,'presentation must not mutate source review/statistical records');
+console.log('Research presentation checks passed against two actual API-derived classification shapes; source checks are distinct from expert approval and scientific efficacy.');

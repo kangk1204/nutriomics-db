@@ -1,0 +1,27 @@
+{
+  "regeneration": "python make_korean_structure.py",
+  "input_sha256": "35532e20ec8a62c1b261134b249b6a154fdc7857db72f0fd21969080a6bf47cb",
+  "schema_sources": [
+    "node",
+    "measurement",
+    "science_record",
+    "study_effect",
+    "edge"
+  ],
+  "new_effect_estimates_generated": false,
+  "causal_pathways_inferred": false,
+  "source_tables": [
+    "nodes.csv",
+    "edges.csv"
+  ],
+  "font": "Malgun Gothic",
+  "python_version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib_version": "3.10.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "scientific_approval": false,
+  "limitations": [
+    "Descriptive data joins, not causal mechanisms",
+    "Not every food has a complete path",
+    "Scientific inclusion review remains pending"
+  ]
+}

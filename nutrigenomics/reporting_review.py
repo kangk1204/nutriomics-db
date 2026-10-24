@@ -118,13 +118,44 @@ def prepare_review_records(source: Any) -> list[dict]:
     return result
 
 
-def validate_review_decisions(source: Any, decisions: list[dict]) -> dict:
+def validate_review_dependencies(source: Any, dependencies: dict) -> dict:
+    """Bind review to captured sources as well as the canonical record payload."""
+    if dependencies.get("schema_version") != "nutriomics-review-dependencies-v1":
+        raise ValueError("Unknown review dependency schema")
+    expected = {(r["record_kind"], r["record_id"]): r for r in prepare_review_records(source)}
+    bound = {}
+    for row in dependencies.get("records", []):
+        key = (row["record_kind"], str(row["record_id"]))
+        if key not in expected or key in bound or row["record_sha256"] != expected[key]["record_sha256"]:
+            raise ValueError("Unknown, duplicate or stale review dependency identity")
+        proofs = row.get("dependencies", {}).get("source_proofs")
+        if not isinstance(proofs, list) or not proofs:
+            raise ValueError("Review dependency requires captured source proofs")
+        for proof in proofs:
+            if (not proof.get("url", "").startswith("https://") or not proof.get("locator")
+                    or not re.fullmatch(r"[0-9a-f]{64}", proof.get("sha256", ""))):
+                raise ValueError("Invalid captured review source proof")
+        for related in row["dependencies"].get("related_records", []):
+            related_key = (related.get("record_kind"), str(related.get("record_id")))
+            if related_key not in expected or related.get("record_sha256") != expected[related_key]["record_sha256"]:
+                raise ValueError("Review dependency refers to a changed related record")
+        value = digest({"record_sha256": row["record_sha256"], "dependencies": row["dependencies"]})
+        if value != row.get("source_dependency_sha256"):
+            raise ValueError("Review dependency digest mismatch")
+        bound[key] = row
+    if set(bound) != set(expected):
+        raise ValueError("Review dependency coverage is incomplete")
+    return bound
+
+
+def validate_review_decisions(source: Any, decisions: list[dict], *, dependencies: dict | None = None) -> dict:
     """Validate identity and explicit human attestation, not reviewer identity proof.
 
     A human declaration is auditable but cannot authenticate who used an offline
     file. The final author remains responsible for checking this declaration.
     """
     expected = {(r["record_kind"], r["record_id"]): r for r in prepare_review_records(source)}
+    bound = validate_review_dependencies(source, dependencies) if dependencies is not None else None
     seen, counts = set(), Counter()
     for row in decisions:
         key = (row.get("record_kind"), str(row.get("record_id")))
@@ -139,6 +170,8 @@ def validate_review_decisions(source: Any, decisions: list[dict]) -> dict:
         if decision not in DECISIONS:
             raise ValueError("Unknown review decision")
         if decision in HUMAN_DECISIONS:
+            if bound is not None and row.get("source_dependency_sha256") != bound[key]["source_dependency_sha256"]:
+                raise ValueError("Review refers to changed or unbound source dependencies")
             reviewer = row.get("reviewer")
             if row.get("reviewer_type") != "human" or row.get("reviewer_attestation") is not True:
                 raise ValueError("Only explicitly attested human decisions can be recorded")
@@ -162,16 +195,24 @@ def validate_review_decisions(source: Any, decisions: list[dict]) -> dict:
     return {"expected_records": len(expected), "submitted_records": len(seen),
             "decisions": dict(counts), "expert_approved": counts["accept"],
             "review_complete": counts["pending"] == 0,
-            "identity_authentication": "offline_human_self_declaration_not_independent_verification"}
+            "identity_authentication": "offline_human_self_declaration_not_independent_verification",
+            "source_dependencies_bound": bound is not None}
 
 
 def build_review_package(source: Any, output: str | Path, sources: Any = None,
-                         decisions: list[dict] | None = None) -> dict:
+                         decisions: list[dict] | None = None, dependencies: dict | None = None) -> dict:
     """Prepare every final-release record afresh; sources is optional audit evidence."""
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     rows = prepare_review_records(source)
-    review_summary = validate_review_decisions(source, decisions or [])
+    review_summary = validate_review_decisions(source, decisions or [], dependencies=dependencies)
+    if dependencies is not None:
+        bound = validate_review_dependencies(source, dependencies)
+        for row in rows:
+            dependency = bound[row["record_kind"], row["record_id"]]
+            row["source_dependency_sha256"] = dependency["source_dependency_sha256"]
+            row["review_dependencies"] = dependency["dependencies"]
+        _json(output / "review-dependencies.json", dependencies)
     if decisions:
         saved = {(r["record_kind"], str(r["record_id"])): r for r in decisions}
         for row in rows:
@@ -196,6 +237,8 @@ def build_review_package(source: Any, output: str | Path, sources: Any = None,
         "expert_review_status": "decisions_recorded" if review_summary["review_complete"] else "pending",
         "primary_paper_fact_candidates": len(facts),
         "sealed_query_answers_accessed": False,
+        "source_dependencies_sha256": digest(dependencies) if dependencies is not None else None,
+        "source_dependency_record_set_sha256": digest(dependencies["records"]) if dependencies is not None else None,
         "review_identity_limit": "Offline human self-declaration; not authenticated independent review"}
     if sources is not None:
         manifest["source_audit_references"] = sources
@@ -258,13 +301,13 @@ def _review_html(rows: list[dict]) -> str:
     return '''<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>NutriOmics 과학적 검수</title>
 <style>body{margin:32px auto;padding:0 24px;max-width:1280px;font:15px/1.6 system-ui;color:#172b3a;background:#f5f7f8}h1{font-size:28px}main{display:grid;grid-template-columns:340px 1fr;gap:24px}article{background:white;padding:24px;border:1px solid #ccd5da}select,textarea,input,button{font:inherit;padding:9px;border:1px solid #acbcc7;border-radius:3px}#records{width:100%;height:650px}pre{font-size:12px;white-space:pre-wrap;max-height:360px;overflow:auto}textarea{display:block;width:95%;height:65px;margin:8px 0}button{cursor:pointer;background:#174761;color:white;margin:6px 6px 6px 0}label{display:block}a{color:#075778}@media(max-width:760px){main{display:block}#records{height:200px}}</style>
 <h1>원문 기반 과학적 검수</h1><p>각 기록의 원문 위치·비교 조건·단위를 확인해 판정합니다. 자동 점검은 과학적 승인이 아닙니다. 수정된 내용은 새 release에서 새 해시로 다시 검수합니다. 이 파일은 검수자의 자기 선언을 저장하며 신원을 인증하지 않습니다.</p><p id="progress"></p>
-<label>검수자 <input id="reviewer" autocomplete="name"></label><label><input type="checkbox" id="attest"> 본인이 원문을 확인한 사람 검수자임을 확인합니다.</label><button id="download">판정 JSON 저장</button><label>저장한 판정 JSON 불러오기 <input type="file" id="resume" accept="application/json"></label><p id="saveStatus">같은 기록 집합의 판정은 이 브라우저에 자동 저장됩니다. JSON 파일도 별도로 보관하세요.</p><main><select id="records" aria-label="검수 기록"></select><article><h2 id="heading"></h2><p id="sourceType"></p><p id="sources"></p><pre id="payload"></pre><label>원문 위치<input id="location" style="width:95%" placeholder="논문 표·절·페이지 또는 보충 시료표"></label><label>판정 이유<textarea id="reason"></textarea></label><label>수정 제안 (수정 판정 시 필수)<textarea id="correction"></textarea></label><div id="buttons"></div></article></main>
+<label>검수자 <input id="reviewer" autocomplete="name"></label><label><input type="checkbox" id="attest"> 본인이 원문을 확인한 사람 검수자임을 확인합니다.</label><button id="download">판정 JSON 저장</button><label>저장한 판정 JSON 불러오기 <input type="file" id="resume" accept="application/json"></label><p id="saveStatus">같은 기록 집합의 판정은 이 브라우저에 자동 저장됩니다. JSON 파일도 별도로 보관하세요.</p><main><select id="records" aria-label="검수 기록"></select><article><h2 id="heading"></h2><p id="sourceType"></p><p id="sources"></p><details><summary>현재 기록·원문·분석 의존자료와 해시</summary><pre id="dependencyProofs"></pre></details><pre id="payload"></pre><label>원문 위치<input id="location" style="width:95%" placeholder="논문 표·절·페이지 또는 보충 시료표"></label><label>판정 이유<textarea id="reason"></textarea></label><label>수정 제안 (수정 판정 시 필수)<textarea id="correction"></textarea></label><div id="buttons"></div></article></main>
 <script>const rows=__DATA__, $=id=>document.getElementById(id), storageKey='nutriomics-review-__SET__';let current=0;const labels={pending:'대기',accept:'확인·수록',correct:'수정 필요',exclude:'제외',unconfirmed:'미확인'};
 const fields=['decision','reviewer','reviewer_type','reviewer_attestation','reviewed_at','primary_paper_location','reason','proposed_correction'];
-function savedRows(){return rows.map(r=>Object.fromEntries(['record_kind','record_id','record_sha256',...fields].map(k=>[k,r[k]])))}
+function savedRows(){return rows.map(r=>Object.fromEntries(['record_kind','record_id','record_sha256','source_dependency_sha256',...fields].map(k=>[k,r[k]])))}
 function save(){try{localStorage.setItem(storageKey,JSON.stringify(savedRows()));$('saveStatus').textContent='이 기록 집합의 판정을 브라우저에 자동 저장했습니다. JSON 파일도 별도로 보관하세요.'}catch(e){$('saveStatus').textContent='브라우저 자동 저장을 사용할 수 없습니다. 판정 JSON을 저장하세요.'}}
-function applySaved(saved){if(!Array.isArray(saved))throw Error('판정 배열이 아닙니다.');const seen=new Set(),known=new Map(rows.map(r=>[r.record_kind+'::'+r.record_id,r]));for(const s of saved){const key=s.record_kind+'::'+s.record_id,original=known.get(key);if(!original||seen.has(key)||original.record_sha256!==s.record_sha256)throw Error('알 수 없는 기록, 중복 또는 변경된 SHA256입니다.');seen.add(key);if(!Object.hasOwn(labels,s.decision))throw Error('판정 종류를 확인하세요.');if(s.decision!=='pending'){if(s.reviewer_type!=='human'||s.reviewer_attestation!==true||!s.reviewer||/\\b(ai|chatgpt|codex|claude|gemini|assistant|automated)\\b/i.test(s.reviewer)||!s.primary_paper_location||!s.reason||!s.reviewed_at||!Number.isFinite(Date.parse(s.reviewed_at)))throw Error('사람 검수자·원문 위치·이유·날짜 확인이 필요합니다.');if(s.decision==='correct'&&!s.proposed_correction)throw Error('수정 제안이 없습니다.');}else if(s.reviewer_attestation===true)throw Error('대기 기록에 승인 선언이 있습니다.');}for(const s of saved){const original=known.get(s.record_kind+'::'+s.record_id);for(const k of fields)original[k]=s[k]??null}const reviewer=saved.find(s=>s.reviewer);if(reviewer)$('reviewer').value=reviewer.reviewer;}
-function render(){const selected=current;$('records').replaceChildren(...rows.map((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=labels[r.decision]+' · '+r.record_kind+' · '+r.record_id;return o}));$('records').value=selected;const r=rows[current];$('heading').textContent=r.record_kind+' / '+r.record_id;$('sourceType').textContent=r.source_reference_type==='repository_only_primary_publication_unconfirmed'?'저장소 링크만 확인됨: 원 논문 연결·원문 검수 필요':r.source_reference_type==='source_reference_missing'?'원문 출처 미확인':'논문 링크 후보: 원문 내용 검수 필요';$('payload').textContent=JSON.stringify(r.record,null,2);$('location').value=r.primary_paper_location||'';$('reason').value=r.reason||'';$('correction').value=r.proposed_correction||'';$('sources').replaceChildren(...r.source_references.filter(s=>/^https?:\\/\\//.test(s.url)).map(s=>{const a=document.createElement('a');a.href=s.url;a.target='_blank';a.rel='noopener';a.textContent=(s.label||'원문')+' ';return a}));$('progress').textContent=rows.filter(r=>r.decision!=='pending').length+' / '+rows.length+' 판정 기록';}
+function applySaved(saved){if(!Array.isArray(saved))throw Error('판정 배열이 아닙니다.');const seen=new Set(),known=new Map(rows.map(r=>[r.record_kind+'::'+r.record_id,r]));for(const s of saved){const key=s.record_kind+'::'+s.record_id,original=known.get(key);if(!original||seen.has(key)||original.record_sha256!==s.record_sha256)throw Error('알 수 없는 기록, 중복 또는 변경된 SHA256입니다.');seen.add(key);if(!Object.hasOwn(labels,s.decision))throw Error('판정 종류를 확인하세요.');if(s.decision!=='pending'){if(original.source_dependency_sha256&&s.source_dependency_sha256!==original.source_dependency_sha256)throw Error('원문·분석 의존자료가 변경되어 재검수가 필요합니다.');if(s.reviewer_type!=='human'||s.reviewer_attestation!==true||!s.reviewer||/\\b(ai|chatgpt|codex|claude|gemini|assistant|automated)\\b/i.test(s.reviewer)||!s.primary_paper_location||!s.reason||!s.reviewed_at||!Number.isFinite(Date.parse(s.reviewed_at)))throw Error('사람 검수자·원문 위치·이유·날짜 확인이 필요합니다.');if(s.decision==='correct'&&!s.proposed_correction)throw Error('수정 제안이 없습니다.');}else if(s.reviewer_attestation===true)throw Error('대기 기록에 승인 선언이 있습니다.');}for(const s of saved){const original=known.get(s.record_kind+'::'+s.record_id);for(const k of fields)original[k]=s[k]??null}const reviewer=saved.find(s=>s.reviewer);if(reviewer)$('reviewer').value=reviewer.reviewer;}
+function render(){const selected=current;$('records').replaceChildren(...rows.map((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=labels[r.decision]+' · '+r.record_kind+' · '+r.record_id;return o}));$('records').value=selected;const r=rows[current];$('heading').textContent=r.record_kind+' / '+r.record_id;$('sourceType').textContent=r.source_reference_type==='repository_only_primary_publication_unconfirmed'?'저장소 링크만 확인됨: 원 논문 연결·원문 검수 필요':r.source_reference_type==='source_reference_missing'?'원문 출처 미확인':'논문 링크 후보: 원문 내용 검수 필요';$('dependencyProofs').textContent=JSON.stringify({record_sha256:r.record_sha256,source_dependency_sha256:r.source_dependency_sha256||null,dependencies:r.review_dependencies||null},null,2);$('payload').textContent=JSON.stringify(r.record,null,2);$('location').value=r.primary_paper_location||'';$('reason').value=r.reason||'';$('correction').value=r.proposed_correction||'';$('sources').replaceChildren(...r.source_references.filter(s=>/^https?:\\/\\//.test(s.url)).map(s=>{const a=document.createElement('a');a.href=s.url;a.target='_blank';a.rel='noopener';a.textContent=(s.label||'원문')+' ';return a}));$('progress').textContent=rows.filter(r=>r.decision!=='pending').length+' / '+rows.length+' 판정 기록';}
 function decide(d){const who=$('reviewer').value.trim(),loc=$('location').value.trim(),reason=$('reason').value.trim();if(d!=='pending'&&(!who||!loc||!reason||!$('attest').checked)){alert('사람 검수자 확인, 원문 위치, 이유가 필요합니다.');return}if(d==='correct'&&!$('correction').value.trim()){alert('수정 제안을 입력하세요.');return}Object.assign(rows[current],{decision:d,reviewer:d==='pending'?null:who,reviewer_type:d==='pending'?null:'human',reviewer_attestation:d!=='pending',reviewed_at:d==='pending'?null:new Date().toISOString(),primary_paper_location:loc||null,reason:reason||null,proposed_correction:$('correction').value.trim()||null});save();render()}
 for(const [d,label]of Object.entries(labels)){const b=document.createElement('button');b.textContent=label;b.onclick=()=>decide(d);$('buttons').append(b)}$('records').onchange=e=>{current=Number(e.target.value);render()};$('download').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(rows,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='scientific-review-decisions.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};$('resume').onchange=async e=>{try{applySaved(JSON.parse(await e.target.files[0].text()));save();render()}catch(error){alert('불러오기 실패: '+error.message)}finally{e.target.value=''}};try{const saved=localStorage.getItem(storageKey);if(saved)applySaved(JSON.parse(saved))}catch(error){$('saveStatus').textContent='자동 저장을 불러오지 못했습니다: '+error.message}render()</script></html>'''.replace("__DATA__", data).replace("__SET__", record_set)
 

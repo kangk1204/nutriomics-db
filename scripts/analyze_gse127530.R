@@ -1,3 +1,7 @@
+# Archive-only instrumentation: preprocessing, contrasts and FDR are unchanged.
+archive_script_argument <- sub("^--file=", "", grep("^--file=", commandArgs(), value=TRUE)[1L])
+archive_helper_path <- file.path(dirname(archive_script_argument), "expression_archive_helpers.R")
+source(archive_helper_path)
 suppressPackageStartupMessages({
   library(edgeR)
   library(limma)
@@ -110,8 +114,14 @@ fit <- lmFit(
   block = sample_info$subject_id,
   correlation = block_correlation$consensus.correlation
 )
+unmoderated_fit <- fit
 fit <- contrasts.fit(fit, contrast_matrix)
 fit <- eBayes(fit, robust = TRUE)
+model_archive <- save_expression_model_archive(
+  voom_fit$E, sample_info, design, contrast_matrix, unmoderated_fit, fit,
+  file.path(output_root, "reanalysis_inputs.rds"), voom_object=voom_fit,
+  block=sample_info$subject_id, correlation=block_correlation$consensus.correlation)
+
 
 write_gzip_tsv <- function(data, path) {
   connection <- gzfile(path, open = "wt")
@@ -230,6 +240,9 @@ metadata <- list(
   environment_lock_path = normalizePath(file.path(data_root,"..","toolchain","r-environment-linux-64.lock.txt")),
   environment_lock_sha256 = strsplit(system2("sha256sum",shQuote(file.path(data_root,"..","toolchain","r-environment-linux-64.lock.txt")),stdout=TRUE)," +")[[1]][1],
   result_files = list("gene_effects.tsv.gz","pathway_effects.tsv.gz"),
+  auxiliary_files = list("sample_metadata.tsv", "sample_qc.tsv", "reanalysis_inputs.rds"),
+  model_archive = model_archive,
+  helper_path = normalizePath(archive_helper_path), helper_sha256 = expression_archive_sha256(archive_helper_path),
   fgsea_random_seed = 20261001L, fgsea_workers = 1L,
   accession = "GSE127530",
   analysis_version = arg_value("--analysis-version", "gse127530-limma-voom-v1"),

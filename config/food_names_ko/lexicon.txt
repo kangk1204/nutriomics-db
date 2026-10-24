@@ -1,0 +1,294 @@
+# Search/display vocabulary authored for NutriOmics. Not an official translated
+# USDA release and not a food identity or scientific-review crosswalk.
+rice=쌀; chicken=닭고기; turkey=칠면조고기; beef=소고기; pork=돼지고기; meat=고기; poultry=가금육; fish=생선; shellfish=패류; seafood=해산물
+egg|eggs=달걀; milk=우유; cheese=치즈; butter=버터; cream=크림; yogurt=요구르트; bread=빵; sandwich|sandwiches=샌드위치; salad|salads=샐러드
+potato|potatoes=감자; sweet potato=고구마; tomato|tomatoes=토마토; carrot|carrots|carrorts=당근; broccoli=브로콜리; cabbage=양배추; napa cabbage=배추; lettuce=상추류
+spinach=시금치; beans|bean=콩; pea|peas=완두콩; corn=옥수수; wheat=밀; barley=보리; oat|oats=귀리; rye=호밀; buckwheat=메밀; millet=기장
+soybean|soybeans=대두; soy=대두; soy-based|soy-base=대두 기반; soy milk=두유; almond milk=아몬드 음료; oat milk=귀리 음료; coconut milk=코코넛 밀크
+juice=주스; drink|drinks|beverage|beverages=음료; fruit|fruits=과일; vegetable|vegetables=채소; mushroom|mushrooms=버섯; nuts|nut=견과; seeds|seed=씨앗
+apple|apples=사과; banana|bananas=바나나; orange|oranges=오렌지; mandarin=만다린 감귤; tangerine=귤; pear|pears=배; peach|peaches=복숭아
+strawberry|strawberries=딸기; blueberry|blueberries|bluberries=블루베리; raspberry|raspberries=라즈베리; blackberry|blackberries=블랙베리; grape|grapes=포도
+pineapple=파인애플; apricot=살구; mango|mangoes=망고; papaya=파파야; melon|melons=멜론; watermelon=수박; cantaloupe=캔털루프 멜론
+lemon=레몬; lime=라임; grapefruit=자몽; coconut=코코넛; avocado=아보카도; kiwi|kiwifruit=키위; plum=자두; prune|prunes=말린 자두
+fig|figs=무화과; raisins|raisin=건포도; cranberry|cranberries=크랜베리; pomegranate=석류; lychee=리치; kumquat=금귤; persimmon=감; dates=대추야자
+cucumber=오이; zucchini=주키니 호박; pumpkin=늙은호박; squash=스쿼시 호박류; eggplant=가지; onion|onions=양파; garlic=마늘; leek|leeks=리크
+scallion=파; green onion=파; shallots=샬롯; ginger=생강; celery=셀러리; asparagus=아스파라거스; cauliflower=콜리플라워; kale=케일
+broccoflower=브로콜리·콜리플라워 교잡종; arugula=루콜라; artichoke|artichokes=아티초크; beet|beets=비트; radish|radishes=무; turnip|turnips|turrnip=순무
+rutabaga=스웨덴순무; parsnips=파스닙; watercress=물냉이; collards=콜라드 잎채소; chard=근대; okra=오크라; lotus=연근; burdock=우엉
+bamboo shoots=죽순; sprouts=새싹; bean sprouts=콩나물류; mung=녹두; lentil|lentils=렌틸콩; chickpeas|garbanzo=병아리콩; blackeyed|blackeye=동부콩
+pinto=핀토콩; kidney beans=강낭콩; navy beans=흰강낭콩; great northern beans=그레이트 노던콩; cannellini=카넬리니콩; lima beans=리마콩
+green beans|string beans=깍지콩; snowpeas=완두 꼬투리; soy sauce=간장; tofu=두부; natto=낫토; miso=일본식 된장
+almond|almonds=아몬드; walnut|walnuts=호두; peanut|peanuts=땅콩; pecans|pecan=피칸; cashew|cashews=캐슈너트; pistachio=피스타치오
+hazelnut|hazelnuts|filberts=헤이즐넛; brazilnuts|brazil nuts=브라질너트; macadamia=마카다미아; pine nuts=잣; chestnut|chestnuts|chesnut=밤
+sesame=참깨; flaxseed|flax=아마씨; chia=치아씨; sunflower=해바라기; poppy=양귀비씨; pumpkin seeds=호박씨; pepitas=껍질 벗긴 호박씨
+olive oil=올리브유; sesame oil=참기름; soybean oil=대두유; corn oil=옥수수유; canola=카놀라; safflower=홍화; cottonseed=목화씨
+olive|olives=올리브; oil=기름; fat=지방; margarine=마가린; lard=라드; shortening=쇼트닝; drippings=육즙·고기에서 나온 기름
+raw=생것; cooked=조리한 것; uncooked=조리 전; boiled=삶은 것; steamed=찐 것; fried=튀긴 것; stir fry|stir-fry=볶음; grilled=그릴에 구운 것
+broiled=직화로 구운 것; baked=오븐에 구운 것; roasted=볶거나 구운 것; toasted=토스트한 것; sauteed=기름에 볶은 것; stewed=끓여 익힌 것
+braised=약한 불에 졸인 것; pan-fried=팬에 지진 것; pan-broiled=팬에 구운 것; smoked=훈제한 것; cured=염지·숙성한 것; pickled=절인 것
+frozen=냉동; fresh=신선한 것; canned=통조림; dried|dry=말린 것; powdered=가루 형태; powder=분말; liquid|fluid=액상; refrigerated=냉장
+with=포함; without=제외; and=및; or=또는; and/or=및/또는; added=첨가; no=없음; not=아님; excluding=제외; including|includes=포함
+no added fat=지방 무첨가; fat added=지방 첨가; no added sugar=설탕 무첨가; no sugar added=설탕 무첨가; no salt added=소금 무첨가
+no added salt=소금 무첨가; without added salt=소금 무첨가; salt added=소금 첨가; with salt=소금 첨가; with skin=껍질 포함; without skin=껍질 제외
+skin eaten=껍질 섭취; skin not eaten=껍질 미섭취; meat only=살코기만; meat and skin=살코기·껍질; skinless=껍질 제거; boneless=뼈 제거; bone-in=뼈 포함
+unsalted=무염; salted=가염; unsweetened=무가당; sweetened=가당; pre-sweetened=미리 가당한 것; nonfat|fat-free|fat free=무지방
+lowfat|low-fat|low fat=저지방; reduced fat|reduced-fat=지방 함량 감소; whole milk=전지우유; skim milk=탈지우유; skim=탈지
+reduced sodium|lower sodium=나트륨 함량 감소; low sodium=저나트륨; sodium=나트륨; sugar-free|sugar free=무당; gluten-free|gluten free=글루텐 무첨가
+gluten=글루텐; lactose=유당; protein=단백질; fiber=식이섬유; vitamin=비타민; calcium=칼슘; iron=철; energy=에너지; calorie=열량
+plain=플레인; flavored=향미 첨가; regular=일반형; low=낮은; high=높은; lower=더 낮은; higher=더 높은; reduced=감소; free=무함유
+white=흰색; brown=갈색; black=검정; red=빨강; green=녹색; yellow=노랑; purple=보라; pink=분홍; blue=파랑; dark=진한; light=라이트
+whole=전체; mixed=혼합; mix|mixture|mixtures=혼합물; only=만; other=기타; type|types=종류; form=형태; nfs=상세 미상; ns=미상
+NS as to=다음 항목 미상:; NFS=상세 미상; NS=미상; as ingredient=재료로 사용; as eaten=섭취 상태; ready-to-eat=바로 먹는 제품
+ready-to-heat=데워 먹는 제품; ready-to-feed=바로 수유하는 제품; ready-to-drink=바로 마시는 제품; ready-to-serve=바로 제공하는 제품
+reconstituted|reconsitituted=물 등에 타서 복원한 것; prepared=조제·준비한 것; unprepared=준비 전; pre-cooked|precooked=미리 조리한 것
+made from=다음 재료로 만듦:; made with=다음 재료로 만듦:; made=만든 것; from=원료:; as=기준:; to=대상:; on=사용한 빵·받침:; in=담긴 형태:
+at=장소:; for=대상:; of=구성:; a=; the=; than=보다; based=기반; use|used=사용; eaten=섭취; food|foods=식품; method=방법
+restaurant=음식점; fast food=패스트푸드; fast=패스트; home=가정식; homemade=가정에서 만든 것; recipe|recipes=레시피; school=학교급식; cafeteria=구내식당
+commercial=시판; store=매장; purchased=구입한 것; brand=브랜드; prepackaged|pre-packaged|packaged=포장 제품; bakery=제과점; deli=델리
+infant=영아용; baby=이유식·영아용; toddler=유아용; formula=조제유; stage=단계; nutritional|nutrition=영양; beverage mix=음료 혼합분말
+breast=가슴살; thigh=허벅지살; drumstick=아랫다리; leg|legs=다리살; wing|wings=날개; skin|skins=껍질; meatless=고기 미포함
+lean=살코기; ground=분쇄한 것; steak=스테이크; sirloin=설로인; tenderloin=안심; loin=등심 부위; ribeye=립아이; brisket=브리스킷
+t-bone=T본; porterhouse=포터하우스; ribs=갈비; rib=갈비; shortribs=짧은 갈비; chuck=목·어깨 부위; flank=옆구리살; belly=뱃살
+bone|bones=뼈; liver|livers=간; kidney=신장; heart=심장; tongue=혀; tripe=위; brains=뇌; feet=발; tail=꼬리; neck=목
+lamb=새끼 양고기; mutton=양고기; goat=염소; veal=송아지고기; venison|deer=사슴고기; duck=오리고기; goose=거위고기; quail=메추리
+ham=햄; bacon=베이컨; sausage|sausages=소시지; frankfurter|frankfurters=프랑크푸르트 소시지; hot dog|hot dogs=핫도그; corned beef=콘비프
+salami=살라미; bologna=볼로냐 소시지; pastrami=파스트라미; mortadella=모르타델라; chorizo=초리소; bratwurst=브라트부르스트
+shrimp=새우; crab|crabs=게; lobster=바닷가재; crayfish=민물가재; clam|clams=조개; oysters|oyster=굴; mussels=홍합; scallops=가리비
+abalone=전복; squid=오징어; octopus=문어; calamari=오징어; tuna=참치; salmon=연어; mackerel=고등어; sardine|sardines=정어리
+anchovy|anchovies=멸치; cod|codfish=대구류; pollock=명태류; carp=잉어; herring=청어; eel=장어; trout=송어; swordfish=황새치
+halibut=할리벗; tilapia=틸라피아; catfish=메기; flounder=가자미류; haddock=해덕; perch=퍼치; whiting=화이팅 어류; mullet=숭어
+bass=배스·농어류; snapper=스내퍼 어류; pompano=폼파노 어류; shark=상어; croaker=민어과 어류; pike=강꼬치고기; sockeye=홍연어; yellowfin=황다랑어
+seaweed=해조류; sushi=초밥; sashimi=회; tempura=튀김; ramen=라면; noodles|noodle=면; pasta=파스타; macaroni=마카로니; spaghetti=스파게티
+rice noodles=쌀국수; wheat noodles=밀국수; fried rice=볶음밥; rice cake=쌀떡; rice cakes=쌀떡; rice pudding=쌀 푸딩; brown rice=현미; white rice=백미
+wild rice=야생미; glutinous rice=찹쌀; congee=죽; oatmeal=오트밀; grits=그리츠; cornmeal=옥수수 가루; flour=가루; starch=전분
+semolina=세몰리나; bulgur=불구르; quinoa=퀴노아; sorghum=수수; amaranth=아마란스; spelt=스펠트밀; einkorn=아인콘밀; farro=파로밀
+cereal=시리얼; granola=그래놀라; crackers|cracker=크래커; pretzel|pretzels=프레첼; muffin=머핀; bagel=베이글; bun=번 빵; roll|rolls=롤
+toast=토스트; tortilla=토르티야; pita=피타빵; croissant=크루아상; pancake|pancakes=팬케이크; waffle=와플; doughnut=도넛
+cake=케이크; cookie|cookies=쿠키; pie=파이; cupcake=컵케이크; brownie=브라우니; pastry=페이스트리; dessert=디저트; candy=사탕·캔디류
+chocolate=초콜릿; cocoa=코코아; vanilla=바닐라; caramel=캐러멜; marshmallow|marshmallows=마시멜로; cinnamon=계피; honey=꿀; sugar|sugars=설탕
+jelly=젤리·과일젤리; jam=잼; syrup=시럽; topping=토핑; icing|frosting=아이싱; filling|filled=소·충전물; bar=바 형태; coated|coating=코팅
+cheddar=체더; parmesan=파르메산; mozzarella=모차렐라; feta=페타; ricotta=리코타; cottage=코티지; swiss=스위스; brie=브리
+gouda=고다; edam=에담; camembert=카망베르; gruyere=그뤼예르; provolone=프로볼로네; monterey=몬터레이; colby=콜비; jack=잭
+muenster=뮌스터; paneer=파니르; cotija=코티하; roquefort=로크포르; fontina=폰티나; limburger=림부르거; cream cheese=크림치즈
+whipped cream=휘핑크림; sour cream=사워크림; ice cream=아이스크림; frozen yogurt=프로즌 요구르트; greek yogurt=그릭 요구르트; milkshake=밀크셰이크
+milk shake|milk shakes=밀크셰이크; creamer=크리머; buttermilk=버터밀크; evaporated milk=무가당 농축유; condensed milk=연유; whey=유청
+coffee=커피; tea=차; water=물; soda=소다; soft drink|soft drinks=탄산음료; beer=맥주; wine=와인; alcoholic=알코올 함유
+nonalcoholic=무알코올; alcohol=알코올; liquor=증류주; cocktail=칵테일; cola=콜라; decaffeinated=카페인 제거; caffeine=카페인
+latte=라테; mocha=모카; espresso=에스프레소; cappuccino=카푸치노; macchiato=마키아토; brewed=우려낸 것; iced=얼음 첨가; hot=뜨거운
+juice drink=과즙 음료; fruit drink=과일 음료; apple cider=애플사이더; cider=사이더; nectar=넥타 음료; smoothie=스무디; shake=셰이크
+lemonade=레모네이드; sports|sport=스포츠; energy drink=에너지 음료; carbonated=탄산 첨가; non-carbonated=무탄산; sparkling=발포성
+tap water=수돗물; bottled water=병입수; mineral water=광천수; enhanced water=강화 음료수; bottled=병입; concentrate=농축액; extract=추출물
+soup|soups=수프; stew|stews=스튜; sauce|sauces=소스; tomato-based=토마토 기반; gravy=그레이비; dressing=드레싱; broth=육수
+mayonnaise=마요네즈; mayonnaise-type=마요네즈형; ketchup=케첩; mustard=머스터드; vinegar=식초; relish=렐리시; salsa=살사
+salt=소금; pepper=후추·고추류; peppers=고추류; bell pepper|bell peppers=파프리카; jalapeno|jalapenos=할라페뇨; chili=칠리
+garlic powder=마늘 가루; onion powder=양파 가루; seasoning=양념; spices|spice=향신료; herbs|herbal=허브; basil=바질; parsley=파슬리
+mint=민트; cilantro=고수; dill=딜; chives=차이브; wasabi=와사비; horseradish=서양고추냉이; chutney=처트니; pesto=페스토
+omelet=오믈렛; scrambled=스크램블; poached=수란 방식; yolk=노른자; whites=흰자; fried egg=달걀 프라이
+pizza=피자; hamburger|hamburgers=햄버거; cheeseburger=치즈버거; burger=버거; burrito=부리토; taco=타코; nachos=나초; quesadilla=케사디야
+enchilada=엔칠라다; empanada=엠파나다; tamale=타말레; tostada=토스타다; taquito=타키토; fajita=파히타; chimichanga=치미창가
+ravioli=라비올리; lasagna=라자냐; tortellini=토르텔리니; manicotti=마니코티; cannelloni=카넬로니; gnocchi=뇨키; couscous=쿠스쿠스
+chow mein=차우미엔 볶음면; lo mein=로미엔 볶음면; chop suey=촙수이; egg foo yung=에그푸영; moo goo gai pan=무구가이판; moo shu=무슈
+kung pao=궁바오; general tso=제너럴 초; teriyaki=데리야키; curry=커리; pad thai=팟타이; pho=퍼 쌀국수; miso soup=미소된장국
+bibimbap=비빔밥; dukboki|tteokbokki=떡볶이; kimchi=김치; bulgogi=불고기; dumpling|dumplings=만두; wonton=완탕; bao=바오 만두
+meatballs|meatball=미트볼; meatloaf=미트로프; patty|patties|pattie=패티; nuggets=너겟; tenders=텐더; fillet=필레; chops|chop=찹 부위
+french fries|fries=감자튀김; potato chips=감자칩; chips|chip=칩; popcorn=팝콘; hash browns|hash brown=해시브라운; mashed potatoes=으깬 감자
+coleslaw=코울슬로; sauerkraut=사우어크라우트; hummus=후무스; guacamole=과카몰레; falafel=팔라펠; ratatouille=라타투이
+salmon roe=연어알; caviar=캐비아; sea=바다; atlantic=대서양산; pacific=태평양산; alaskan=알래스카산; farm raised=양식; caught=어획한 것
+species=종; source|sources=원료; moisture=수분; content=함량; components=구성 성분; ingredients|ingredient=재료; solids|solid=고형분
+soft=부드러운; hard=단단한; thick=두꺼운; thin=얇은; creamy=크리미; crunchy=바삭한; crispy=바삭한; chewy=쫄깃한
+small=작은; medium=중간; large=큰; double=더블; extra=추가; full=전체; part=부분; half=절반; quarter=4분의 1; whole grain=통곡물
+multigrain=잡곡; bran=겨; germ=배아; unroasted=볶지 않은 것; unbleached=표백하지 않은 것; bleached=표백한 것; enriched=영양 강화
+unenriched=영양 비강화; fortified=영양 강화; pasteurized=살균; organic=유기농; drained=물기 제거; rinsed=헹군 것; peeled=껍질 벗긴 것
+peel=껍질; root=뿌리; leaf|leaves=잎; leafy=잎채소; dark-green=짙은 녹색; dark-=짙은; stem=줄기; bulb=구근
+ground beef=다진 소고기; trimmed=손질한 것; separable=분리 가능한; chopped=다진 것; sliced|slice=얇게 썬 것; diced=깍둑썰기
+grated=갈아낸 것; shredded=가늘게 썬 것; crushed=으깬 것; mashed=으깬 것; crumbled|crumbles=잘게 부순 것; cut=자른 것
+skin removed=껍질 제거; removed=제거; seedless=씨 없는; seeded=씨 있는; dehusked=겉껍질 제거; destemmed=줄기 제거
+low moisture=저수분; part-skim=부분 탈지; full-fat=전지방; defatted=탈지; non-dairy|nondairy=비유제품; meatless-beef=식물성 소고기 대체품
+meat-filled=고기 소 포함; poultry-filled=가금육 소 포함; spinach-filled=시금치 소 포함; cheese-filled=치즈 소 포함; fruit-filled=과일 소 포함
+cream-filled=크림 소 포함; custard-filled=커스터드 소 포함; chocolate-covered=초콜릿으로 덮은 것; chocolate-coated=초콜릿 코팅; non-chocolate=초콜릿 미포함
+covered=덮은 것; breaded|breading=빵가루 튀김옷; batter=반죽·튀김옷; stuffing|stuffed=속 채움; crust|crusts=크러스트; dough=반죽
+thick crust=두꺼운 도우; thin crust=얇은 도우; sour=신맛; sweet=단맛; lightly=살짝; slightly=약간; salted butter=가염버터
+high protein=고단백; low calorie=저열량; diet=다이어트형; replacement=대체; substitute=대체품; meal=식사; breakfast=아침식사; lunch=점심식사
+dinner=저녁식사; snack|snacks=간식; portion=분량; serving=제공량; entree=주요리; bowl=볼; pack=팩; cup=컵; box=상자
+American=미국식; English=잉글리시; French=프랑스식; Italian=이탈리아식; Greek|Grecian=그리스식; Chinese=중국식; Japanese=일본식
+Korean=한국식; Asian=아시아식; Thai=태국식; Mexican=멕시코식; Spanish=스페인식; Puerto Rican=푸에르토리코식; Cuban=쿠바식
+Indian=인도식; Turkish=튀르키예식; German=독일식; Russian=러시아식; Armenian=아르메니아식; Hawaiian=하와이식; Canadian=캐나다식
+Swedish=스웨덴식; Ethiopian=에티오피아식; Syrian=시리아식; Peruvian=페루식; Hungarian=헝가리식; Polish=폴란드식; Latino=라틴아메리카식
+Irish=아일랜드식; szechuan|szechuan-style=쓰촨식; hunan=후난식; creole=크리올식; korean style=한국식; french toast=프렌치토스트
+glazed=당의 코팅; candied=설탕에 절인 것; frosted=아이싱한 것; frosted flakes=프로스티드 플레이크; toasted oats=토스트한 귀리
+unheated=가열하지 않은 것; heated=가열한 것; oven=오븐; microwave=전자레인지; pan=팬; bake=굽기; fry=튀기기
+sweetener=감미료; sweeteners=감미료; molasses=당밀; maple=단풍나무; agave=아가베; saccharin=사카린; aspartame=아스파탐
+sucralose=수크랄로스; stevia=스테비아; monk fruit=나한과; glucose=포도당; electrolyte=전해질; solution=용액; granulated=과립형
+confectioner's=분당형; cane=사탕수수; salt substitute=소금 대체품; iodized=요오드 첨가; sodium chloride=염화나트륨
+vodka=보드카; whiskey=위스키; rum=럼; gin=진; tequila=테킬라; brandy=브랜디; liqueur=리큐르; champagne=샴페인
+red wine=레드와인; white wine=화이트와인; rose=로제; ale=에일; malt=맥아; malted=맥아 첨가; beer cheese=맥주 치즈
+custard=커스터드; pudding=푸딩; mousse=무스; gelatin|gelatins=젤라틴; sorbet=소르베; sherbet=셔벗; gelato=젤라토
+sundae=선데; popsicle=아이스바; fudgesicle=초콜릿 아이스바; creamsicle=크림 아이스바; ice=얼음; ices=아이스 디저트
+cheesecake=치즈케이크; tiramisu=티라미수; flan=플란; shortbread=쇼트브레드; brioche=브리오슈; focaccia=포카치아
+baguette=바게트; flatbread=납작빵; crispbread=크리스프브레드; pumpernickel=펌퍼니클; chal­lah=할라; challah=할라
+croutons=크루통; breadsticks=브레드스틱; saltine=솔틴; graham=그레이엄; matzo=마초; biscotti=비스코티; crepe=크레프
+eclair=에클레어; shortcake=쇼트케이크; sponge=스펀지; pound cake=파운드케이크; angel food cake=엔젤푸드케이크; torte=토르테
+strudel=슈트루델; danish=데니시; rugelach=루겔라흐; churros=추로스; scone=스콘; beignet=베녜; macaroons|macaroon=마카룬
+meringue|meringues=머랭; toffee=토피; nougat=누가; taffy=태피; licorice=감초 캔디; gummy=구미; lollipop=막대사탕
+brittle=브리틀; cotton candy=솜사탕; fudge=퍼지; butterscotch=버터스카치; sprinkles=스프링클; trifle=트라이플
+kolhrabi=콜라비; kohlrabi=콜라비; jicama=히카마; cassava|yuca=카사바; taro=토란; plantain|plantains=플랜틴 바나나; breadfruit=빵나무 열매
+passion fruit=패션프루트; guava=구아바; tamarind=타마린드; starfruit=스타프루트; soursop=사워솝; pawpaw=포포 열매
+acai=아사이; dragon fruit=용과; alfalfa=알팔파; aloe vera=알로에 베라; fennel=회향; jute=황마 잎; dandelion=민들레
+escarole=에스카롤; endive=엔다이브; chicory=치커리; radicchio=라디키오; lambsquarter=명아주; salsify=서양쇠채; cress=크레스
+bok choy=청경채; savoy cabbage=사보이 양배추; romaine=로메인; iceberg=아이스버그; cos=코스; baby arugula=어린 루콜라
+button mushroom=양송이버섯; beech mushroom=느티만가닥버섯; enoki=팽이버섯; shiitake=표고버섯; maitake=잎새버섯
+lion's mane=노루궁뎅이버섯; crimini=크리미니 버섯; portabella=포토벨로 버섯; pioppini=포플러 버섯; wood ear=목이버섯
+asadero=아사데로; fresco=프레스코; seco=세코; anejo=아녜호; aged=숙성; oaxaca=오아하카; queso=케소; farmer's=파머스
+chewing gum=껌; gum=껌; cough drops=기침용 캔디; cough=기침; drops=작은 방울형
+slaw=슬로 샐러드; cobb=코브; caesar=시저; ranch=랜치; catalina=카탈리나; vinaigrette=비네그레트; thousand island=사우전드 아일랜드
+barbecue|BBQ=바비큐; alfredo=알프레도; hollandaise=홀랜다이즈; hoisin=호이신; worcestershire=우스터; tartar=타르타르; tzatziki=차지키
+marinara=마리나라; marinad­e|marinade=마리네이드; brussels sprouts=방울양배추; brussels=브뤼셀; snow peas=완두 꼬투리
+style=방식; instant=인스턴트; dip=딥소스; greens=잎채소; cone=콘; pepperoni=페퍼로니; wild=야생종; flavors|flavor=맛·향
+biscuit=비스킷; cooking=조리; summer=여름형; winter=겨울형; casserole=캐서롤; sub=서브 샌드위치; garden=가든; loaf=로프
+classic=클래식; pre-lightened=미리 우유·크리머를 첨가한 것; roast=로스트; cracked=깨뜨린 것; cafe=카페; citrus=감귤류
+luncheon=런천미트; spread=스프레드; rotisserie=로티세리; blend|blends|blended=블렌드; multiple=여러 종류; vegetarian=채식형; vegan=비건
+topped=토핑한 것; wrap=랩; quick=퀵; turnover=턴오버; pocket=포켓; round=라운드 부위; king=킹; scalloped=스캘럽 방식
+tots=토츠; paste=페이스트; animal=동물성; grain=곡물; stick|sticks=스틱; pot=냄비; any=종류 무관; shell|shells=껍데기
+serve=제공; puffs|puff=퍼프; vienna=비엔나; curd=커드; dairy=유제품; shelf stable|shelf-stable=상온 보관형; souffle=수플레
+creamed=크림 조리; wafer=웨이퍼; whipped=휘핑한 것; spray=스프레이; slim=슬림; shish kabob=시시케밥; kabob=케밥
+choice=초이스 등급; major=주요; trail mix=트레일 믹스; cherry|cherries=체리; cornbread=콘브레드; strips|strip=길쭉하게 자른 것
+dulce de leche=둘세데레체; dulce=둘세; gentle=젠틀; applesauce=사과 퓌레; split=쪼갠 것; ripe=익은 것; refried=리프라이드
+hash=해시; tart=타르트; flakes=플레이크; squares=사각형; fricassee=프리카세; club=클럽; yeast=효모; woven=엮은 형태
+gordita=고르디타; pickles|pickle=피클; popped=팝핑한 것; restructured=재성형; ruffled=물결 모양; salisbury=솔즈베리
+seasoned=양념한 것; stroganoff=스트로가노프; select=셀렉트 등급; top=윗부분; rings=링; ball|balls=볼; milkfat=유지방
+slider=슬라이더; cobbler=코블러; berry|berries=베리류; cornish=코니시; game=야생동물; hen=암탉; imitation=모조품
+crisp=크리스프; carton=팩; freshly=갓; squeezed=착즙한 것; gumbo=검보; scooped=떠낸 것; long=긴; evaporated=농축한 것
+muscle=근육; bell=벨; pupusa|pupusas=푸푸사; atole=아톨레; jerky=저키; chipped=잘게 자른 것; short=짧은; biryani=비리야니
+marble=마블; special=스페셜; melted=녹인 것; cactus=선인장; punch=펀치; quiche=키슈; base=베이스; croquette=크로켓
+back=등 부위; chipotle=치폴레; crumb=빵 부스러기; quick-bread=퀵브레드; mush=죽 형태; heavy=진한; griddle=철판
+grade=등급; pearled=도정한 것; all-purpose=다목적; fritter=프리터; margarita=마르가리타; tonic=토닉; tender=부드러운
+paella=파에야; pig's|pig|hog=돼지; buttered=버터 첨가; sloppy joe=슬로피조; snow=스노; sopa=소파; veggie=채소형
+sticker=스티커; adobo=아도보; bits=조각; overripe=과숙; underripe=덜 익은 것; head=머리; bison|buffalo=들소
+bitter=쓴맛; native=토종; sprouted=발아; swirl=소용돌이 모양; date=대추야자; link|links=링크형; raab=라브
+tub=통; hocks=족 관절 부위; calzone=칼초네; mature=성숙한 것; less=적은; crunch=크런치; process|processed=가공
+product=제품; soup-based=수프 기반; cordon bleu=코르동블뢰; reported separately=별도 보고; parmigiana=파르미자나
+mole=몰레; fryers|broiler|broilers=육계; bengal gram=병아리콩; gram=그램; chiles rellenos=칠레스레예노스
+chitterlings=돼지 곱창; chow fun=차우펀; creme=크렘; masa harina=마사가루; pone=폰; kernel|kernels=알갱이
+crustaceans=갑각류; lump=덩어리; daiquiri=다이키리; dosa=도사; dove=비둘기; eggnog=에그노그; lemon-butter=레몬버터
+fine=고운; glutinous=찰; funnel=퍼널; fizz=피즈; cracklings=크래클링; guisada=기사다; honeydew=허니듀 멜론
+horchata=오르차타; additional=추가; spit-up=역류 관련; premature=미숙아용; lau lau=라우라우; assorted=모둠
+mahi mahi=만새기; manhattan=맨해튼; martini=마티니; original=오리지널; halves=반쪽; old fashioned=올드패션드
+pimiento=피멘토; pulp=과육; pina colada=피냐콜라다; air-popped=열풍 팝핑; kettle=케틀; movie theater=영화관
+porcupine balls=포큐파인 미트볼; tapioca=타피오카; pounder=파운더; rabbit=토끼; paper=페이퍼; sangria=상그리아
+mild=순한; seven=일곱; all=전체; slush=슬러시; containing=함유; sopaipilla=소파이피야; chowder=차우더; caldo=칼도
+soupy=국물이 많은; flesh=살 부분; enhanced=강화한 것; ambrosia=앰브로지아; anisette=아니제트; antipasto=안티파스토
+fuji=후지; gala=갈라; granny smith=그래니스미스; honeycrisp=허니크리스프; red delicious=레드딜리셔스
+arepa dominicana=도미니카 아레파; arepa=아레파; armadillo=아르마딜로; avena=귀리; hass=하스; wheels=바퀴 모양
+melts=멜트; bacalaitos=바칼라이토스; side=사이드; baklava=바클라바; barfi|burfi=바르피; basbousa=바스부사
+franks=프랑크 소시지; bear=곰; beaver=비버; burgundy=부르고뉴; wellington=웰링턴; spaetzle=슈페츨레
+corned=염지한 것; cow=소; lip-on=립온; oxtails=소꼬리; eye=아이 부위; bone-in=뼈 포함; country=컨트리
+cube=큐브; big=빅; blood=피; bloody mary=블러디메리; alexander=알렉산더; chappatti=차파티; roti=로티
+naan=난; paratha=파라타; puri=푸리; bruschetta=브루스케타; groats=거칠게 도정한 곡물; gingerbread=진저브레드
+velvet=벨벳; flourless=가루 미사용; upside down=업사이드다운; tres leches=트레스레체스; cotton=솜; pieces=조각
+leather=레더형; caribou=순록; casabe=카사베; one=하나; salty=짭짤한; ceviche=세비체; channa saag=차나사그
+fondue=퐁뒤; pressurized=가압; can=캔; brick=벽돌형; port du salut=포르살뤼; singles=개별 슬라이스
+maraschino=마라스키노; au gratin|gratin=그라탱; kiev=키이우식; cacciatore=카치아토레; divan=디반; tetrazzini=테트라치니
+additives=첨가물; chilaquiles=칠라킬레스; chiliburger=칠리버거; various=다양한; christophine=차요테; casino=카지노
+clementine=클레멘타인; serenata=세레나타; starchy=전분성; lebkuchen=레프쿠헨; pfeffernusse=페퍼누스; pizzelle=피첼레
+fortune=포춘; gingersnaps=진저스냅; ladyfinger=레이디핑거; sandwich-type=샌드위치형; dog=핫도그
+block=블록; brulee=브륄레; swimming=스위밍; namasu=나마스; currants=커런트; dal=달; dirty=더티
+holes=홀; peking=베이징식; edamame=풋콩; benedict=베네딕트; deviled=데빌드; escargot=에스카르고
+fava=잠두; firni=피르니; item=항목; timbale=팀발; coarse=거친; semi-coarse=중간 굵기; flowers|blossoms|blossom=꽃
+sesbania=세스바니아; lily=백합; fonio=포니오; freezer=냉동용; pop=팝; frescavena=프레스카베나; frito=프리토
+frog=개구리; noncitrus=비감귤류; fufu=푸푸; fuzzy navel=퍼지네이블; gefilte=게필테; shot=샷
+ghee=기; clarified=정제한 것; gimlet=김렛; gizzard|gizzards=모래주머니; glug=글뢰그; sope=소페
+greyhound=그레이하운드; groundhog=마멋; gyro=기로스; prosciutto=프로슈토; seltzer=셀처; haupia=하우피아
+hayacas=아야카스; maws=위; hominy=호미니; huevos rancheros=우에보스란체로스; hush puppy=허시퍼피
+idli=이들리; industrial=산업용; diarrhea=설사 관련; amino acids=아미노산; sensitivity=민감성
+injera=인제라; jagerbomb=예거밤; jai=자이; monk's=사찰식; jambalaya=잠발라야; johnnycake=조니케이크
+kamikaze=가미카제; kefir=케피어; khorasan=호라산밀; kibby=키베; knish=크니시; knockwurst=크나크부르스트
+ladoo=라두; layer=층; lefse=레프세; wilted=숨 죽인 것; licuado|batido=리쿠아도; calves=송아지
+pate=파테; liverwurst=리버부르스트; lomi=로미; mai tai=마이타이; ataulfo=아타울포; tommy=토미
+marmalade=마멀레이드; potted=포트형; protein-based=단백질 기반; melba=멜바; michelada=미첼라다
+condensed=농축한 것; mimosa=미모사; julep=줄렙; mirepoix=미르푸아; mock=모조형; mojito=모히토
+moose=무스사슴; moscow mule=모스크바뮬; beech=느티만가닥; button=양송이; nectarine|nectarines=천도복숭아
+rolled=압착한 것; steel cut=스틸컷; virgin=버진; tapenade=타프나드; manzanilla=만사니야; pearl=진주형
+opossum=주머니쥐; navels=네이블; ostrich=타조; rockefeller=록펠러식; pakora=파코라; palak=팔락
+palm hearts=야자순; palm=야자; hearts=속대; pannetone=파네토네; papad=파파드; mainly=주로
+mineral=무기질; anjou=앙주; bartlett=바틀릿; wax=왁스; poblano=포블라노; serrano=세라노
+pheasant=꿩; kosher=코셔; key=키; pierogi=피에로기; blanket=블랭킷; poke=포케; popover=팝오버
+rinds|rind=껍질; carnitas=카르니타스; center=가운데 부위; ears=귀; dishes|dish=요리; shaped=모양
+russet=러셋; pasteles=파스텔레스; raccoon=라쿤; frijoles=프리홀레스; reuben=루벤; rhubarb=루바브
+pilaf=필라프; rob roy=롭로이; bolillo=볼리요; hoagie=호기; submarine=서브마린; rusty nail=러스티네일
+verde=베르데; pico de gallo=피코데가요; sambar=삼바르; samosa=사모사; bay=베이; patagonian=파타고니아산
+scotch=스카치; scrapple=스크래플; screwdriver=스크루드라이버; chilean=칠레산; seabreeze=시브리즈
+thermidor=테르미도르; seven-layer=일곱 겹; combination=조합; shepherd's=셰퍼드; shirley temple=셜리템플
+scampi=스캄피; simple=심플; singapore sling=싱가포르슬링; sloe=슬로; wedding=웨딩
+new england=뉴잉글랜드; bisque=비스크; borscht=보르시; bouillabaisse=부야베스; drop=드롭
+gazpacho=가스파초; minestrone=미네스트로네; mulligatawany=멀리가토니; pepperpot=페퍼포트; pozole=포솔레
+fideo=피데오; aguada=아과다; pollo=포요; res=레스; deep=깊게; spanakopita=스파나코피타
+spoonbread=스푼브레드; zero=제로; acorn=도토리형; butternut=버터넛; tubes|tube=튜브형
+squirrel=다람쥐; tartare=타르타르; stir=젓기; sun-dried=햇볕에 말린 것; california=캘리포니아식
+chrysanthemum=국화; sweetbreads=흉선·췌장; tabbouleh=타불레; tahini=타히니; bubble=버블
+chamomile=캐모마일; hibiscus=히비스커스; oolong=우롱차; kombucha=콤부차; sunrise=선라이즈
+textured=조직화한 것; thuringer=튀링거; beginning=시작 단계; next=다음 단계; pediatric=소아용
+tom collins=톰콜린스; tomatillos=토마티요; puree=퓌레; roma=로마; liquids=액체; cool=쿨
+nacho=나초; ahi=아히; turtle=거북; upma=우프마; vada=바다; marsala=마르살라; scallopini=스칼로피니
+vermicelli=버미셀리; tap=수돗물; welsh rarebit=웰시레어빗; cooler=쿨러; spritzer=스프리처
+yat ga mein=얏가미엔; parfait=파르페; yokan=양갱; zwieback=츠비바크
+bean sprouts=콩나물류; split peas=쪼갠 완두콩; navy=네이비콩; great northern=그레이트 노던콩; snap=스냅; romaine lettuce=로메인 상추
+napa=배추형; savoy=사보이; small curd=작은 커드; large curd=큰 커드; scrambled eggs=스크램블에그; egg salad=달걀 샐러드
+chicken breast|chicken, breast=닭가슴살; turkey breast|turkey, breast=칠면조 가슴살; whole egg|egg, whole=전란; egg white=달걀흰자
+rice, white=백미; rice, brown=현미; rice, black=흑미; oat bran=귀리겨; wheat bran=밀기울; wheat germ=밀배아
+milk, whole=전지우유; milk, nonfat=무지방우유; milk, low fat|milk, lowfat=저지방우유; milk, fat free=무지방우유
+lactose free=유당 제거; peanut butter=땅콩버터; almond butter=아몬드버터; cooking spray=조리용 기름 스프레이
+not reconstituted=복원하지 않은 것; not eaten=미섭취; no dressing=드레싱 미포함; no sauce=소스 미포함; no noodles=면 미포함
+with added vegetables=채소 첨가; with added vitamin=비타민 첨가:; shelf=선반; stable=안정형; cheese-=치즈-; vegetable-=채소-; cereal-=곡물-; spinach-=시금치-
+de=데; con=콘; la=라; boston=보스턴식; leche=레체; non=비; par=부분; cape=케이프; tan=황갈색
+table=테이블; general=제너럴; island=아일랜드; forest=포리스트; angel=엔젤; pound=파운드; tres=트레스; carioca=카리오카; flor de mayo=플로르데마요; biscayne=비스케인식
+rice, brown and wild=현미·야생미 혼합; rice, white, cooked=흰쌀밥; rice, brown, cooked=현미밥; rice milk=쌀 음료
+milk, evaporated=무가당 농축유; milk, condensed, sweetened=가당 연유; cocoa butter=코코아버터; peanut butter and jelly=땅콩버터·과일젤리
+white bread=흰빵; wheat bread=밀빵; whole wheat=통밀; whole-wheat=통밀; banana bread=바나나빵; bread crumbs=빵가루
+McDouble=맥더블; McDonalds=맥도날드; Pocky=포키; Spam=스팸; Enfamil=엔파밀; Similac=시밀락; Gerber=거버
+egg, white=달걀흰자; egg, yolk=달걀노른자; egg yolk=달걀노른자; yogurt, Greek=그릭 요구르트; mung bean sprouts=숙주
+beans, kidney=강낭콩; dark red kidney=진한 붉은 강낭콩; light red kidney=연한 붉은 강낭콩; red kidney=붉은 강낭콩
+blackeye pea=동부콩; blackeyed peas=동부콩; blue cheese=블루치즈; blue or roquefort cheese=블루 또는 로크포르 치즈
+hot sauce=매운 소스; hot thai sauce=매운 태국식 소스; hot pepper|hot peppers|peppers, hot=매운 고추
+hot chocolate=핫초콜릿; hot cocoa=따뜻한 코코아; light meat=밝은색 살; dark meat=진한색 살; dry mix=건조 혼합분말
+half and half=하프앤하프; milk, dry=분유; cream, light=라이트 크림; cream, heavy=헤비 크림; light red=연한 빨강; light tan=연한 황갈색
+soybeans, green=풋콩; rice, glutinous=찹쌀; rice paper=라이스페이퍼; potato, sweet=고구마; canola oil=카놀라유
+green tea|tea, green=녹차; black tea|tea, black=홍차; cheddar cheese=체더치즈; chicken nuggets=치킨너겟; sunflower seeds=해바라기씨
+rice, fried=볶음밥; cheese, cheddar=체더치즈; cabbage, napa=배추; cabbage, bok choy=청경채; cabbage, Chinese=중국배추류
+Kellogg's=켈로그; Quaker=퀘이커; General Mills=제너럴밀스; Good Start=굿스타트; Nature Valley=네이처밸리
+Nutri-Grain=뉴트리그레인; Fritos=프리토스; Doritos=도리토스; Ritz=리츠; Nesquik=네스퀵; Nutella=누텔라
+Whopper=와퍼; KIND=카인드; Kashi=카시; Triscuit=트리스킷; Cheetos=치토스; Cheez-It=치즈잇; Goldfish=골드피시
+Mountain Dew=마운틴듀; Red Bull=레드불; Rockstar=록스타; Gatorade=게토레이; Powerade=파워에이드; Monster=몬스터
+Boost=부스트; Ensure=엔슈어; Carnation=카네이션; Clif=클리프; Powerbar=파워바; Snickers=스니커즈
+Glucerna=글루서나; Isopure=아이소퓨어; Herbalife=허벌라이프; Enfagrow=엔파그로; Nido=니도; Kinder=킨더; Pediasure=페디아슈어
+Nutramigen=뉴트라미젠; Pregestimil=프리제스티밀; Alimentum=알리멘텀; Gentlease=젠틀리스; ProSobee=프로소비; Isomil=아이소밀
+Atkins=앳킨스; Chex=첵스; Teddy Grahams=테디그레이엄; South Beach Living=사우스비치리빙; Go and Grow=고앤그로
+
+# Preserve unknown source qualifiers as readable Korean phrases.
+NS as to fat=지방 정보 미상
+NS as to fat type=지방 종류 미상
+NS as to form=형태 미상
+NS as to part=부위 미상
+NS as to type=종류 미상
+NS as to cooking method=조리법 미상
+NS as to type of meat=고기 종류 미상
+NS as to fat eaten=지방 섭취 여부 미상
+flavors other than fruit=과일 이외 향미
+NS as to type of milk=우유 종류 미상
+NS as to major flour=주원료 곡물가루 미상
+NS as to skin eaten=껍질 섭취 여부 미상
+NS as to part and cooking method=부위·조리법 미상
+NS as to icing=아이싱 여부 미상
+NS as to type of crust=크러스트 종류 미상
+NS as to filling=속재료 미상
+NS as to brewed or instant=추출·인스턴트 여부 미상
+NS as to fresh=신선 여부 미상
+NS as to type of milk or flavor=우유 종류·맛 미상
+NS as to fried or grilled=튀김·그릴 조리 여부 미상
+NS as to raisins=건포도 포함 여부 미상
+NS as to light=라이트 제품 여부 미상
+NS as to cut=절단 부위 미상
+NS as to fat content=지방 함량 미상
+NS as to fried or baked=튀김·오븐 조리 여부 미상
+NS as to fresh or frozen=신선·냉동 여부 미상
+NS as to type of bran=겨 종류 미상
+NS as to vegetable or animal=식물성·동물성 미상

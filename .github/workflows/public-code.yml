@@ -4,7 +4,11 @@ permissions:
   contents: read
 jobs:
   portable-python:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -12,11 +16,12 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install uv==0.8.22
       - run: uv sync --frozen --extra dev
+      - run: uv run python scripts/verify_repository_files.py
       - run: uv run pytest -q --junitxml=portable-tests.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: portable-python-results
+          name: portable-python-results-${{ matrix.os }}
           path: portable-tests.xml
   explorer:
     runs-on: ubuntu-latest

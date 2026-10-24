@@ -1,0 +1,27 @@
+{
+  "schema": "nutriomics-report-structure-scope-v1",
+  "recorded_date": "2026-10-24",
+  "data_release_id": "nutriomics-composed-candidate-20261022-v3",
+  "review_collection_id": "nutriomics-submission-draft-20261024-v1",
+  "counts": {
+    "food_records_with_composition": 5794,
+    "composition_records": 368208,
+    "registered_study_groups": 9,
+    "reanalyzed_study_groups": 8,
+    "analysis_runs": 14,
+    "quantitative_result_rows": 6254477,
+    "predicted_regulatory_links": 1073409,
+    "clinical_source_summary_records": 44,
+    "core_records_awaiting_review": 263,
+    "expert_approved_records": 0,
+    "verified_independent_participants": null,
+    "contrasts": 53
+  },
+  "source_metadata_sha256": "a27c2bac448ba21aa64b53d58fbd258c6d15447a762b6ab178e2b15e3f441f18",
+  "scientific_approval": false,
+  "source_data": [
+    "nodes.csv",
+    "edges.csv"
+  ],
+  "interpretation": "Traceable data joins; not causal pathways or complete coverage for every food"
+}

@@ -2,7 +2,7 @@ import type { ApplicabilityCondition, ScientificContrast, ScientificEvidence } f
 
 export function contrastConditions(exposure?: ScientificEvidence, contrast?: ScientificContrast): ApplicabilityCondition[] {
   if (!exposure) return [];
-  const inputDimensions = new Set(['food_formulation', 'dose']);
+  const inputDimensions = new Set(['food_formulation', 'dose', 'gene_identity']);
   return [
     ...exposure.applicability.filter(item => inputDimensions.has(item.dimension)),
     ...(contrast?.applicability || exposure.applicability.filter(item => !inputDimensions.has(item.dimension))),
