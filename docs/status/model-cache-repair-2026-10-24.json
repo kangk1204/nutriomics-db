@@ -1,0 +1,58 @@
+{
+  "observed_at": "2026-10-24T03:46:00.652825+00:00",
+  "scope": "resource_admission_and_cached_model_resolution",
+  "cause": "Fixed BERT tokenizer blocked on Hugging Face template listing TLS handshake after connectivity loss",
+  "trace_components": [
+    "huggingface_hub",
+    "list_repo_templates",
+    "do_handshake",
+    "KeyboardInterrupt"
+  ],
+  "owned_child_interrupted": true,
+  "protected_files": 42,
+  "protected_bytes": 24463852709,
+  "changed_protected_files": [],
+  "interruption_receipt_sha256": "d9e23b79b645db6076abac8d7e7594f3e8628b3b630f4a01ce3c211a23448b8c",
+  "scientific_source_manifest_sha256": "fdf372bc72352bfc5e498afa4202ebe9de7d047d45ca916042679ccd359747f4",
+  "configuration_sha256": "4b91d028612b98bf272004a4273987b946b0385a3122fefc323f97465c005051",
+  "operational_files": {
+    "desktop-policy.json": "8b310abe0255977685a08f3cf40fa88db28b47295f67928a7334707eca485188",
+    "supervisor.py": "b8c229611a9258d288d767a552a29a8f648bf61d22b6abfc1fb638248f095d8c",
+    "v8_resource_layer.py": "8dda13b882cd775e4b86068dab3718ec168847713f589734f957cfcc21ebe6dd"
+  },
+  "previous_configuration_sha256": "07106631b98cdf961e01c0112700a30c633eaa2d4f07d3e81e9f201add4097f8",
+  "cache_probe": {
+    "network_access_disabled": true,
+    "loaded": true,
+    "seconds": 2.3906282839889172,
+    "base_weights_sha256": "e837888c5184965c44f2e21de674b171ec4eab2e2c469e3efd418535864198ea",
+    "tokenizer_vocab_sha256": "78b67e809947d48f1460996f15d6bfc23838dcea3c9c72d5029def09d19a3957",
+    "missing_cache_refused": true,
+    "revision": "e1354b7a3a09615f6aba48dfad4b7a613eef7062"
+  },
+  "library_policy": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "missing_cache": "fail"
+  },
+  "tests": {
+    "local_passed": 83,
+    "linux_passed": 55,
+    "duplicate_test_groups_not_summed": true
+  },
+  "same_100_paper_evaluation": "pending",
+  "additional_generative_model_calls": 0,
+  "default_engine": "heuristic-v1",
+  "resumed_learning": {
+    "observed_at": "2026-10-24T03:47:55.675227+00:00",
+    "stage": "train-id",
+    "gpu": "2921 MiB, 97 %",
+    "external_network_connections": 0,
+    "upstream_ner_epochs_with_optimizer_update": 2,
+    "training_loss": [
+      0.3908868963332427,
+      0.09399618473323669
+    ],
+    "scope": "Nested upstream NER inside ID validation; not relation accuracy"
+  }
+}

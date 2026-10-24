@@ -1,0 +1,16 @@
+# Install torch separately from https://download.pytorch.org/whl/cu128 for Blackwell.
+torch==2.10.0
+transformers==4.57.1
+huggingface-hub==0.36.0
+tokenizers==0.22.1
+safetensors==0.6.2
+numpy==2.2.6
+scipy==1.15.3
+scikit-learn==1.6.1
+psutil==7.0.0
+rapidfuzz==3.14.1
+requests==2.32.5
+sklearn-crfsuite==0.5.0
+python-crfsuite==0.9.11
+pytest==8.4.2
+ijson==3.6.0

@@ -1,0 +1,3 @@
+# Optional official Sign in with ChatGPT local companion.
+PyJWT[crypto]==2.10.1
+cryptography==46.0.7

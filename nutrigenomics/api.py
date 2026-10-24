@@ -914,7 +914,7 @@ def download_analysis_auxiliary_file(
     return analysis_auxiliary_response(accession, analysis_version, filename, session, DATA_DIR)
 
 
-@app.delete("/api/v1/meals/{meal_id}", status_code=204)
+@app.delete("/api/v1/meals/{meal_id}", status_code=204, response_class=Response, response_model=None)
 def delete_meal(meal_id: int, session: Session = Depends(get_session)) -> None:
     meal = session.get(MealRecord, meal_id)
     if meal is None:

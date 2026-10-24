@@ -54,7 +54,7 @@ function LociView({items,onSelect}:{items:Locus[];onSelect:(id:string)=>void}) {
     const chart=echarts.init(host.current);
     const rows=items.filter(r=>r.chromosome===active);
     const minimum=Math.min(...rows.map(r=>r.start));
-    chart.setOption({aria:{enabled:true,description:`${active} 조절 영역 원본 좌표. 관계의 인과성이나 유의성을 뜻하지 않습니다.`},
+    chart.setOption({aria:{enabled:true,description:`${active} 조절 영역 원본 좌표. 원본 좌표와 식별자 정보를 표시합니다.`},
       animation:false,grid:{left:155,right:35,top:18,bottom:50},tooltip:{trigger:'axis'},
       xAxis:{type:'value',min:minimum,axisLabel:{formatter:(v:number)=>v.toLocaleString('en-US')}},
       yAxis:{type:'category',inverse:true,data:rows.map(r=>`${r.subject_id.split(':').pop()} · ${r.tissue||'미확인'}`)},
@@ -66,14 +66,14 @@ function LociView({items,onSelect}:{items:Locus[];onSelect:(id:string)=>void}) {
     const observer=new ResizeObserver(()=>chart.resize());observer.observe(host.current);
     return()=>{observer.disconnect();chart.dispose()};
   },[items,active,onSelect]);
-  if (!items.length) return <div className="wb-empty"><MapPin/><h3>표시할 수 있는 검증된 좌표가 없습니다</h3><p>식별자 연관 근거는 비교 표에서 확인할 수 있습니다. 기준이 미확인인 좌표는 중첩 분석에 사용하지 않습니다.</p></div>;
+  if (!items.length) return <div className="wb-empty"><MapPin/><h3>표시할 수 있는 검증된 좌표가 없습니다</h3><p>좌표 기준과 식별자 연결은 비교 표에서 확인할 수 있습니다.</p></div>;
   return <><div className="wb-inline"><label>원본 기준 GRCh38/hg38 · <select value={active} onChange={e=>setChr(e.target.value)}>{chromosomes.map(c=><option key={c}>{c}</option>)}</select></label><span>{items.length}개 위치 · 원본 좌표 관례는 상세 참조</span></div><div ref={host} className="wb-locus-chart"/><div className="wb-table-scroll"><table className="wb-small-table"><thead><tr><th>영역</th><th>원본 위치</th><th>근거</th><th>조직·세포</th></tr></thead><tbody>{items.map(r=><tr key={r.evidence_id} onClick={()=>onSelect(r.evidence_id)}><td><button>{r.subject_id}</button></td><td>{r.chromosome}:{r.start.toLocaleString()}–{r.end.toLocaleString()}</td><td>{layers[r.layer]}</td><td>{r.tissue||'미확인'}</td></tr>)}</tbody></table></div></>;
 }
 
 function GeneIdentifiers({detail,onSelect,onError}:{detail:NodeDetail|null;onSelect:(e:Entity)=>void;onError:(message:string)=>void}) {
   const links=detail?.verified_identifier_links||[];
   if(!links.length)return null;
-  return <section><h3>공식 유전자 식별자</h3><p className="wb-muted">HGNC의 정확한 ID 대응입니다. 통계·조직·식이 효과를 합치지 않습니다.</p>{links.map(e=>{const target=e.subject_id===detail?.id?e.object_id:e.subject_id;return <button key={e.id} onClick={()=>{void getNode(target).then(onSelect).catch(error=>onError(error.message))}}>{target}</button>})}</section>;
+  return <section><h3>공식 유전자 식별자</h3><p className="wb-muted">대응 기준: HGNC ID · 연구별 통계·조직·중재 정보</p>{links.map(e=>{const target=e.subject_id===detail?.id?e.object_id:e.subject_id;return <button key={e.id} onClick={()=>{void getNode(target).then(onSelect).catch(error=>onError(error.message))}}>{target}</button>})}</section>;
 }
 
 function MealSummary({meal,exportAllowed=true}:{meal:Record<string,unknown>;exportAllowed?:boolean}) {
@@ -235,7 +235,7 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
             {seed?.kind==='gene'&&<p className="ws-gene-context">공식 ID와 분석별 측정 ID가 일치하는 결과를 연결합니다. 비유의·상반된 결과도 포함하며, 중재의 유전자 조절 효과나 건강상 이득을 보장하지 않습니다.</p>}{regNotice&&<p className="wb-condition" role="status">{regNotice}</p>}
             <div className="wb-table-scroll" aria-label="조건별 근거 표" tabIndex={0}><table className="wb-evidence-table"><thead>{table.getHeaderGroups().map(g=><tr key={g.id}>{g.headers.map(h=><th scope="col" key={h.id}>{flexRender(h.column.columnDef.header,h.getContext())}</th>)}</tr>)}</thead><tbody>{table.getRowModel().rows.map(r=><tr key={r.id} className={selected?.id===r.original.id?'selected':''} onClick={()=>selectRow(r.original)}>{r.getVisibleCells().map(c=><td key={c.id}>{flexRender(c.column.columnDef.cell,c.getContext())}</td>)}</tr>)}</tbody></table>{!rows.length&&((busy||regBusy)?<LoadingRows label="연구 조건 조회 중"/>:<div className="wb-empty compact"><BookOpen/><h3>{error?'조회가 완료되지 않았습니다':matches?.rule_version==='not_embedded'?'이 항목의 연구 대응 결과는 이 파일에 없습니다':regNotice?'문헌 후보 상세 이용 제한':'해당 조건의 수록 근거가 없습니다'}</h3><p>{error?'연결 상태와 표시된 오류를 확인해주세요.':matches?.rule_version==='not_embedded'?'내장되지 않은 결과이며 실제 연구 근거가 0건이라는 뜻이 아닙니다. 원본 서비스에서 조회하세요.':'근거 부재는 효과가 없다는 결과가 아닙니다.'}</p></div>)}</div>
             <div className="wb-table-foot"><span>관계·대비 기록 수이며 독립 대상자 수와 다릅니다.</span><div className="wb-pager"><button aria-label="이전 근거 페이지" disabled={regPage===1||regBusy} onClick={()=>setRegPage(p=>p-1)}><ChevronLeft size={17}/></button><span>{regPage} / {Math.max(1,Math.ceil(regTotal/25))}</span><button aria-label="다음 근거 페이지" disabled={regPage*25>=regTotal||regBusy} onClick={()=>setRegPage(p=>p+1)}><ChevronRight size={17}/></button></div></div>
-            <details className="wb-method-note"><summary><Info size={15}/>자료 범위·결측·해석 기준</summary><p>동일 연구의 assay와 반복 방문은 독립 대상자로 집계하지 않습니다. eQTM은 연관, CRISPR 목록은 시험된 쌍, GraphRegLR는 계산 예측입니다. 일부 자원은 공개된 선택 요약만 포함합니다. 전문 검수 대기와 자료 부재를 그대로 보존합니다.</p>{matches?.evidence_gaps.map(g=><p key={g}>{g}</p>)}</details>
+            <details className="wb-method-note"><summary><Info size={15}/>자료 범위·결측·해석 기준</summary><p>자료 유형: eQTM 연관 · CRISPR 시험 쌍 · GraphRegLR 예측. 연구·assay·방문·검수 상태를 개별 표시합니다.</p>{matches?.evidence_gaps.map(g=><p key={g}>{g}</p>)}</details>
           </>}
           {tab==='omics'&&<div className="wb-omics"><div className="ws-section-heading"><Dna size={22}/><div><h2>원 분석 결과</h2><p>측정 유형·대비·분석 버전을 함께 확인합니다.</p></div></div>{selected?.contrast?<>
             <div className="ws-contrast-banner"><span>선택한 대비</span><h3>{selected.contrast.comparison||selected.contrast.label||selected.contrast.contrast}</h3><code>{selected.contrast.series_accession} · {selected.contrast.analysis_version||'분석 버전 미확인'}</code></div>
@@ -254,8 +254,8 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
           <ReviewDecisionBadges presentation={selectedReview}/>
           <SourceClassificationNote exposure={selected.exposure} contrast={selected.contrast}/>
           <h3>연구 조건</h3><dl><div><dt>조직·세포</dt><dd>{selected.tissue||'미확인'}</dd></div><div><dt>대상자</dt><dd>{f(selected.n)}{selected.contrast?.n_people_scope&&<details className="ws-count-scope"><summary>집계 범위</summary><small>{selected.contrast.n_people_scope}</small></details>}</dd></div><div><dt>Assay</dt><dd>{f(selected.assays)}{selected.contrast?.n_samples_scope&&<details className="ws-count-scope"><summary>집계 범위</summary><small>{selected.contrast.n_samples_scope}</small></details>}</dd></div></dl>
-          {selected.layer==='regulatory_predicted'&&<section className="wb-condition"><h3>계산 예측 · 실험 검증 아님</h3><p>{selected.tissue||'세포주 미확인'}의 cCRE–유전자 연결입니다. 사람 식이중재의 관찰 결과가 아닙니다.</p><dl><div><dt>원본 수치 필드</dt><dd>{f(selected.reg?.context?.source_numeric_fields)}</dd></div><div><dt>방법</dt><dd>{f(selected.reg?.context?.method)}</dd></div><div><dt>원본 위치</dt><dd>{f(selected.reg?.context?.source_interval)}</dd></div></dl><p>thresholded 원본의 필드입니다. 효과량·P/FDR·건강 효과의 확률로 해석하지 않습니다.</p></section>}
-          {selected.layer==='literature_candidate'&&<section className="wb-condition"><h3>자동 추출 후보 · 의미 검수 대기</h3><blockquote>{f(selected.reg?.context?.quote)}</blockquote><p>문자 위치 [{f(selected.reg?.context?.start)}, {f(selected.reg?.context?.end)}) · title/abstract 기준</p><p>원문 문자 일치는 의미 정확도나 인과성 검증이 아닙니다. 용량·조직·대상군·건강 효과는 확정하지 않았습니다.</p></section>}
+          {selected.layer==='regulatory_predicted'&&<section className="wb-condition"><h3>계산 예측</h3><p>{selected.tissue||'세포주 미확인'}의 cCRE–유전자 예측 연결입니다.</p><dl><div><dt>원본 수치 필드</dt><dd>{f(selected.reg?.context?.source_numeric_fields)}</dd></div><div><dt>방법</dt><dd>{f(selected.reg?.context?.method)}</dd></div><div><dt>원본 위치</dt><dd>{f(selected.reg?.context?.source_interval)}</dd></div></dl><p>thresholded 원본 필드 · 모델 점수</p></section>}
+          {selected.layer==='literature_candidate'&&<section className="wb-condition"><h3>자동 추출 후보 · 의미 검수 대기</h3><blockquote>{f(selected.reg?.context?.quote)}</blockquote><p>문자 위치 [{f(selected.reg?.context?.start)}, {f(selected.reg?.context?.end)}) · title/abstract 기준</p><p>원문 위치 · 추출 엔진 · 연구 조건을 함께 확인할 수 있습니다.</p></section>}
           {selected.reg&&selected.layer!=='clinical'&&<><h3>효과와 불확실성</h3><dl><div><dt>효과 정의</dt><dd>{selected.unit||'정량 효과 미보고'}</dd></div><div><dt>효과량</dt><dd>{f(selected.effect)}</dd></div><div><dt>원본 P / FDR</dt><dd>{f(selected.p)} / {f(selected.q)}</dd></div><div><dt>신뢰구간</dt><dd>{selected.reg.ci_low!=null&&selected.reg.ci_high!=null?`${f(selected.reg.ci_low)} – ${f(selected.reg.ci_high)}`:'미보고'}</dd></div><div><dt>가설군</dt><dd>{selected.reg.hypothesis_family||'미보고'}</dd></div><div><dt>원문 위치</dt><dd>{selected.reg.source_ref||'미확인'}</dd></div></dl></>}
           {selected.exposure&&<><h3>실험 노출·적용 조건</h3><MatchingBadge identity={selected.exposure.mapping_identity}/><p className="ws-mapping-note">{selected.exposure.mapping_identity.note||selected.exposure.mapping_identity.label}</p><p>{selected.context}</p><Conditions rows={contrastConditions(selected.exposure,selected.contrast)}/><p className="ws-condition-boundary">조건의 일치는 입력과 실험의 대응입니다. 건강 개선이나 인과성의 판정이 아닙니다.</p>{selected.contrast?<button className="wb-primary" onClick={()=>{setTab('omics');setMobilePanel('workspace')}}><Dna size={16}/>{seed?.kind==='gene'?'선택 유전자의 발현 결과':'이 대비의 전체 결과'}</button>:<p className="wb-condition">이 노출에는 조회할 수 있는 분석 대비가 수록되지 않았습니다. 결과 미수록을 변화량 0으로 처리하지 않습니다.</p>}</>}
           {selected.layer==='clinical'?<section className="clinical-panel" aria-label="선택한 임상 보고값"><h3>선택한 군·건강지표의 원문 보고값</h3><p className="clinical-boundary">군별 요약값·원문 검정입니다. 유전자 매개·개인 효과나 단일 치료 효과로 환산하지 않습니다.</p><ClinicalFacts records={clinicalFacts(selected.reg)}/></section>:<ClinicalEndpoints studyId={selected.exposure?.study_id||selected.reg?.study_id}/>}
@@ -268,7 +268,7 @@ export default function Workbench({onLegacy}:{onLegacy:()=>void}) {
         </>:<div className="ws-inspector-empty"><BookOpen size={28}/><h3>근거의 맥락을 확인하는 곳</h3><p>항목 또는 근거를 선택하면 원본 식별자·연구 조건·출처가 표시됩니다.</p><div><span>01</span>항목 선택</div><div><span>02</span>연구·관계 확인</div><div><span>03</span>원본 출처 확인</div></div>}
       </aside>
     </div>
-    <footer className="wb-footer"><span><Info size={13}/>출처 확인과 전문가 검수는 별도 상태입니다.</span><span>개인별 건강·질병 위험 예측 없음</span></footer>
+    <footer className="wb-footer"><span><Info size={13}/>출처 확인과 전문가 검수는 별도 상태입니다.</span><span>음식 · 성분 · 연구 · 유전자 탐색</span></footer>
   </div>;
 }
 

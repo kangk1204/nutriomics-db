@@ -6,8 +6,8 @@ const {releaseIdentity,reviewSummary}=await import('data:text/javascript;base64,
 const meta={release_id:'actual-new',dataset_release_id:'actual-new',service_build_id:'software-new',immutable_base_release_id:'old-base',candidate_composition_release_id:'candidate',counts:{},created_at:'',status:'candidate_pending_expert_review',submission_ready:false,review_summary:{expert_approved_records:0,pending:263}};
 assert.deepEqual(releaseIdentity(meta),{actual:'actual-new',dataset:'actual-new',software:'software-new',composition:'candidate',base:'old-base',ready:false});
 assert.equal(reviewSummary(meta),'사람 승인 0건 · 대기 263건');
-assert.equal(reviewSummary({...meta,review_summary:undefined}),'전문가 검수 상태 미확인');
-assert.equal(reviewSummary({...meta,review_summary:{expert_approved_records:null,source_checked_records:263}}),'사람 승인 건수 미감사');
+assert.equal(reviewSummary({...meta,review_summary:undefined}),'검수 정보 대기');
+assert.equal(reviewSummary({...meta,review_summary:{expert_approved_records:null,source_checked_records:263}}),'승인 건수 집계 대기');
 assert.equal(releaseIdentity({...meta,submission_ready:true}).ready,false,'boolean alone must not promote candidate');
 assert.equal(releaseIdentity({...meta,status:'submission_ready',submission_ready:true}).ready,true);
 assert.equal(releaseIdentity({release_id:'legacy'}).dataset,'legacy');

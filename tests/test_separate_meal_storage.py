@@ -8,6 +8,15 @@ from nutrigenomics.models import CompositionMeasurement, MealRecord
 from test_bridge_api import client as client, session as session  # noqa: F401
 
 
+def test_delete_meal_preserves_empty_204_contract(client, session):
+    record = MealRecord(note='Synthetic HTTP response contract', calculation_json={})
+    session.add(record); session.commit()
+    identifier = record.id
+    response = client.delete(f'/api/v1/meals/{identifier}')
+    assert response.status_code == 204 and response.content == b''
+    assert client.delete(f'/api/v1/meals/{identifier}').status_code == 404
+
+
 def test_recording_uses_frozen_calculation_and_separate_history(client, session, tmp_path, monkeypatch):
     storage = tmp_path / 'meal-history.sqlite3'
     with sqlite3.connect(session.get_bind().url.database) as src, sqlite3.connect(storage) as dst:

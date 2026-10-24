@@ -1,6 +1,8 @@
 .venv/
 .bootstrap/
 .env
+.env.*
+!.env.example
 .cache/
 __pycache__/
 *.py[cod]
@@ -26,3 +28,7 @@ frontend/explorer/dist/
 .ruff_cache/
 *.egg-info/
 portable-tests.xml
+literature_service/runtime/
+literature_service/.venv*/
+literature_service/dist/
+frontend/explorer/node_modules/
